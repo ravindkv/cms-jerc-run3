@@ -1,0 +1,6 @@
+Skim/makeSkim
+Skim/*.root
+Skim/sample/FilesNano_cff.sh
+Skim/sample/JobsNano_cff.py
+Skim/src/*.o
+Skim/condor/tmpSub
