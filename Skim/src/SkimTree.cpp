@@ -1,6 +1,6 @@
 #include "SkimTree.h"
 
-SkimTree::SkimTree(bool xRootDAccess, string year, vector<string>fileNames, bool isMC){
+SkimTree::SkimTree(string year, vector<string>fileNames, bool isMC){
     chain = new TChain("Events");
 
     std::cout << "Start SkimTree" << std::endl;
@@ -8,40 +8,32 @@ SkimTree::SkimTree(bool xRootDAccess, string year, vector<string>fileNames, bool
     bool isCopy = false;
     //fileNames = {"/store/data/Run2016G/SingleElectron/NANOAOD/UL2016_MiniAODv2_NanoAODv9-v1/270000/19B10F2C-40CC-C245-A1C8-9A722EA672B6.root"};
     int nFiles = fileNames.size();
-    if (xRootDAccess){
-        //string dir = "root://cms-xrd-global.cern.ch/";
-        string dir = "root://cmsxrootd.fnal.gov/";
-        //string dir = "root://xrootd-cms.infn.it/";
-        for(int fileI=0; fileI<nFiles; fileI++){
-            string fName = fileNames[fileI];
-            if(isCopy){
-                string singleFile = fName.substr(fName.find_last_of("/")+1,fName.size());
-                string xrdcp_command = "xrdcp " + dir + fName + " " + singleFile ;
-                cout << xrdcp_command.c_str() << endl;
-                //system(xrdcp_command.c_str());
-                chain->Add( singleFile.c_str());
-                cout << singleFile << "  " << chain->GetEntries() << endl;
-            }
-            else{
-                TFile* fCheck = TFile::Open((dir+fName).c_str());
-                if(!fCheck || fCheck->IsZombie() || fCheck->GetSize()<100){
-                    cout<<"fCheck: issue with file: "<<dir+fName<<endl;
-                    continue;
-                }
-                if(!fCheck->GetListOfKeys()->Contains("Events")){
-                    cout<<"fCheck: issue with tree Events: "<<dir+fName<<endl;
-                    continue;
-                }
-                fCheck->Close();
-                chain->Add( (dir + fName).c_str());
-                cout << dir+fName << "  " << chain->GetEntries() << endl;
-            }
+    //string dir = "root://cms-xrd-global.cern.ch/";
+    string dir = "root://cmsxrootd.fnal.gov/";
+    //string dir = "root://xrootd-cms.infn.it/";
+    for(int fileI=0; fileI<nFiles; fileI++){
+        string fName = fileNames[fileI];
+        if(isCopy){
+            string singleFile = fName.substr(fName.find_last_of("/")+1,fName.size());
+            string xrdcp_command = "xrdcp " + dir + fName + " " + singleFile ;
+            cout << xrdcp_command.c_str() << endl;
+            //system(xrdcp_command.c_str());
+            chain->Add( singleFile.c_str());
+            cout << singleFile << "  " << chain->GetEntries() << endl;
         }
-    }
-    else{
-        for(int fileI=0; fileI<nFiles; fileI++){
-            chain->Add(fileNames[fileI].c_str());
-            cout <<fileNames[fileI]<<endl;
+        else{
+            TFile* fCheck = TFile::Open((dir+fName).c_str());
+            if(!fCheck || fCheck->IsZombie() || fCheck->GetSize()<100){
+                cout<<"fCheck: issue with file: "<<dir+fName<<endl;
+                continue;
+            }
+            if(!fCheck->GetListOfKeys()->Contains("Events")){
+                cout<<"fCheck: issue with tree Events: "<<dir+fName<<endl;
+                continue;
+            }
+            fCheck->Close();
+            chain->Add( (dir + fName).c_str());
+            cout << dir+fName << "  " << chain->GetEntries() << endl;
         }
     }
     std::cout << "Begin" << std::endl;

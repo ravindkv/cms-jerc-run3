@@ -1,6 +1,7 @@
 Skim/makeSkim
 Skim/*.root
-Skim/sample/FilesNano_cff.sh
+Skim/sample/FilesNano_cff.json
 Skim/sample/JobsNano_cff.py
+Skim/sample/__pycache__
 Skim/src/*.o
 Skim/condor/tmpSub

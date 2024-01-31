@@ -1,6 +1,7 @@
 #include<iostream>
+#include <unistd.h>
+#include <cstdlib>
 #include<string>
-#include "src/SkimTree.h"
 #include<TFile.h>
 #include<TTree.h>
 #include<TH1F.h>
@@ -8,71 +9,85 @@
 #include<TObject.h>
 #include<TCanvas.h>
 #include<iomanip>
+#include <fstream>
 
-int main(int ac, char** av){
-    //ac is the total number of arguments
-	if(ac < 3){
-		std::cout << "usage: ./makeSkim year 1of2 outputFileName inputFile[s]" << std::endl;
-		return -1;
-	}
-    //av[1] = year
-	std::string year(av[1]);
+#include "src/SkimTree.h"
+#include <nlohmann/json.hpp>
 
-    //av[2] = NofM
-	int nJob = -1;
-	int totJob = -1;
-	std::string checkJobs(av[2]);
-	size_t pos = checkJobs.find("of");
-	if (pos != std::string::npos){
-	    nJob = std::stoi(checkJobs.substr(0,pos));
-	    totJob = std::stoi(checkJobs.substr(pos+2,checkJobs.length()));
+int main(int argc, char* argv[]){
+    int opt;
+    std::string year;
+    int nthJob    = 1; //nofN
+    int totJob    = 10;
+    std::string oName;
+    std::string iName;
+    // Parse command-line options
+    while ((opt = getopt(argc, argv, "y:n:N:o:i:h")) != -1) {
+        switch (opt) {
+            case 'y':
+                year = optarg;
+                break;
+            case 'n':
+                nthJob = std::stoi(optarg);
+                break;
+            case 'N':
+                totJob = std::stoi(optarg);
+                break;
+            case 'o':
+                oName = optarg; 
+                break;
+            case 'i':
+                iName = optarg; 
+                break;
+            case 'h':
+                std::cout << "Usage: ./makeSkim -y 2022 -n 1 -N 100 -o oName -i iName" << std::endl;
+                return 0;
+            default:
+                std::cerr << "Invalid option" << std::endl;
+                return 1;
+        }
     }
-	cout << nJob << " of " << totJob << endl;
-
-    //av[3] = Output.root 
-	bool isMC = true;
-	std::string outFileName(av[3]);
-	if( outFileName.find("Data") != std::string::npos){
-	    cout << "IsData" << endl;
-	    isMC = false;
-	}
-
-    //av[4] = xrootd or local 
-	bool xRootDAccess = false;
-	if (std::string(av[4])=="xrootd"){
-	    xRootDAccess=true;
-	    std::cout << "Will access files from xRootD" << std::endl;
-    }
-
-    //av[5...] = string containing the input files separated by space
-    std::vector<std::string> fileNames;
-	for (int i = 5; i < ac; i++){
-        fileNames.push_back(av[i]);
-	}
 
     //--------------------------------
     // files to run for each job 
     //--------------------------------
+    std::ifstream file("sample/FilesNano_cff.json");
+    nlohmann::json js = nlohmann::json::parse(file);
+    std::vector<std::string> fileNames;
+    //std::string tmp_;
+    //js.at("input_names").get_to(tmp_);
+    std::cout << js.at(iName) << std::endl;
+    js.at(iName).get_to(fileNames);
+
 	int nFiles  = fileNames.size(); 
     cout<<"Total files = "<<nFiles<<endl;
-	if (nJob>0 && totJob>0 && nJob <= totJob && totJob <= nFiles){
+    if (totJob > nFiles){
+        cout<<"totJob > nFiles. Setting it to the nFiles = "<<nFiles<<endl;
+        totJob = nFiles;
+    }
+	if (nthJob>0 && totJob>0 && nthJob <= totJob){
+	    cout << nthJob << " of " << totJob << endl;
 		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
-	    pos = outFileName.find(".root");
-	    outFileName = outFileName.substr(0,pos) + "_" + checkJobs + ".root";
-	    cout << "new output file name: "<< outFileName << endl;
+	    oName = oName+ "_" + std::to_string(nthJob)+"of"+std::to_string(totJob)+ ".root";
+	    cout << "new output file name: "<< oName << endl;
 	}
     else{
-        cout<<"\n ERROR: In MofN, M > 0 and N > 0 and M =< N and N=<nFiles\n ";
+        cout<<"\n ERROR: n > 0 and N > 0 and n =< N\n ";
         return 0;
     }
 	SkimTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
 	cout << "HERE" << endl;
-	tree = new SkimTree(xRootDAccess, year, smallVectors[nJob-1], isMC);
+	bool isMC = true;
+	if( oName.find("Data") != std::string::npos){
+	    cout << "IsData" << endl;
+	    isMC = false;
+	}
+	tree = new SkimTree(year, smallVectors[nthJob-1], isMC);
 	tree->isData_ = !isMC;
 
 
-	TFile* outFile = TFile::Open( outFileName.c_str() ,"RECREATE","",207 );
+	TFile* outFile = TFile::Open( oName.c_str() ,"RECREATE","",207 );
     outFile->cd();
 	TTree* newTree = tree->chain->GetTree()->CloneTree(0);
 	newTree->SetCacheSize(50*1024*1024);

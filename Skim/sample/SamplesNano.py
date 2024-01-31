@@ -1,6 +1,4 @@
 import sys
-sys.dont_write_bytecode = True
-
 #--------------------------
 #MC
 #--------------------------
@@ -19,9 +17,9 @@ def getData(year):
     samps22 = {}
     samps22['Data_2022C']       = '/EGamma/Run2022C-22Sep2023-v1/NANOAOD' 
     samps22['Data_2022D']       = '/EGamma/Run2022D-22Sep2023-v1/NANOAOD'
-    samps22['Data_2022E']       = '/EGamma/Run2022E-22Sep2023-v1/NANOAOD'
-    samps22['Data_2022F']       = '/EGamma/Run2022F-22Sep2023-v1/NANOAOD'
-    samps22['Data_2022G']       = '/EGamma/Run2022G-PromptNanoAODv10_v1-v1/NANOAOD'
+    #samps22['Data_2022E']       = '/EGamma/Run2022E-22Sep2023-v1/NANOAOD'
+    #samps22['Data_2022F']       = '/EGamma/Run2022F-22Sep2023-v1/NANOAOD'
+    #samps22['Data_2022G']       = '/EGamma/Run2022G-PromptNanoAODv10_v1-v1/NANOAOD'
 
     samps23 = {}
     #EGamma0
