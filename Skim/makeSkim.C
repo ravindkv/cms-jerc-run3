@@ -15,13 +15,19 @@
 #include <nlohmann/json.hpp>
 
 int main(int argc, char* argv[]){
+
+    std::ifstream file("sample/FilesNano_cff.json");
+    nlohmann::json js = nlohmann::json::parse(file);
+
+    //--------------------------------
+    // Parse command-line options
+    //--------------------------------
     int opt;
     std::string year;
     int nthJob    = 1; //nofN
     int totJob    = 10;
     std::string oName;
     std::string iName;
-    // Parse command-line options
     while ((opt = getopt(argc, argv, "y:n:N:o:i:h")) != -1) {
         switch (opt) {
             case 'y':
@@ -40,7 +46,11 @@ int main(int argc, char* argv[]){
                 iName = optarg; 
                 break;
             case 'h':
-                std::cout << "Usage: ./makeSkim -y 2022 -n 1 -N 100 -o oName -i iName" << std::endl;
+                std::cout << "Usage: ./makeSkim -y 2022 -n 1 -N 100 -o oName -i iName\n" << std::endl;
+                cout<<"Choose iName from the following:"<<endl;
+                for (auto& element : js.items()) {
+                    std::cout << element.key() << std::endl;
+                }
                 return 0;
             default:
                 std::cerr << "Invalid option" << std::endl;
@@ -51,30 +61,32 @@ int main(int argc, char* argv[]){
     //--------------------------------
     // files to run for each job 
     //--------------------------------
-    std::ifstream file("sample/FilesNano_cff.json");
-    nlohmann::json js = nlohmann::json::parse(file);
     std::vector<std::string> fileNames;
-    //std::string tmp_;
-    //js.at("input_names").get_to(tmp_);
-    std::cout << js.at(iName) << std::endl;
     js.at(iName).get_to(fileNames);
-
-	int nFiles  = fileNames.size(); 
+    int nFiles  = fileNames.size(); 
     cout<<"Total files = "<<nFiles<<endl;
     if (totJob > nFiles){
         cout<<"totJob > nFiles. Setting it to the nFiles = "<<nFiles<<endl;
         totJob = nFiles;
     }
-	if (nthJob>0 && totJob>0 && nthJob <= totJob){
-	    cout << nthJob << " of " << totJob << endl;
+    if (nthJob > totJob){
+        cout<<"n > N. Setting it to the N = "<<nFiles<<endl;
+        totJob = nFiles;
+    }
+	if (nthJob>0 && totJob>0){
+	    cout <<"jobs: " <<nthJob << " of " << totJob << endl;
 		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
 	    oName = oName+ "_" + std::to_string(nthJob)+"of"+std::to_string(totJob)+ ".root";
 	    cout << "new output file name: "<< oName << endl;
 	}
     else{
-        cout<<"\n ERROR: n > 0 and N > 0 and n =< N\n ";
+        cout<<"\n ERROR: n > 0 and N > 0\n ";
         return 0;
     }
+
+    //--------------------------------
+    // Read input files 
+    //--------------------------------
 	SkimTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
 	cout << "HERE" << endl;
@@ -84,8 +96,6 @@ int main(int argc, char* argv[]){
 	    isMC = false;
 	}
 	tree = new SkimTree(year, smallVectors[nthJob-1], isMC);
-	tree->isData_ = !isMC;
-
 
 	TFile* outFile = TFile::Open( oName.c_str() ,"RECREATE","",207 );
     outFile->cd();
@@ -99,102 +109,20 @@ int main(int argc, char* argv[]){
 	std::cout << "Sample has "<<nEntr << " entries" << std::endl;
 	cout << "Processing events "<<startEntry<< " to " << endEntry << endl;
 	TH1F* hEvents_ = new TH1F("hEvents", "Cutflow", 5, -1.5, 3.5);
-    hEvents_->GetXaxis()->SetBinLabel(2, "NanoAOD");
-    hEvents_->GetXaxis()->SetBinLabel(3, "Filters");
-    hEvents_->GetXaxis()->SetBinLabel(4, "MuonOREleTrig");
-    //--------------------------------
-    // Trigger flow histograms
-    //--------------------------------
-    TString  im24, itm24, im27, m50, tm50, m100, tm100;
-    TString  e27, e32, e32D, e115, e45j200, e50j165, p175, p200;
-    im24    = "HLT_IsoMu24"   ;
-    itm24   = "HLT_IsoTkMu24" ;
-    im27    = "HLT_IsoMu27"   ;
-    m50     = "HLT_Mu50"      ;
-    tm50    = "HLT_TkMu50"    ;
-    m100    = "HLT_Mu100"     ;
-    tm100   = "HLT_TkMu100"   ;
+    hEvents_->GetXaxis()->SetBinLabel(1, "NanoAOD");
+    hEvents_->GetXaxis()->SetBinLabel(2, "Trig");
     
-    e27     = "HLT_Ele27_WPTight_Gsf"                         ;
-    e32     = "HLT_Ele32_WPTight_Gsf"                         ;
-    e32D    = "HLT_Ele32_WPTight_Gsf_L1DoubleEG"              ;
-    e115    = "HLT_Ele115_CaloIdVT_GsfTrkIdT"                 ;
-    e45j200 = "HLT_Ele45_CaloIdVT_GsfTrkIdT_PFJet200_PFJet50" ;
-    e50j165 = "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165"         ;
-    p175    = "HLT_Photon175"                                 ;
-    p200    = "HLT_Photon200"                                 ;
-
-    std::map<TString, int> names, namesE;
-    if (year.find("2016")!=std::string::npos){
-        names[im24 ] = 1;
-        names[itm24] = 2;
-        names[m50  ] = 3;
-        names[tm50 ] = 4;
-        namesE[e27    ] = 1;
-        namesE[e115    ] = 2;
-        namesE[e45j200] = 3;
-        namesE[e50j165] = 4;
-        namesE[p175   ] = 5;
-        
-    }
-    if (year.find("2017")!=std::string::npos){
-        names[im27 ] = 1;
-        names[m50  ] = 2;
-        names[m100 ] = 3;
-        names[tm100] = 4;
-        namesE[e32D    ] = 1;
-        namesE[e115    ] = 2;
-        namesE[e50j165] = 3;
-        namesE[p200   ] = 4;
-        
-    }
-    if (year.find("2018")!=std::string::npos){
-        names[im24 ] = 1;
-        names[m50  ] = 2;
-        names[m100 ] = 3;
-        names[tm100] = 4;
-        namesE[e32    ] = 1;
-        namesE[e115    ] = 2;
-        namesE[e50j165] = 3;
-        namesE[p200   ] = 4;
-        
-    }
-	TH1F* hAll           = new TH1F("hAll_MuTrig",  "events in NanoAOD",   6, 0.5, 6.5);
-	TH1F* hAllE          = new TH1F("hAll_EleTrig", "events in NanoAOD",  6, 0.5, 6.5);
-	TH1F* hPass_         = new TH1F("hPass_MuTrig", "exclusive events (passes one && fails others)",  6, 0.5, 6.5);
-	TH1F* hPassE_        = new TH1F("hPass_EleTrig","exclusive events (passes one && fails others)", 6, 0.5, 6.5);
-	TH1F* hPass          = new TH1F("hPass_MuTrigFlow", "OR flow of HLT paths",  6, 0.5, 6.5);
-	TH1F* hPassE         = new TH1F("hPass_EleTrigFlow","OR flow of HLT paths", 6, 0.5, 6.5);
-    for(const auto &pair:names){
-        hAll->GetXaxis()->SetBinLabel(pair.second, TString(pair.first));
-        hPass->GetXaxis()->SetBinLabel(pair.second, TString(pair.first));
-        hPass_->GetXaxis()->SetBinLabel(pair.second, TString(pair.first));
-    }
-    for(const auto &pair:namesE){
-        hAllE->GetXaxis()->SetBinLabel(pair.second, TString(pair.first));
-        hPassE->GetXaxis()->SetBinLabel(pair.second, TString(pair.first));
-        hPassE_->GetXaxis()->SetBinLabel(pair.second, TString(pair.first));
-    }
-    bool isTrig; 
-    bool isTrigE;
-    Int_t passTrigMu, passTrigEle;
-    TBranch* passTrigMu_  = newTree->Branch("passTrigMu",  &passTrigMu, "passTrigMu/I");
-    TBranch* passTrigEle_ = newTree->Branch("passTrigEle", &passTrigEle, "passTrigEle/I");
-
-
-    //---------------------
+    //--------------------------------
     //Event loop
-    //---------------------
+    //--------------------------------
     std::cout<<"---------------------------"<<std::endl;
     std::cout<<setw(10)<<"Progress"<<setw(10)<<"Time"<<std::endl;
     std::cout<<"---------------------------"<<std::endl;
     double totalTime = 0.0;
 	auto startClock = std::chrono::high_resolution_clock::now();
-    int count_bad = 0;
+    bool passTrig = false;
 	for(Long64_t entry= startEntry; entry < endEntry; entry++){
         //if(entry>4235) break; 
-        //cout<<entry<<endl;
-        //if(entry<4228) continue; 
 		if(entry%(eventsPerJob/100) == 0){// print after every 1% of events
             totalTime+= std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-startClock).count();
             int sec = (int)(totalTime)%60;
@@ -203,167 +131,18 @@ int main(int argc, char* argv[]){
 			startClock = std::chrono::high_resolution_clock::now();			
 		}
 		tree->GetEntry(entry);
-        //tree->Show(entry);
-		hEvents_->Fill(0.);
-        if (tree->nTrigObj > 50 || tree->nMu > 50 || tree->nEle > 50 || tree->nJet > 50 || tree->nPho > 50){
-            count_bad++;
-            continue;
-        }
-        //--------------------------------
-        // MET filters
-        //--------------------------------
-        bool filters = 
-            (tree->Flag_goodVertices_ &&
-		    tree->Flag_globalSuperTightHalo2016Filter_ &&
-		    tree->Flag_HBHENoiseFilter_ &&
-		    tree->Flag_HBHENoiseIsoFilter_ && 
-		    tree->Flag_EcalDeadCellTriggerPrimitiveFilter_ &&
-		    tree->Flag_BadPFMuonFilter_ &&
-		    tree->Flag_eeBadScFilter_ );
-        if (year=="2017" || year=="2018") filters = filters && tree->Flag_ecalBadCalibFilter_ ;
-
-        //--------------------------------
-        // TrigObj matching for 2017 
-        //--------------------------------
-        bool is32D = false;
-        for(int j=0;j<tree->nTrigObj;j++){
-            if (!(tree->TrigObj_pt[j]>31)) continue;
-            if (!(abs(tree->TrigObj_id[j])==11)) continue;
-            if (!(tree->TrigObj_filterBits[j] & 1024)) continue;
-            for(int k=0; k<tree->nEle; k++){
-                double dR = tree->deltaR(tree->eleEta[k],  tree->elePhi[k], tree->TrigObj_eta[j], tree->TrigObj_phi[j]);
-                if(dR < 0.1){
-                    is32D = true;
-                    break;
-                }
-            }
-        }
-
-
-        //Fill hAll 
-        for(const auto& pair: names)  hAll->Fill(pair.second);
-        for(const auto& pair: namesE) hAllE->Fill(pair.second);
-        //--------------------------------------
-        // Fill exclusive trigger histograms 
-        //--------------------------------------
-        if (year.find("2016")!=std::string::npos){
-            if(tree->im24_  && !(tree->itm24_ || tree->m50_ || tree->tm50_))      hPass_->Fill(1);
-            if(tree->itm24_ && !(tree->im24_  || tree->m50_ || tree->tm50_))      hPass_->Fill(2);
-            if(tree->m50_   && !(tree->im24_ || tree->itm24_ || tree->tm50_))     hPass_->Fill(3);
-            if(tree->tm50_  && !(tree->im24_ || tree->itm24_ || tree->m50_))     hPass_->Fill(4);
-            //Electron
-            if(tree->e27_       && !(tree->e45j200_ || tree->e50j165_ || tree->p175_ || tree->e115_))   hPassE_->Fill(1);
-            if(tree->e115_      && !(tree->e27_ ||  tree->e45j200_ || tree->e50j165_ || tree->p175_))   hPassE_->Fill(2);
-            if(tree->e45j200_   && !(tree->e27_ || tree->e50j165_ || tree->p175_ || tree->e115_))       hPassE_->Fill(3);
-            if(tree->e50j165_   && !(tree->e27_ || tree->e45j200_ || tree->p175_ || tree->e115_))       hPassE_->Fill(4);
-            if(tree->p175_      && !(tree->e27_ || tree->e45j200_ || tree->e50j165_ || tree->e115_))    hPassE_->Fill(5);
-        }
-        if (year.find("2017")!=std::string::npos){
-            if(tree->im27_   && !(tree->m50_ || tree->tm100_ || tree->m100_))    hPass_->Fill(1);
-            if(tree->m50_    && !(tree->im27_ || tree->tm100_ || tree->m100_))   hPass_->Fill(2);
-            if(tree->tm100_  && !(tree->im27_ || tree->m50_ ||  tree->m100_))    hPass_->Fill(3);
-            if(tree->m100_   && !(tree->im27_ || tree->m50_ || tree->tm100_))    hPass_->Fill(4);
-            //Electron
-            if(is32D            && !(tree->e50j165_ || tree->p200_ || tree->e115_))   hPassE_->Fill(1);
-            if(tree->e115_      && !(is32D  || tree->e50j165_ || tree->p200_))        hPassE_->Fill(2);
-            if(tree->e50j165_   && !(is32D  || tree->p200_ || tree->e115_))           hPassE_->Fill(3);
-            if(tree->p200_      && !(is32D  || tree->e50j165_ || tree->e115_ ))       hPassE_->Fill(4);
-        }
-        if (year.find("2018")!=std::string::npos){
-            if(tree->im24_      && !(tree->m50_ || tree->tm100_ || tree->m100_ ))     hPass_->Fill(1);
-            if(tree->m50_       && !(tree->im24_ || tree->tm100_ || tree->m100_ ))    hPass_->Fill(2);
-            if(tree->tm100_     && !(tree->im24_ || tree->m50_ || tree->m100_ ))      hPass_->Fill(3);
-            if(tree->m100_      && !(tree->im24_ || tree->m50_ || tree->tm100_ ))     hPass_->Fill(4);
-            //Electron
-            if(tree->e32_       && !(tree->e50j165_ || tree->p200_ || tree->e115_))   hPassE_->Fill(1);
-            if(tree->e115_      && !(tree->e32_ || tree->e50j165_ || tree->p200_))    hPassE_->Fill(2);
-            if(tree->e50j165_   && !(tree->e32_ || tree->p200_ || tree->e115_))       hPassE_->Fill(3);
-            if(tree->p200_      && !(tree->e32_ || tree->e50j165_ || tree->e115_))    hPassE_->Fill(4);
-        }
-        //--------------------------------
-        // Fill trigger FLOW  histograms 
-        //--------------------------------
-        //Fill hPass 
-        isTrig  = false;
-        isTrigE = false;
-        if (year.find("2016")!=std::string::npos){
-            if(tree->im24_)      hPass->Fill(1);
-            if(tree->im24_ || tree->itm24_)     hPass->Fill(2);
-            if(tree->im24_ || tree->itm24_ || tree->m50_)       hPass->Fill(3);
-            if(tree->im24_ || tree->itm24_ || tree->m50_ || tree->tm50_){
-                isTrig = true;
-                hPass->Fill(4);
-            }
-            //Electron
-            if(tree->e27_)       hPassE->Fill(1);
-            if(tree->e27_ || tree->e115_)       hPassE->Fill(2);
-            if(tree->e27_ || tree->e115_ || tree->e45j200_)   hPassE->Fill(3);
-            if(tree->e27_ || tree->e115_ || tree->e45j200_ || tree->e50j165_)   hPassE->Fill(4);
-            if(tree->e27_ || tree->e115_ || tree->e45j200_ || tree->e50j165_ || tree->p175_){
-                hPassE->Fill(5);
-                isTrigE = true;
-            }
-        }
-        if (year.find("2017")!=std::string::npos){
-            if(tree->im27_)          hPass->Fill(1);
-            if(tree->im27_ || tree->m50_)       hPass->Fill(2);
-            if(tree->im27_ || tree->m50_ || tree->tm100_)     hPass->Fill(3);
-            if(tree->im27_ || tree->m50_ || tree->tm100_ || tree->m100_ ){
-                hPass->Fill(4);
-                isTrig = true;
-            }
-            //Electron
-            if(is32D)           hPassE->Fill(1);
-            if(is32D || tree->e115_)           hPassE->Fill(2);
-            if(is32D || tree->e115_ || tree->e50j165_)   hPassE->Fill(3);
-            if(is32D || tree->e115_ || tree->e50j165_ || tree->p200_){
-                hPassE->Fill(4);
-                isTrigE = true;
-            }
-        }
-        if (year.find("2018")!=std::string::npos){
-            if(tree->im24_)          hPass->Fill(1);
-            if(tree->im24_ || tree->m50_)       hPass->Fill(2);
-            if(tree->im24_ || tree->m50_ || tree->tm100_)     hPass->Fill(3);
-            if(tree->im24_ || tree->m50_ || tree->tm100_ || tree->m100_){
-                hPass->Fill(4);
-                isTrig = true;
-            }
-            //Electron
-            if(tree->e32_)       hPassE->Fill(1);
-            if(tree->e32_ || tree->e115_)       hPassE->Fill(2);
-            if(tree->e32_ || tree->e115_ || tree->e50j165_)   hPassE->Fill(3);
-            if(tree->e32_ || tree->e115_ || tree->e50j165_ || tree->p200_){
-                hPassE->Fill(4);
-                isTrigE = true;
-            }
-        }
-        passTrigMu  = isTrig;
-        passTrigEle = isTrigE;
-        //--------------------------------
-        //fill tree
-        //--------------------------------
-        if(!filters) continue;
+		hEvents_->Fill(0);
+        //2022
+		passTrig = tree->p20 || tree->p20HE || tree->p30HE || tree->p33 || tree->p200;
+		if(passTrig){
             hEvents_->Fill(1);
-
-		if(isTrig || isTrigE){
 			newTree->Fill();
-            hEvents_->Fill(2);
 		}
 	}
     std::cout<<"nEvents_Skim = "<<newTree->GetEntries()<<endl;
-    std::cout<<"Bad Events   = "<< count_bad <<endl;
     newTree->Write();
 	hEvents_->Write();
-    hAll->Write();
-    hAllE->Write();
-    hPass_->Write();
-    hPassE_->Write();
-    hPass->Write();
-    hPassE->Write();
-
 	outFile->Close();
-
 	
 	return 0;
 }
