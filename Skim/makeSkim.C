@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     // Parse command-line options
     //--------------------------------
     int opt;
-    std::string year;
+    TString year;
     int nthJob    = 1; //nofN
     int totJob    = 10;
     std::string oName;
@@ -40,10 +40,10 @@ int main(int argc, char* argv[]){
                 totJob = std::stoi(optarg);
                 break;
             case 'o':
-                oName = optarg; 
+                oName = optarg;
                 break;
             case 'i':
-                iName = optarg; 
+                iName = optarg;
                 break;
             case 'h':
                 std::cout << "Usage: ./makeSkim -y 2022 -n 1 -N 100 -o oName -i iName\n" << std::endl;
@@ -59,11 +59,11 @@ int main(int argc, char* argv[]){
     }
 
     //--------------------------------
-    // files to run for each job 
+    // files to run for each job
     //--------------------------------
     std::vector<std::string> fileNames;
     js.at(iName).get_to(fileNames);
-    int nFiles  = fileNames.size(); 
+    int nFiles  = fileNames.size();
     cout<<"Total files = "<<nFiles<<endl;
     if (totJob > nFiles){
         cout<<"totJob > nFiles. Setting it to the nFiles = "<<nFiles<<endl;
@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
     }
 
     //--------------------------------
-    // Read input files 
+    // Read input files
     //--------------------------------
 	SkimTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
@@ -111,7 +111,7 @@ int main(int argc, char* argv[]){
 	TH1F* hEvents_ = new TH1F("hEvents", "Cutflow", 5, -1.5, 3.5);
     hEvents_->GetXaxis()->SetBinLabel(1, "NanoAOD");
     hEvents_->GetXaxis()->SetBinLabel(2, "Trig");
-    
+
     //--------------------------------
     //Event loop
     //--------------------------------
@@ -122,18 +122,89 @@ int main(int argc, char* argv[]){
 	auto startClock = std::chrono::high_resolution_clock::now();
     bool passTrig = false;
 	for(Long64_t entry= startEntry; entry < endEntry; entry++){
-        //if(entry>4235) break; 
+        //if(entry>4235) break;
 		if(entry%(eventsPerJob/100) == 0){// print after every 1% of events
             totalTime+= std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-startClock).count();
             int sec = (int)(totalTime)%60;
             int min = (int)(totalTime)/60;
 	        std::cout<<setw(10)<<100*entry/endEntry<<" %"<<setw(10)<<min<<"m "<<sec<<"s"<<std::endl;
-			startClock = std::chrono::high_resolution_clock::now();			
+			startClock = std::chrono::high_resolution_clock::now();
 		}
 		tree->GetEntry(entry);
 		hEvents_->Fill(0);
         //2022
-		passTrig = tree->p20 || tree->p20HE || tree->p30HE || tree->p33 || tree->p200;
+        if(year.Contains("2022")){ 
+		passTrig =
+            tree->HLT_Photon300_NoHE                                                ||
+            tree->HLT_Photon20                                                      ||
+            tree->HLT_Photon33                                                      ||
+            tree->HLT_Photon50                                                      ||
+            tree->HLT_Photon75                                                      ||
+            tree->HLT_Photon90                                                      ||
+            tree->HLT_Photon120                                                     ||
+            tree->HLT_Photon150                                                     ||
+            tree->HLT_Photon175                                                     ||
+            tree->HLT_Photon200                                                     ||
+            tree->HLT_Photon30EB_TightID_TightIso                                   ||
+            tree->HLT_Photon100EB_TightID_TightIso                                  ||
+            tree->HLT_Photon110EB_TightID_TightIso                                  ||
+            tree->HLT_Photon120EB_TightID_TightIso                                  ||
+            tree->HLT_Photon100EBHE10                                               ||
+            tree->HLT_Photon100EEHE10                                               ||
+            tree->HLT_Photon100EE_TightID_TightIso                                  ||
+            tree->HLT_Photon50_R9Id90_HE10_IsoM                                     ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM                                     ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 ||
+            tree->HLT_Photon90_R9Id90_HE10_IsoM                                     ||
+            tree->HLT_Photon120_R9Id90_HE10_IsoM                                    ||
+            tree->HLT_Photon165_R9Id90_HE10_IsoM                                    ||
+            tree->HLT_Photon35_TwoProngs35                                          ||
+            tree->HLT_Photon60_R9Id90_CaloIdL_IsoL                                  ||
+            tree->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL                     ||
+            tree->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350MinPFJet15   ||
+            tree->HLT_Photon20_HoverELoose                                          ||
+            tree->HLT_Photon30_HoverELoose                                          ||
+            tree->HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50    ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3           ;
+        }
+        if(year.Contains("2023")){ 
+		passTrig =
+            tree->HLT_Photon300_NoHE                                     ||
+            tree->HLT_Photon33                                           ||
+            tree->HLT_Photon50                                           ||
+            tree->HLT_Photon75                                           ||
+            tree->HLT_Photon90                                           ||
+            tree->HLT_Photon120                                          ||
+            tree->HLT_Photon150                                          ||
+            tree->HLT_Photon175                                          ||
+            tree->HLT_Photon200                                          ||
+            tree->HLT_Photon30EB_TightID_TightIso                        ||
+            tree->HLT_Photon50EB_TightID_TightIso                        ||
+            tree->HLT_Photon75EB_TightID_TightIso                        ||
+            tree->HLT_Photon90EB_TightID_TightIso                        ||
+            tree->HLT_Photon110EB_TightID_TightIso                       ||
+            tree->HLT_Photon130EB_TightID_TightIso                       ||
+            tree->HLT_Photon150EB_TightID_TightIso                       ||
+            tree->HLT_Photon175EB_TightID_TightIso                       ||
+            tree->HLT_Photon200EB_TightID_TightIso                       ||
+            tree->HLT_Photon100EBHE10                                    ||
+            tree->HLT_Photon50_R9Id90_HE10_IsoM                          ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM                          ||
+            tree->HLT_Photon90_R9Id90_HE10_IsoM                          ||
+            tree->HLT_Photon120_R9Id90_HE10_IsoM                         ||
+            tree->HLT_Photon165_R9Id90_HE10_IsoM                         ||
+            tree->HLT_Photon35_TwoProngs35                               ||
+            tree->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350  ||
+            tree->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT380  ||
+            tree->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT400  ||
+            tree->HLT_Photon20_HoverELoose                               ||
+            tree->HLT_Photon30_HoverELoose                               ||
+            tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ||
+            tree->HLT_Photon32_OneProng32_M50To105                       ;
+        }
+
 		if(passTrig){
             hEvents_->Fill(1);
 			newTree->Fill();
@@ -143,6 +214,6 @@ int main(int argc, char* argv[]){
     newTree->Write();
 	hEvents_->Write();
 	outFile->Close();
-	
+
 	return 0;
 }
