@@ -34,9 +34,11 @@ def formatNum(num):
 if __name__=="__main__":
     #Store the ouputs in two separate files
     f1 = open("FilesNano_cff.json", "w")
-    f2 = open("JobsNano_cff.py", "w")
+    f2 = open("JobsSkim_cff.py", "w")
+    f3 = open("FilesSkim_cff.json", "w")
     allJobs = 0
-    toWrite = []
+    toNano = []
+    toSkim = []
     for year in Years:
     #for year in ['2017']: 
         splitJobs = {}
@@ -46,13 +48,13 @@ if __name__=="__main__":
         print('---------------------------------------')
         jobs = 0
         for sKey, sName in sampleDict(year).items():
-            fileList = getFiles(sName)
-            if not fileList:
+            fNano = getFiles(sName)
+            if not fNano:
                 print(f'PROBLEM: {sName}\n')
                 continue
-            tW = '\"%s_FileList_%s\" : %s'%(sKey,year, fileList)
-            toWrite.append(tW.replace('b\'', '\'').replace('\'', '\"'))#for json format
-            nFiles = len(fileList)
+            tN = '\"%s_FileList_%s\" : %s'%(sKey,year, fNano)
+            toNano.append(tN.replace('b\'', '\'').replace('\'', '\"'))#for json format
+            nFiles = len(fNano)
             evt     = getEvents(sName)
             evtStr  = formatNum(evt) 
             nJob = int(np.ceil(evt/evtPerJob))
@@ -60,6 +62,11 @@ if __name__=="__main__":
                 nJob = nFiles
             splitJobs[sKey] = [nJob, evtStr, evt, nFiles]
             jobs += nJob
+            fSkim = []
+            for i in range(nJob):
+                fSkim.append('%s/%s/%s__%s_Skim_%sof%s.root'%(eosSkimDir, year, sKey, year, i+1, nJob))
+            tS = '\"%s_FileList_%s\" : %s'%(sKey,year, fSkim)
+            toSkim.append(tS.replace('\'', '\"'))
             print("%i\t %i\t %s\t %s"%(nFiles, nJob, evtStr, sKey))
         f2.write("Samples_%s = %s \n"%(str(year), str(splitJobs)))
         f2.write("AllJobs_%s = %s \n"%(str(year), str(jobs)))
@@ -68,11 +75,15 @@ if __name__=="__main__":
         print('==================')
         allJobs += jobs
     f1.write("{\n")
-    for i, tW in enumerate(toWrite):
-        if i==len(toWrite)-1:
-            f1.write('%s \n'%tW)#for json format
+    f3.write("{\n")
+    for t in range(len(toNano)): 
+        if t==len(toNano)-1:
+            f1.write('%s \n'%toNano[t])#for json format
+            f3.write('%s \n'%toSkim[t])#for json format
         else:
-            f1.write('%s,\n'%tW)
+            f1.write('%s,\n'%toNano[t])
+            f3.write('%s,\n'%toSkim[t])
     f1.write("}\n")
+    f3.write("}\n")
     f2.write("AllJobs_AllYears = %s \n"%str(allJobs))
  

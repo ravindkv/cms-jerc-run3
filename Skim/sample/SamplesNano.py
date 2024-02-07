@@ -73,7 +73,7 @@ def getMC(year):
 
 def sampleDict(year):
     allSamples = {}
-    allSamples.update(getGJet(year))
+    #allSamples.update(getGJet(year))
     allSamples.update(getData(year))
     return allSamples
 

@@ -6,6 +6,7 @@ myArray=( "$@" )
 
 printf "Start skimming at ";/bin/date
 printf "Worker node hostname ";/bin/hostname
+printf "Worker node OS " ; lsb_release -d
 
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then 
     echo "Running Interactively" ; 
@@ -18,7 +19,7 @@ else
     cd CMSSW_12_6_0/src
     eval `scramv1 runtime -sh`
     cd ../..
-	tar --strip-components=1 -zxf Skim_NanoAOD.tar.gz
+	tar --strip-components=1 -zxf Skim.tar.gz
 fi
 
 #Run for Base, Signal region
@@ -26,14 +27,13 @@ echo "All arguements: "$@
 echo "Number of arguements: "$#
 year=$1
 sample=$2
-job=$3
-nJobTotal=$4
+nthJob=$3
+totJobs=$4
 outDir=$5
-varname=${sample}_FileList_${year}
-source sample/FilesNano_cff.sh
-jobNum="${job}of${nJobTotal}"
-echo "./makeSkim ${year} ${jobNum} ${sample}_Skim.root ${!varname}"
-./makeSkim ${year} $jobNum ${sample}_Skim.root ${!varname}
+iName=${sample}_${year}
+oName=${sample}__${year}_Skim
+echo "./makeSkim -y ${year} -n ${nthJob} -N ${totJobs} -o ${oName} -i ${iName}" 
+./makeSkim -y ${year} -n ${nthJob} -N ${totJobs} -o ${oName} -i ${iName} 
 
 printf "Done skimming at ";/bin/date
 #---------------------------------------------
@@ -42,7 +42,7 @@ printf "Done skimming at ";/bin/date
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f ${sample}_Skim_${jobNum}.root root://cmseos.fnal.gov/${outDir}
+    xrdcp -f ${oName}.root ${outDir}
     echo "Cleanup"
     rm -rf CMSSW*
     rm *.root 
