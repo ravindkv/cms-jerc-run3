@@ -15,19 +15,22 @@ if os.path.exists("tmpSub"):
     print("Deleted dir: tmpSub")
 os.system("mkdir -p tmpSub/log")
 print("Created dir: tmpSub")
-condorLogDir = "log"
+logDir = "log"
 tarFile = "tmpSub/Skim.tar.gz"
-os.system("tar -zcvf %s ../../Skim --exclude condor"%tarFile)
+os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Skim"%tarFile)
 os.system("cp runMakeSkims.sh tmpSub/")
 common_command = \
 'Universe   = vanilla\n\
 should_transfer_files = YES\n\
 when_to_transfer_output = ON_EXIT\n\
 Transfer_Input_Files = Skim.tar.gz, runMakeSkims.sh\n\
-x509userproxy        = /tmp/x509up_u93032\n\
+x509userproxy        = /afs/cern.ch/user/r/rverma/x509up_u93032\n\
++MaxRuntime = 60*60*8\n\
+max_retries = 3\n\
+use_x509userproxy = true\n\
 Output = %s/log_$(cluster)_$(process).stdout\n\
-Error  = %s/log_$(cluster)_$(process).stderr\n\n'%(condorLogDir, condorLogDir)
-#use_x509userproxy = true\n\
+Log = %s/log_$(cluster)_$(process).log\n\
+Error  = %s/log_$(cluster)_$(process).stderr\n\n'%(logDir, logDir, logDir)
 
 #----------------------------------------
 #Create jdl files
@@ -44,9 +47,9 @@ for year in Years:
     print("Out eos dir: %s"%outDir)
     jdlFile.write("X=$(step)+1\n")
     
-    for sampleName, nJobEvt in samples.items():
+    for sKey, nJobEvt in samples.items():
         nJob = nJobEvt[0]
-        args =  'Arguments  = %s %s $INT(X) %i %s\n' %(year, sampleName, nJob, outDir)
+        args =  'Arguments  = %s $INT(X) %i %s\n' %(sKey, nJob, outDir)
         args += "Queue %i\n\n"%nJob
         jdlFile.write(args)
     

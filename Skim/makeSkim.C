@@ -1,6 +1,6 @@
 #include<iostream>
-#include <unistd.h>
-#include <cstdlib>
+#include<unistd.h>
+#include<cstdlib>
 #include<string>
 #include<TFile.h>
 #include<TTree.h>
@@ -13,6 +13,7 @@
 
 #include "src/SkimTree.h"
 #include <nlohmann/json.hpp>
+#include <boost/algorithm/string.hpp>
 
 int main(int argc, char* argv[]){
 
@@ -23,31 +24,19 @@ int main(int argc, char* argv[]){
     // Parse command-line options
     //--------------------------------
     int opt;
-    TString year;
-    int nthJob    = 1; //nofN
-    int totJob    = 10;
-    std::string oName;
-    std::string iName;
-    while ((opt = getopt(argc, argv, "y:n:N:o:i:h")) != -1) {
+    std::string sJob;
+    std::string sKey;
+    while ((opt = getopt(argc, argv, "s:j:h")) != -1) {
         switch (opt) {
-            case 'y':
-                year = optarg;
+            case 's':
+                sKey = optarg;
                 break;
-            case 'n':
-                nthJob = std::stoi(optarg);
-                break;
-            case 'N':
-                totJob = std::stoi(optarg);
-                break;
-            case 'o':
-                oName = optarg;
-                break;
-            case 'i':
-                iName = optarg;
+            case 'j':
+                sJob = optarg; 
                 break;
             case 'h':
-                std::cout << "Usage: ./makeSkim -y 2022 -n 1 -N 100 -o oName -i iName\n" << std::endl;
-                cout<<"Choose iName from the following:"<<endl;
+                std::cout << "Usage: ./makeSkim -s sKey -j 1of100\n" << std::endl;
+                cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
                 }
@@ -61,22 +50,27 @@ int main(int argc, char* argv[]){
     //--------------------------------
     // files to run for each job
     //--------------------------------
+	SkimTree* tree;
+    std::vector<int> sJob_ = tree->getJobs(sJob);
+    int nthJob =sJob_.at(0);
+    int totJob =sJob_.at(1);
+
     std::vector<std::string> fileNames;
-    js.at(iName).get_to(fileNames);
+    js.at(sKey).get_to(fileNames);
     int nFiles  = fileNames.size();
     cout<<"Total files = "<<nFiles<<endl;
     if (totJob > nFiles){
-        cout<<"totJob > nFiles. Setting it to the nFiles = "<<nFiles<<endl;
+        cout<<"Since totJob > nFiles, setting it to the nFiles, totJob = "<<nFiles<<endl;
         totJob = nFiles;
     }
     if (nthJob > totJob){
         cout<<"n > N. Setting it to the N = "<<nFiles<<endl;
         totJob = nFiles;
     }
+    std::string oName = sKey+"__"+sJob+".root";
 	if (nthJob>0 && totJob>0){
 	    cout <<"jobs: " <<nthJob << " of " << totJob << endl;
 		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
-	    oName = oName+ "_" + std::to_string(nthJob)+"of"+std::to_string(totJob)+ ".root";
 	    cout << "new output file name: "<< oName << endl;
 	}
     else{
@@ -87,11 +81,12 @@ int main(int argc, char* argv[]){
     //--------------------------------
     // Read input files
     //--------------------------------
-	SkimTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
-	cout << "HERE" << endl;
+
+    TString year = sKey.substr(sKey.find_last_of("__") + 1);
+	cout << "HERE: "<<year<< endl;
 	bool isMC = true;
-	if( oName.find("Data") != std::string::npos){
+	if( sKey.find("Data") != std::string::npos){
 	    cout << "IsData" << endl;
 	    isMC = false;
 	}

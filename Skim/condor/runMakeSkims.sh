@@ -13,10 +13,9 @@ if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
 else
     echo "Running In Batch"
     echo ${_CONDOR_SCRATCH_DIR}
-    source /cvmfs/cms.cern.ch/cmsset_default.sh
-    export SCRAM_ARCH=slc7_amd64_gcc700
-    scramv1 project CMSSW CMSSW_12_6_0
-    cd CMSSW_12_6_0/src
+    export SCRAM_ARCH=el9_amd64_gcc10
+    scramv1 project CMSSW CMSSW_13_3_0
+    cd CMSSW_13_3_0/src
     eval `scramv1 runtime -sh`
     cd ../..
 	tar --strip-components=1 -zxf Skim.tar.gz
@@ -25,15 +24,12 @@ fi
 #Run for Base, Signal region
 echo "All arguements: "$@
 echo "Number of arguements: "$#
-year=$1
-sample=$2
-nthJob=$3
-totJobs=$4
-outDir=$5
-iName=${sample}_${year}
-oName=${sample}__${year}_Skim
-echo "./makeSkim -y ${year} -n ${nthJob} -N ${totJobs} -o ${oName} -i ${iName}" 
-./makeSkim -y ${year} -n ${nthJob} -N ${totJobs} -o ${oName} -i ${iName} 
+sKey=$1
+nthJob=$2
+totJobs=$3
+outDir=$4
+echo "./makeSkim -s ${sKey} -j ${nthJob}of${totJobs}"
+./makeSkim -s ${sKey} -j ${nthJob}of${totJobs}
 
 printf "Done skimming at ";/bin/date
 #---------------------------------------------
@@ -42,7 +38,7 @@ printf "Done skimming at ";/bin/date
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f ${oName}.root ${outDir}
+    xrdcp -f ${sKey}__${nthJob}of${totJobs}.root ${outDir}
     echo "Cleanup"
     rm -rf CMSSW*
     rm *.root 

@@ -7,7 +7,7 @@ import sys
 def getGJet(year):
     samps22 = {}
     samps22['G4Jets_HT_100to200_preEE']  = '/G-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer22NanoAODv12-130X_mcRun3_2022_realistic_v5-v2/NANOAODSIM'
-    samps22['G4Jets_HT_100to200_postEE'] = '/G-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer22EENanoAODv12-130X_mcRun3_2022_realistic_postEE_v6-v2/NANOAODSIM'
+    #samps22['G4Jets_HT_100to200_postEE'] = '/G-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8/Run3Summer22EENanoAODv12-130X_mcRun3_2022_realistic_postEE_v6-v2/NANOAODSIM'
     
     samps23 = {}
     #preBpix
@@ -40,10 +40,10 @@ def getGJet(year):
 def getData(year):
     samps22 = {}
     samps22['Data_2022C']       = '/EGamma/Run2022C-22Sep2023-v1/NANOAOD' 
-    samps22['Data_2022D']       = '/EGamma/Run2022D-22Sep2023-v1/NANOAOD'
-    samps22['Data_2022E']       = '/EGamma/Run2022E-22Sep2023-v1/NANOAOD'
-    samps22['Data_2022F']       = '/EGamma/Run2022F-22Sep2023-v1/NANOAOD'
-    samps22['Data_2022G']       = '/EGamma/Run2022G-PromptNanoAODv10_v1-v1/NANOAOD'
+    #samps22['Data_2022D']       = '/EGamma/Run2022D-22Sep2023-v1/NANOAOD'
+    #samps22['Data_2022E']       = '/EGamma/Run2022E-22Sep2023-v1/NANOAOD'
+    #samps22['Data_2022F']       = '/EGamma/Run2022F-22Sep2023-v1/NANOAOD'
+    #samps22['Data_2022G']       = '/EGamma/Run2022G-PromptNanoAODv10_v1-v1/NANOAOD'
 
     samps23 = {}
     #EGamma0
@@ -73,7 +73,7 @@ def getMC(year):
 
 def sampleDict(year):
     allSamples = {}
-    #allSamples.update(getGJet(year))
+    allSamples.update(getGJet(year))
     allSamples.update(getData(year))
     return allSamples
 

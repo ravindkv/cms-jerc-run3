@@ -52,7 +52,8 @@ if __name__=="__main__":
             if not fNano:
                 print(f'PROBLEM: {sName}\n')
                 continue
-            tN = '\"%s_FileList_%s\" : %s'%(sKey,year, fNano)
+            sKeyNew = "%s__%s"%(sKey, year)
+            tN = '\"%s\" : %s'%(sKeyNew, fNano)
             toNano.append(tN.replace('b\'', '\'').replace('\'', '\"'))#for json format
             nFiles = len(fNano)
             evt     = getEvents(sName)
@@ -60,12 +61,12 @@ if __name__=="__main__":
             nJob = int(np.ceil(evt/evtPerJob))
             if nFiles<nJob: 
                 nJob = nFiles
-            splitJobs[sKey] = [nJob, evtStr, evt, nFiles]
+            splitJobs[sKeyNew] = [nJob, evtStr, evt, nFiles]
             jobs += nJob
             fSkim = []
             for i in range(nJob):
-                fSkim.append('%s/%s/%s__%s_Skim_%sof%s.root'%(eosSkimDir, year, sKey, year, i+1, nJob))
-            tS = '\"%s_FileList_%s\" : %s'%(sKey,year, fSkim)
+                fSkim.append('%s/%s/%s__%sof%s.root'%(eosSkimDir, year, sKeyNew, i+1, nJob))
+            tS = '\"%s\" : %s'%(sKeyNew, fSkim)
             toSkim.append(tS.replace('\'', '\"'))
             print("%i\t %i\t %s\t %s"%(nFiles, nJob, evtStr, sKey))
         f2.write("Samples_%s = %s \n"%(str(year), str(splitJobs)))

@@ -75,6 +75,7 @@ class SkimTree{
 
 
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
+    std::vector<int> getJobs(std::string jobStr="1of100");
 };
 
 #endif

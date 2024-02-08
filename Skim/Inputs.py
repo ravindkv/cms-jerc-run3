@@ -6,5 +6,5 @@ Years.append('2022')
 #Years.append('2023')
 
 
-evtPerJob = 5e6 #5million events per job
+evtPerJob = 1e6 # 1 million events per job
 

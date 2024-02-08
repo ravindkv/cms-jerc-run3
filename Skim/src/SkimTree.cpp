@@ -6,8 +6,8 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
     chain->SetCacheSize(100*1024*1024);
     bool isCopy = false;
     int nFiles = fileNames.size();
-    string dir = "root://cms-xrd-global.cern.ch/";
-    //string dir = "root://cmsxrootd.fnal.gov/";
+    //string dir = "root://cms-xrd-global.cern.ch/";
+    string dir = "root://cmsxrootd.fnal.gov/";
     for(int fileI=0; fileI<nFiles; fileI++){
         string fName = fileNames[fileI];
         if(isCopy){
@@ -25,7 +25,7 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
     }
     std::cout << "Begin" << std::endl;
     chain->SetBranchStatus("*",0);
-
+/*
     // event
     chain->SetBranchStatus("run",1);
     chain->SetBranchStatus("event",1);
@@ -79,7 +79,7 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
             chain->SetBranchStatus("L1PreFiringWeight_Up",1);
         }
     }
-
+*/
     chain->SetBranchStatus("HLT_Photon*", 1);
     //2022
     if(year.Contains("2022")){ 
@@ -183,4 +183,23 @@ std::vector<std::vector<std::string>> SkimTree::splitVector(const std::vector<st
         }
     }
     return smallVectors;
+}
+std::vector<int> SkimTree::getJobs(std::string jobStr){
+	std::vector<int> jobs;
+    // Find the position of "of"
+    size_t posOf = jobStr.find("of");
+    if (posOf != std::string::npos) {
+        // Extract the substring before "of" (first number)
+        std::string num1 = jobStr.substr(0, posOf);
+        // Extract the substring after "of" (second number)
+        std::string num2 = jobStr.substr(posOf + 2);
+        // Output the numbers
+        std::cout << "nthJob: " << num1 << std::endl;
+        std::cout << "totJob: " << num2 << std::endl;
+		jobs.push_back(std::stoi(num1));
+		jobs.push_back(std::stoi(num2));
+    } else {
+        std::cout << "Invalid format =  " << jobStr << std::endl;
+    }
+	return jobs;
 }
