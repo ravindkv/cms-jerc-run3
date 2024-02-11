@@ -24,12 +24,10 @@ fi
 #Run for Base, Signal region
 echo "All arguements: "$@
 echo "Number of arguements: "$#
-sKey=$1
-nthJob=$2
-totJobs=$3
+oName=$1
 outDir=$4
-echo "./makeSkim -s ${sKey} -j ${nthJob}of${totJobs}"
-./makeSkim -s ${sKey} -j ${nthJob}of${totJobs}
+echo "./makeSkim -o oName"
+./makeSkim -o ${oName}
 
 printf "Done skimming at ";/bin/date
 #---------------------------------------------
@@ -38,7 +36,7 @@ printf "Done skimming at ";/bin/date
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f ${sKey}__${nthJob}of${totJobs}.root ${outDir}
+    xrdcp -f ${oName} ${outDir}
     echo "Cleanup"
     rm -rf CMSSW*
     rm *.root 

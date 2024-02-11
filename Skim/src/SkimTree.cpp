@@ -25,42 +25,50 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
     }
     std::cout << "Begin" << std::endl;
     chain->SetBranchStatus("*",0);
-/*
     // event
     chain->SetBranchStatus("run",1);
     chain->SetBranchStatus("event",1);
     chain->SetBranchStatus("luminosityBlock",1);
 
-    //objects
+    //main branches
+    chain->SetBranchStatus("Jet_*",1);
+    chain->SetBranchStatus("Photon_*",1);
+    chain->SetBranchStatus("nJet",1);
+    chain->SetBranchStatus("nPhoton",1);
+    chain->SetBranchStatus("Flag_*",1);
+    chain->SetBranchStatus("HLT_Photon*", 1);
     chain->SetBranchStatus("PV_*",1);
     chain->SetBranchStatus("MET*",1);
+    chain->SetBranchStatus("ChsMET*",1);
     chain->SetBranchStatus("RawPuppiMET*",1);
+	chain->SetBranchStatus("Rho_fixedGridRhoFastjetAll");
+	/*
     chain->SetBranchStatus("Electron_*",1);
     chain->SetBranchStatus("TrigObj_*",1);
     chain->SetBranchStatus("Muon_*",1);
-    chain->SetBranchStatus("Jet_*",1);
     chain->SetBranchStatus("FatJet_*",1);
-    chain->SetBranchStatus("Photon_*",1);
-    chain->SetBranchStatus("Flag_*",1);
-    chain->SetBranchStatus("Rho_fixedGridRhoFastjetAll",1);
-
-    //size of objects
-    chain->SetBranchStatus("nElectron",1);
+    chain->SetBranchStatus("nElectron",1)
     chain->SetBranchStatus("nTrigObj",1);
     chain->SetBranchStatus("nMuon",1);
-    chain->SetBranchStatus("nJet",1);
     chain->SetBranchStatus("nFatJet",1);
-    chain->SetBranchStatus("nPhoton",1);
+	*/
+ 
     if (isMC){
-	    chain->SetBranchStatus("Pileup_*",1);
-        chain->SetBranchStatus("GenPart_*",1);
-        chain->SetBranchStatus("GenJet_*",1);
-        chain->SetBranchStatus("GenJetAK8_*",1);
-        chain->SetBranchStatus("nGenPart",1);
-        chain->SetBranchStatus("nGenJet",1);
-        chain->SetBranchStatus("nGenJetAK8",1);
+		chain->SetBranchStatus("genWeight");
+		chain->SetBranchStatus("nPSWeight");
+		chain->SetBranchStatus("PSWeight");
+		chain->SetBranchStatus("LHE_HT");
+		chain->SetBranchStatus("Pileup_nTrueInt");
         chain->SetBranchStatus("GenIsolatedPhoton*",1);
         chain->SetBranchStatus("nGenIsolatedPhoton",1);
+        chain->SetBranchStatus("GenJet_*",1);
+        chain->SetBranchStatus("nGenJet",1);
+		/*
+	    chain->SetBranchStatus("Pileup_*",1);
+        chain->SetBranchStatus("GenPart_*",1);
+        chain->SetBranchStatus("GenJetAK8_*",1);
+        chain->SetBranchStatus("nGenPart",1);
+        chain->SetBranchStatus("nGenJetAK8",1);
         chain->SetBranchStatus("LHE_*",1);
         // weight
         chain->SetBranchStatus("Generator_weight",1);
@@ -73,14 +81,8 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
         chain->SetBranchStatus("PSWeight",1);
         chain->SetBranchStatus("nPSWeight",1);
         chain->SetBranchStatus("genWeight",1);
-        if(year.Contains("2018")){ 
-            chain->SetBranchStatus("L1PreFiringWeight_Dn",1);
-            chain->SetBranchStatus("L1PreFiringWeight_Nom",1);
-            chain->SetBranchStatus("L1PreFiringWeight_Up",1);
-        }
+		*/
     }
-*/
-    chain->SetBranchStatus("HLT_Photon*", 1);
     //2022
     if(year.Contains("2022")){ 
         chain->SetBranchAddress("HLT_Photon300_NoHE"                                                , & HLT_Photon300_NoHE);

@@ -12,7 +12,10 @@ def getFiles(dataset):
     dasquery = ["dasgoclient",  "-query=file dataset=%s" % dataset]
     files = subprocess.check_output(dasquery)
     files = files.splitlines()
-    return files
+    files_ = []
+    for file in files:
+        files_.append(file.decode('utf-8'))
+    return files_
 
 def getEvents(dataset):
     dasquery = ["dasgoclient",  "-query=summary dataset=%s" % dataset]
@@ -32,16 +35,14 @@ def formatNum(num):
     return f"{round(num, 1)}{suffixes[magnitude]}"
 
 if __name__=="__main__":
-    #Store the ouputs in two separate files
     f1 = open("FilesNano_cff.json", "w")
     f2 = open("JobsSkim_cff.py", "w")
     f3 = open("FilesSkim_cff.json", "w")
     allJobs = 0
-    toNano = []
-    toSkim = []
+    toNano = {}
+    toSkim = {}
+    toJobs = {}
     for year in Years:
-    #for year in ['2017']: 
-        splitJobs = {}
         print('---------------------------------------')
         print(year)
         print("nFiles\t  nJobs\t nEvents\t Samples")
@@ -53,38 +54,26 @@ if __name__=="__main__":
                 print(f'PROBLEM: {sName}\n')
                 continue
             sKeyNew = "%s__%s"%(sKey, year)
-            tN = '\"%s\" : %s'%(sKeyNew, fNano)
-            toNano.append(tN.replace('b\'', '\'').replace('\'', '\"'))#for json format
+            toNano[sKeyNew] = fNano
             nFiles = len(fNano)
             evt     = getEvents(sName)
             evtStr  = formatNum(evt) 
             nJob = int(np.ceil(evt/evtPerJob))
             if nFiles<nJob: 
                 nJob = nFiles
-            splitJobs[sKeyNew] = [nJob, evtStr, evt, nFiles]
+            toJobs[sKeyNew] = [nJob, evtStr, evt, nFiles]
             jobs += nJob
             fSkim = []
             for i in range(nJob):
-                fSkim.append('%s/%s/%s__%sof%s.root'%(eosSkimDir, year, sKeyNew, i+1, nJob))
-            tS = '\"%s\" : %s'%(sKeyNew, fSkim)
-            toSkim.append(tS.replace('\'', '\"'))
+                fSkim.append("%s/%s/%s__%sof%s.root"%(eosSkimDir, year, sKeyNew, i+1, nJob))
+            toSkim[sKeyNew] = fSkim
             print("%i\t %i\t %s\t %s"%(nFiles, nJob, evtStr, sKey))
-        f2.write("Samples_%s = %s \n"%(str(year), str(splitJobs)))
-        f2.write("AllJobs_%s = %s \n"%(str(year), str(jobs)))
-        print('==================')
         print("AllJobs_%s = %i"%(year, jobs))
-        print('==================')
         allJobs += jobs
-    f1.write("{\n")
-    f3.write("{\n")
-    for t in range(len(toNano)): 
-        if t==len(toNano)-1:
-            f1.write('%s \n'%toNano[t])#for json format
-            f3.write('%s \n'%toSkim[t])#for json format
-        else:
-            f1.write('%s,\n'%toNano[t])
-            f3.write('%s,\n'%toSkim[t])
-    f1.write("}\n")
-    f3.write("}\n")
-    f2.write("AllJobs_AllYears = %s \n"%str(allJobs))
+    json.dump(toNano, f1, indent=4)
+    json.dump(toJobs, f2, indent=4)
+    json.dump(toSkim, f3, indent=4)
+    print('---------------------------------------')
+    print("AllJobs_AllYears = %s \n"%str(allJobs))
+    print('---------------------------------------')
  

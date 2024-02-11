@@ -1,22 +1,33 @@
-## To produce one skim file from NanoAOD
-* cd Skim_NanoAOD
-* make clean
-* make
-* voms-proxy-init -voms cms
-* cd sample
-* python getFiles.py
-* cd ..
-* source sample/FilesNano_cff.sh
-* ./makeNtuple Semilep 2017 SignalSpin12_M800__JEC_SubTotalRelative_up 1of1 . $SignalSpin12_M800_FileList_2017
+# Produce skim file from NanoAOD
 
-### to produce many skim files using the condor setup
+## Step-1: get root files of samples from DAS
+* cd sample
+* python3 getFiles.py  
+* cd ..
+
+## Step-2: produce ONE skim file from nanofiles 
+* make
+* ./makeSkim -h
+
+or 
+* ./makeSkim
+
+## Step-3: submit condor jobs to produce MANY skims 
+
 * cd condor
 * python createJdlFiles.py
 * cd tmpSub
-* source condorSubmit.sh
+* condor_submit submitJobs_cff.jdl
 
 Monitor the conodr jobs on linux terminal
 * condor_q 
 * condor_q -better-analyze 75671743.5
-* condor_release rverma -name lpcschedd3.fnal.gov
-* condor_qedit rverma RequestMemory 3072 -name lpcschedd3.fnal.gov
+
+Once condor_q is DONE. Check the finished jobs
+* cd ..
+* python3 checkJobStatus.py
+
+This will open each file and perform many checks. It  will  create JDL files for the failed 
+jobs which can be resubmitted
+* cd tmpSub
+* condor_submit resub_submitJobs_cff.jdl

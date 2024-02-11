@@ -15,6 +15,10 @@
 #include <nlohmann/json.hpp>
 #include <boost/algorithm/string.hpp>
 
+    #include <iostream>
+#include <string>
+#include <sstream>
+
 int main(int argc, char* argv[]){
 
     std::ifstream file("sample/FilesNano_cff.json");
@@ -24,18 +28,14 @@ int main(int argc, char* argv[]){
     // Parse command-line options
     //--------------------------------
     int opt;
-    std::string sJob;
-    std::string sKey;
-    while ((opt = getopt(argc, argv, "s:j:h")) != -1) {
+    std::string oName = js.begin().key()+"__1of100.root";
+    while ((opt = getopt(argc, argv, "o:h")) != -1) {
         switch (opt) {
-            case 's':
-                sKey = optarg;
-                break;
-            case 'j':
-                sJob = optarg; 
+            case 'o':
+                oName = optarg;
                 break;
             case 'h':
-                std::cout << "Usage: ./makeSkim -s sKey -j 1of100\n" << std::endl;
+                std::cout << "Usage: ./makeSkim -o sKey__1of1000.root\n" << std::endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
@@ -46,15 +46,44 @@ int main(int argc, char* argv[]){
                 return 1;
         }
     }
+    cout<<"--------------------------------------------"<<endl;
+    cout<<"Inputs: ./makeSkim -o " <<oName<<endl;
+    cout<<"--------------------------------------------"<<endl;
+    // Extracting he sample key 
+    std::string sKey = oName.substr(0, oName.find("__"));
+    
+    // Extracting year
+    TString year = oName.substr(oName.find("__") + 2, 4);
+    sKey = sKey+"__"+year;
+    std::cout << "sKey: " << sKey << std::endl;
+    
+	// Finding the position of the second "__"
+    std::size_t pos_second_double_underscore = oName.find("__", oName.find("__") + 1);
+    if (pos_second_double_underscore == std::string::npos) {
+        std::cerr << "Second '__' not found." << std::endl;
+        return 1;
+    }
+    
+    // Extracting the part after the second "__"
+    std::string fraction_str = oName.substr(pos_second_double_underscore + 2);
+    std::cout << "Fraction: " << fraction_str << std::endl;
+
+	// Finding the position of "of"
+    std::size_t pos_of = fraction_str.find("of");
+    
+    // Extracting the numerator before "of"
+    std::string numerator_str = fraction_str.substr(0, pos_of);
+    int nthJob = std::stoi(numerator_str);
+    std::cout << "nthJob: " << nthJob << std::endl;
+    
+	// Extracting the denominator after "of" and before "."
+    std::string denominator_str = fraction_str.substr(pos_of + 2, fraction_str.find(".") - pos_of - 2);
+    int totJob = std::stoi(denominator_str);
+    std::cout << "totJob: " << totJob << std::endl;
 
     //--------------------------------
     // files to run for each job
     //--------------------------------
-	SkimTree* tree;
-    std::vector<int> sJob_ = tree->getJobs(sJob);
-    int nthJob =sJob_.at(0);
-    int totJob =sJob_.at(1);
-
     std::vector<std::string> fileNames;
     js.at(sKey).get_to(fileNames);
     int nFiles  = fileNames.size();
@@ -64,27 +93,24 @@ int main(int argc, char* argv[]){
         totJob = nFiles;
     }
     if (nthJob > totJob){
-        cout<<"n > N. Setting it to the N = "<<nFiles<<endl;
-        totJob = nFiles;
+        cout<<"Error: Make sure nthJob < totJob"<<endl;
+        return 0;
     }
-    std::string oName = sKey+"__"+sJob+".root";
 	if (nthJob>0 && totJob>0){
 	    cout <<"jobs: " <<nthJob << " of " << totJob << endl;
 		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
 	    cout << "new output file name: "<< oName << endl;
 	}
     else{
-        cout<<"\n ERROR: n > 0 and N > 0\n ";
+        cout<<"\n Error: Make sure nthJob > 0 and totJob > 0\n ";
         return 0;
     }
 
     //--------------------------------
     // Read input files
     //--------------------------------
+	SkimTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
-
-    TString year = sKey.substr(sKey.find_last_of("__") + 1);
-	cout << "HERE: "<<year<< endl;
 	bool isMC = true;
 	if( sKey.find("Data") != std::string::npos){
 	    cout << "IsData" << endl;
@@ -127,8 +153,7 @@ int main(int argc, char* argv[]){
 		}
 		tree->GetEntry(entry);
 		hEvents_->Fill(0);
-        //2022
-        if(year.Contains("2022")){ 
+        if(year.Contains("2022")){
 		passTrig =
             tree->HLT_Photon300_NoHE                                                ||
             tree->HLT_Photon20                                                      ||
@@ -164,7 +189,7 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ||
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3           ;
         }
-        if(year.Contains("2023")){ 
+        if(year.Contains("2023")){
 		passTrig =
             tree->HLT_Photon300_NoHE                                     ||
             tree->HLT_Photon33                                           ||
@@ -199,7 +224,6 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ||
             tree->HLT_Photon32_OneProng32_M50To105                       ;
         }
-
 		if(passTrig){
             hEvents_->Fill(1);
 			newTree->Fill();

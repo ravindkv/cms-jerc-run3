@@ -24,7 +24,9 @@ class SkimTree{
     UInt_t    run_;
     ULong64_t event_;
     UInt_t    lumis_;
-
+    //-----------------------------
+    // Branch values
+    //-----------------------------
     //2022
     Bool_t HLT_Photon300_NoHE = false;
     Bool_t HLT_Photon20 = false;
@@ -72,7 +74,6 @@ class SkimTree{
     Bool_t HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT380 = false;
     Bool_t HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT400 = false;
     Bool_t HLT_Photon32_OneProng32_M50To105 = false;
-
 
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
     std::vector<int> getJobs(std::string jobStr="1of100");
