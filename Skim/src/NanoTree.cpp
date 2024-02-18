@@ -1,8 +1,8 @@
-#include "SkimTree.h"
+#include "NanoTree.h"
 
-SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
+NanoTree::NanoTree(TString year, vector<string>fileNames, bool isMC){
     chain = new TChain("Events");
-    std::cout << "Start SkimTree" << std::endl;
+    std::cout << "Start NanoTree" << std::endl;
     chain->SetCacheSize(100*1024*1024);
     bool isCopy = false;
     int nFiles = fileNames.size();
@@ -25,6 +25,7 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
     }
     std::cout << "Begin" << std::endl;
     chain->SetBranchStatus("*",0);
+    chain->SetBranchStatus("HLT_Photon*", 1);
     // event
     chain->SetBranchStatus("run",1);
     chain->SetBranchStatus("event",1);
@@ -36,7 +37,6 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
     chain->SetBranchStatus("nJet",1);
     chain->SetBranchStatus("nPhoton",1);
     chain->SetBranchStatus("Flag_*",1);
-    chain->SetBranchStatus("HLT_Photon*", 1);
     chain->SetBranchStatus("PV_*",1);
     chain->SetBranchStatus("MET*",1);
     chain->SetBranchStatus("ChsMET*",1);
@@ -156,19 +156,19 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
     }
 }
 
-SkimTree::~SkimTree(){
+NanoTree::~NanoTree(){
     delete chain;
 }
 
-Long64_t SkimTree::GetEntries(){
+Long64_t NanoTree::GetEntries(){
     return chain->GetEntries();
 }
 
-Int_t SkimTree::GetEntry(Long64_t entry){
+Int_t NanoTree::GetEntry(Long64_t entry){
     return chain->GetEntry(entry);
 }
 
-std::vector<std::vector<std::string>> SkimTree::splitVector(const std::vector<std::string>& strings, int n) {
+std::vector<std::vector<std::string>> NanoTree::splitVector(const std::vector<std::string>& strings, int n) {
     int size = strings.size() / n;  // Size of each small vector
     int remainder = strings.size() % n;  // Remaining elements
     std::vector<std::vector<std::string>> smallVectors;
@@ -186,7 +186,7 @@ std::vector<std::vector<std::string>> SkimTree::splitVector(const std::vector<st
     }
     return smallVectors;
 }
-std::vector<int> SkimTree::getJobs(std::string jobStr){
+std::vector<int> NanoTree::getJobs(std::string jobStr){
 	std::vector<int> jobs;
     // Find the position of "of"
     size_t posOf = jobStr.find("of");

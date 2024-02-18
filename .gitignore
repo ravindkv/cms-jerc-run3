@@ -7,3 +7,5 @@ Skim/sample/__pycache__
 Skim/condor/__pycache__
 Skim/src/*.o
 Skim/condor/tmpSub
+
+Hist

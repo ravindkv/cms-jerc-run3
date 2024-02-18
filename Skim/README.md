@@ -19,7 +19,7 @@ or
 * cd tmpSub
 * condor_submit submitJobs_cff.jdl
 
-Monitor the conodr jobs on linux terminal
+Monitor the condor jobs on linux terminal
 * condor_q 
 * condor_q -better-analyze 75671743.5
 

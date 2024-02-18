@@ -11,7 +11,7 @@
 #include<iomanip>
 #include <fstream>
 
-#include "src/SkimTree.h"
+#include "src/NanoTree.h"
 #include <nlohmann/json.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -109,14 +109,14 @@ int main(int argc, char* argv[]){
     //--------------------------------
     // Read input files
     //--------------------------------
-	SkimTree* tree;
+	NanoTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
 	bool isMC = true;
 	if( sKey.find("Data") != std::string::npos){
 	    cout << "IsData" << endl;
 	    isMC = false;
 	}
-	tree = new SkimTree(year, smallVectors[nthJob-1], isMC);
+	tree = new NanoTree(year, smallVectors[nthJob-1], isMC);
 
 	TFile* outFile = TFile::Open( oName.c_str() ,"RECREATE","",207 );
     outFile->cd();

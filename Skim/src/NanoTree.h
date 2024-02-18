@@ -13,10 +13,10 @@
 using namespace std;
 const Int_t maxP = 600;
 
-class SkimTree{
+class NanoTree{
  public:
-    SkimTree(TString year, vector<string> fileNames, bool isMC);
-    ~SkimTree();
+    NanoTree(TString year, vector<string> fileNames, bool isMC);
+    ~NanoTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
     TChain* chain;
