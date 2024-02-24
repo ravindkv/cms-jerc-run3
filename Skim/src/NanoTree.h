@@ -15,7 +15,7 @@ const Int_t maxP = 600;
 
 class NanoTree{
  public:
-    NanoTree(TString year, vector<string> fileNames, bool isMC);
+    NanoTree(TString oName, vector<string> fileNames, bool isMC);
     ~NanoTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
@@ -76,7 +76,6 @@ class NanoTree{
     Bool_t HLT_Photon32_OneProng32_M50To105 = false;
 
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
-    std::vector<int> getJobs(std::string jobStr="1of100");
 };
 
 #endif

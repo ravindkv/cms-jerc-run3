@@ -1,4 +1,4 @@
-Skim/makeSkim
+Skim/runMakeSkim
 Skim/*.root
 Skim/sample/FilesNano_cff.json
 Skim/sample/FilesSkim_cff.json
@@ -8,4 +8,11 @@ Skim/condor/__pycache__
 Skim/src/*.o
 Skim/condor/tmpSub
 
-Hist/old
+Hist/runGamHistosFill
+Hist/src/*.o
+
+Hist/files
+Hist/POG
+Hist/mikko
+Hist/pileup
+Hist/rootfiles

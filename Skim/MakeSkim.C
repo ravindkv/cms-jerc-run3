@@ -28,14 +28,15 @@ int main(int argc, char* argv[]){
     // Parse command-line options
     //--------------------------------
     int opt;
-    std::string oName = js.begin().key()+"__1of100.root";
+    std::string oN; //output Name
+    oN = js.begin().key()+"__1of100.root"; //defualt value
     while ((opt = getopt(argc, argv, "o:h")) != -1) {
         switch (opt) {
             case 'o':
-                oName = optarg;
+                oN = optarg;
                 break;
             case 'h':
-                std::cout << "Usage: ./makeSkim -o sKey__1of1000.root\n" << std::endl;
+                std::cout << "Usage: ./runMakeSkim -o sKey__1of1000.root\n" << std::endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
@@ -47,26 +48,26 @@ int main(int argc, char* argv[]){
         }
     }
     cout<<"--------------------------------------------"<<endl;
-    cout<<"Inputs: ./makeSkim -o " <<oName<<endl;
+    cout<<"Inputs: ./runMakeSkim -o " <<oN<<endl;
     cout<<"--------------------------------------------"<<endl;
     // Extracting he sample key 
-    std::string sKey = oName.substr(0, oName.find("__"));
+    std::string sKey = oN.substr(0, oN.find("__"));
     
     // Extracting year
-    TString year = oName.substr(oName.find("__") + 2, 4);
+    TString year = oN.substr(oN.find("__") + 2, 4);
     sKey = sKey+"__"+year;
     std::cout << "sKey: " << sKey << std::endl;
     
 	// Finding the position of the second "__"
-    std::size_t pos_second_double_underscore = oName.find("__", oName.find("__") + 1);
+    std::size_t pos_second_double_underscore = oN.find("__", oN.find("__") + 1);
     if (pos_second_double_underscore == std::string::npos) {
         std::cerr << "Second '__' not found." << std::endl;
         return 1;
     }
-    
     // Extracting the part after the second "__"
-    std::string fraction_str = oName.substr(pos_second_double_underscore + 2);
+    std::string fraction_str = oN.substr(pos_second_double_underscore + 2);
     std::cout << "Fraction: " << fraction_str << std::endl;
+    TString oName = oN;
 
 	// Finding the position of "of"
     std::size_t pos_of = fraction_str.find("of");
@@ -116,9 +117,9 @@ int main(int argc, char* argv[]){
 	    cout << "IsData" << endl;
 	    isMC = false;
 	}
-	tree = new NanoTree(year, smallVectors[nthJob-1], isMC);
+	tree = new NanoTree(oName, smallVectors[nthJob-1], isMC);
 
-	TFile* outFile = TFile::Open( oName.c_str() ,"RECREATE","",207 );
+	TFile* outFile = TFile::Open( oName ,"RECREATE","",207 );
     outFile->cd();
 	TTree* newTree = tree->chain->GetTree()->CloneTree(0);
 	newTree->SetCacheSize(50*1024*1024);
@@ -153,7 +154,7 @@ int main(int argc, char* argv[]){
 		}
 		tree->GetEntry(entry);
 		hEvents_->Fill(0);
-        if(year.Contains("2022")){
+        if(oName.Contains("2022")){
 		passTrig =
             tree->HLT_Photon300_NoHE                                                ||
             tree->HLT_Photon20                                                      ||
@@ -189,7 +190,7 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ||
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3           ;
         }
-        if(year.Contains("2023")){
+        if(oName.Contains("2023")){
 		passTrig =
             tree->HLT_Photon300_NoHE                                     ||
             tree->HLT_Photon33                                           ||

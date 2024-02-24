@@ -24,7 +24,7 @@
 #include "src/SkimTree.h"
 #include "src/EventPick.h"
 #include "src/ObjectPick.h"
-#include "src/JECvariation.h"
+#include "src/ObjectScale.h"
 
 #include "correction.h"
 struct BasicHistos {
@@ -95,15 +95,8 @@ class GamHistosFill {
     SkimTree* tree;   
     EventPick* evtPick;   
     ObjectPick* objectPick;   
+    ObjectScale* objectScale;
 	
-    int             isMC;     // data=0, PythiaPtFlat=1, MadGraphHT=2
-    bool            is16apv, is16fgh, is16;
-    bool            is17;
-    bool            is18;
-    bool            is22;
-    bool            is22v10;
-    bool            is23;
-    bool            isRun2, isRun3;
     bool            isQCD;
     bool            isMG;
     string          dataset;
@@ -115,12 +108,6 @@ class GamHistosFill {
     int eventNum = -1;
 
     bool isSystematicRun;
-
-    // Declaration of leaf types
-    Int_t    run;
-    Long64_t event;
-    Int_t    lumis;
-    Bool_t   isData;
 
     void InitVariables();
     void FillEvent(std::string year);
@@ -309,12 +296,6 @@ void GamHistosFill::InitBranches(){
 
 void GamHistosFill::InitVariables()
 {
-
-    run      = -9;
-    event    = -9;
-    lumis	  = -9;
-    isData	   = false;
-    
 }
 #endif
 

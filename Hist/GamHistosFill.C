@@ -11,137 +11,15 @@ bool smearJets = false;
 
 // Error counters
 int cntErrDR(0);
-/*
-
-    objectPick = new Selector();
-    if (isMC){
-    	objectPick->init_JER(jerRefSF, jerRefSF8, jerRefReso, jerRefReso8);
-    }
-    objectPick->systVariation = systVar;
-    //-----------------------------------------------------------
-    //JES and JER SFs
-    //-----------------------------------------------------------
-    std::string jmeU = "Total"; 
-    std::string systVar    = "nom";
-    if (checkStr(systematicType, "up")){
-        systVar    = "up";
-        if(checkStr(systematicType, "JER")) runSystJER = true;
-        else{
-            runSystJES = true;
-            jmeU = getElementByIndex(systematicType, 2);
-        }
-
-    }
-    if (checkStr(systematicType, "down")){
-        systVar    = "down";
-        if(checkStr(systematicType, "JER")) runSystJER = true;
-        else{ 
-            runSystJES = true;
-            jmeU = getElementByIndex(systematicType, 2);
-        }
-    }
-    cout <<"HERE-2 "<< sampleType << "  " << systematicType << " "<< jmeU << endl;
-    //https://twiki.cern.ch/twiki/bin/view/CMS/JECDataMC
-    //https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/JME
-    //https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/blob/master/examples/jercExample.py
-    // Both JES and JER are read from the same JSON file
-    // JES = Jet Energy Scale, JER = Jet Energy Resolution
-    std::map<std::string, string> jmeJ;
-    jmeJ["2016Pre"]     = "weight/JME/2016preVFP_UL";
-    jmeJ["2016Post"]    = "weight/JME/2016postVFP_UL";
-    jmeJ["2017"]        = "weight/JME/2017_UL";
-    jmeJ["2018"]        = "weight/JME/2018_UL";
-    // The treatment of JEC is the same for AK4 and AK8 (the txt files for AK8 are clones of the ak4 ones).
-    // https://cms-talk.web.cern.ch/t/question-on-run-2-reduced-set-of-uncertainty-sources-for-ak8-jet/21641
-    // https://cms-talk.web.cern.ch/t/ak8-jets-jec-for-summer19ul17-mc/23154/11
-    auto jmeFF  = correction::CorrectionSet::from_file(jmeJ[year]+"/jet_jerc.json");
-
-    //for jes SF 
-    std::map<std::string, string> jmeUL;
-    jmeUL["2016Pre"]     = "Summer19UL16APV_V7_MC";
-    jmeUL["2016Post"]    = "Summer19UL16_V7_MC";
-    jmeUL["2017"]        = "Summer19UL17_V5_MC";
-    jmeUL["2018"]        = "Summer19UL18_V5_MC";
-    correction::CompoundCorrection::Ref jesRefSF;
-    jesRefSF = jmeFF->compound().at(jmeUL[year]+"_L1L2L3Res_"+"AK4PFchs");
-
-    //for jes Unc
-    correction::Correction::Ref jesRefUnc;
-    jesRefUnc   = jmeFF->at(jmeUL[year]+"_"+jmeU+"_"+"AK4PFchs");
-
-    //for jer SF 
-    std::map<std::string, string> jerUL;
-    jerUL["2016Pre"]     = "Summer20UL16APV_JRV3_MC";
-    jerUL["2016Post"]    = "Summer20UL16_JRV3_MC";
-    jerUL["2017"]        = "Summer19UL17_JRV2_MC";
-    jerUL["2018"]        = "Summer19UL18_JRV2_MC";
-    correction::Correction::Ref jerRefSF, jerRefSF8;
-    //The AK4 files are exactly the same for AK8
-    //https://github.com/ravindkv/cms-TT-run2/tree/5e5d735814abb6563e704bc932c68704cfd7384a/Ntuple_Skim/weight/JetSF/JER
-    //PtResolution_AK4PFchs.txt = PtResolution_AK8PFPuppi.txt
-    //SF_AK4PFchs.txt           = SF_AK8PFPuppi.txt
-    jerRefSF  = jmeFF->at(jerUL[year]+"_ScaleFactor_"+"AK4PFchs");
-    jerRefSF8 = jmeFF->at(jerUL[year]+"_ScaleFactor_"+"AK4PFchs");
-    //for jer pT resolution
-    correction::Correction::Ref jerRefReso, jerRefReso8;
-    jerRefReso  = jmeFF->at(jerUL[year]+"_PtResolution_"+"AK4PFchs");
-    jerRefReso8 = jmeFF->at(jerUL[year]+"_PtResolution_"+"AK4PFchs");
-
-    //std::unique_ptr<correction::CorrectionSet> cseta = 0x0, csetb = 0x0, cset = 0x0;
-    //cset = correction::CorrectionSet::from_file( Form("%s/weightUL/JetSF/PUJetID/SF/%d_UL/UL%d_jmar.json",fBasePath.Data(), fYear, (fYear%2000)) );
-    //double out_nom = cset->at("PUJetID_eff")->evaluate({2.0,20.,"nom","L"});
-    //double out_up = cset->at("PUJetID_eff")->evaluate({2.0,20.,"up","L"});
-    //double out_down = cset->at("PUJetID_eff")->evaluate({2.0,20.,"down","L"});
-    //printf("Output (down, nom, up) : (%lf,%lf,%lf)\n", out_down, out_nom, out_up); 
-
-    //--------------------------
-    //Luminosity
-    //--------------------------
-    //https://twiki.cern.ch/twiki/bin/view/CMS/PdmVRun2LegacyAnalysis
-    //https://twiki.cern.ch/twiki/bin/view/CMS/LumiRecommendationsRun2
-    std::map<std::string, double> lumiValues;
-    lumiValues["2016Pre"]       = 19.52 *1000; 
-    lumiValues["2016Post"]      = 16.81 *1000; 
-    lumiValues["2017"]          = 41.48 *1000; 
-    lumiValues["2018"]          = 59.83 *1000; 
-   
-    std::map<std::string, string> lumiJSON;
-    string comJSON = "weight/LumiJSON/";
-    lumiJSON["2016Pre"]     = comJSON+"Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt";
-    lumiJSON["2016Post"]    = comJSON+"Cert_271036-284044_13TeV_ReReco_07Aug2017_Collisions16_JSON.txt";
-    lumiJSON["2017"]        = comJSON+"Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt";
-    lumiJSON["2018"]        = comJSON+"Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt";
-	lumiMask = new LumiMask(lumiJSON[year]);
-        	//jecvar->applyJEC(tree, jesRefSF, jesRefUnc, systVar); 
-    //--------------------------
-    //Pileup SFs
-    //--------------------------
-    //https://gitlab.cern.ch/cms-nanoAOD/jsonpog-integration/-/tree/master/POG/LUM
-    //https://github.com/cms-nanoAOD/nanoAOD-tools/tree/master/python/postprocessing/data/pileup
-    std::map<std::string, string> puJ;
-    puJ["2016Pre"]     = "weight/LUM/2016preVFP_UL";
-    puJ["2016Post"]    = "weight/LUM/2016postVFP_UL";
-    puJ["2017"]        = "weight/LUM/2017_UL";
-    puJ["2018"]        = "weight/LUM/2018_UL";
-    auto puFF  = correction::CorrectionSet::from_file(puJ[year]+"/puWeights.json");
-    std::map<std::string, string> puN;
-    puN["2016Pre"]     = "Collisions16_UltraLegacy_goldenJSON";
-    puN["2016Post"]    = "Collisions16_UltraLegacy_goldenJSON"; 
-    puN["2017"]        = "Collisions17_UltraLegacy_goldenJSON"; 
-    puN["2018"]        = "Collisions18_UltraLegacy_goldenJSON";
-    auto puRef         = puFF->at(puN[year]);
-                _PUweight_Do    = puRef->evaluate({tree->nPUTrue_, "down"}); 
-                _PUweight       = puRef->evaluate({tree->nPUTrue_, "nominal"}); 
-                _PUweight_Up    = puRef->evaluate({tree->nPUTrue_, "up"}); 
-*/
 #ifdef GamHistosFill_cxx
 GamHistosFill::GamHistosFill(int ac, char** av)
 {
-  TString year = "2022";
   vector<string> fileNames;
   fileNames.push_back("/eos/user/r/rverma/www/public/cms-jerc-run3/Skim/2022/Data_2022C__2022__1of264.root");
-  bool isMC = false;
-  tree = new SkimTree(year, fileNames, isMC); 
+   
+  TString oName = "Data_2022C";
+
+  tree = new SkimTree(oName, fileNames); 
 
   TStopwatch fulltime, laptime;
   fulltime.Start();
@@ -151,69 +29,31 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   int _ntot(0), _nevents(0), _nbadevents_json(0), _nbadevents_trigger(0);
   int _nbadevents_veto(0);
   
+  bool isPrint = false;
+  //------------------------------------------------
+  // Object scaling (=correction)
+  //------------------------------------------------
+  objectScale = new ObjectScale(); 
+  if(oName.Contains("Data")) objectScale->isData = true;
+
+  //Jet energy resolution and correction
+  auto jercJson  = correction::CorrectionSet::from_file("POG/JME/2022_Summer22/jet_jerc.json.gz");
+  vector<string> l2l3Names = objectScale->getL2L3Names(oName);
+  vector<correction::Correction::Ref> l2l3Refs;
+  for(auto name: l2l3Names) l2l3Refs.push_back(jercJson->at(name));
+
+  //Jet veto maps
+  auto jvJson   = correction::CorrectionSet::from_file("POG/JME/2022_Prompt/jetvetomaps.json.gz");
+  string jvName = objectScale->getJvName(oName);
+  string jvKey  = objectScale->getJvKey(oName);
+  correction::Correction::Ref jvRef = jvJson->at(jvName);
+
+  //PU
+
+
   dataset = "2022C"; 
   string& ds = dataset;
   // Select appropriate L1RC for type-I MET L1L2L3-RC calculation
-  /*
-  FactorizedJetCorrector *jecl1rc(0), *jec(0);
-
-  // FactorizedJetCorrector for redoing JEC on the fly.
-  //2022
-  if (ds=="2022C") {
-    jec = getFJC("", "Summer22Run3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run22CD-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22-22Sep2023_Run2022CD_V3_DATA_L2L3Residual_AK4PFPuppi");
-  }
-  if (ds=="2022D") {
-    jec = getFJC("", "Summer22Run3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run22CD-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22-22Sep2023_Run2022CD_V3_DATA_L2L3Residual_AK4PFPuppi");
-  }
-  if (ds=="2022E") {
-    jec = getFJC("", "Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run22E-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22EE-22Sep2023_Run2022E_V3_DATA_L2L3Residual_AK4PFPuppi");		 
-  }
-  if (ds=="2022F") {
-    jec = getFJC("", "Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run22F-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22EEPrompt22_Run2022F_V3_DATA_L2L3Residual_AK4PFPuppi");
-  }
-  if (ds=="2022G") {
-    jec = getFJC("", "Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run22G-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22EEPrompt22_Run2022G_V3_DATA_L2L3Residual_AK4PFPuppi");
-  }
-  //22/23 MC
-  if (ds=="2022P8" || ds=="2022QCD") {
-    jec = getFJC("", "Summer22Run3_V1_MC_L2Relative_AK4PUPPI","");
-  }
-  if (ds=="2022EEP8" || ds=="2022EEQCD") {
-    jec = getFJC("", "Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI", "");
-  }
-  if (dataset=="Summer23") {
-    jec = getFJC("", "Winter23Prompt23_V2_MC_L2Relative_AK4PFPuppi", "");
-    assert(false); // not yet available
-  }
-  //2023
-  if (ds=="2023B" || ds=="2023Cv123") {
-    jec = getFJC("", "Summer22Run3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run23C123-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22Prompt23_Run2023Cv123_V3_DATA_L2L3Residual_AK4PFPUPPI");
-  }
-  if (ds=="2023Cv4") {
-    jec = getFJC("", "Summer22Run3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run23C4-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22Prompt23_Run2023Cv4_V3_DATA_L2L3Residual_AK4PFPUPPI");
-  }
-  if (ds=="2023D") {
-    jec = getFJC("", "Summer22Run3_V1_MC_L2Relative_AK4PUPPI",
-		 //"Run23D-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-		 "Summer22Prompt23_Run2023D_V3_DATA_L2L3Residual_AK4PFPUPPI");
-  }
-  assert(jec);
-  */
-  
   string sera("");
   if (ds=="2016APVP8" || ds=="2016APVQCD") sera = "2016APV";
   if (ds=="2016P8" || ds=="2016QCD") sera = "2016FGH";
@@ -259,61 +99,6 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   // Load pileup profiles
   LoadPU();
   
-  // Load veto maps
-  // JECDatabase/jet_veto_maps/Summer19UL16_V0/hotjets-UL16.root
-  // JECDatabase/jet_veto_maps/Summer19UL17_V2/hotjets-UL17_v2.root
-  // JECDatabase/jet_veto_maps/Summer19UL18_V1/hotjets-UL18.root
-  TFile *fjv(0);
-  if (TString(ds.c_str()).Contains("2016"))
-    fjv = new TFile("files/hotjets-UL16.root","READ");
-  if (TString(ds.c_str()).Contains("2017"))
-    fjv = new TFile("files/hotjets-UL17_v2.root","READ");
-  if (TString(ds.c_str()).Contains("2018"))
-    fjv = new TFile("files/hotjets-UL18.root","READ");
-  if (TString(ds.c_str()).Contains("2022")) {
-    if (TString(ds.c_str()).Contains("2022C") || 
-	TString(ds.c_str()).Contains("2022D") ||
-	TString(ds.c_str()).Contains("2022P8") ||
-      	TString(ds.c_str()).Contains("2022QCD"))
-      fjv = new TFile("files/jetveto2022CD.root","READ");
-    if (TString(ds.c_str()).Contains("2022E") || // incl. EEP8 
-	TString(ds.c_str()).Contains("2022F") || 
-	TString(ds.c_str()).Contains("2022G") ||
-      	TString(ds.c_str()).Contains("2022EEP8") ||
-	TString(ds.c_str()).Contains("2022EEQCD") )
-      fjv = new TFile("files/jetveto2022EFG.root","READ");
-  }
-  if (TString(ds.c_str()).Contains("2023")) {
-    if (TString(ds.c_str()).Contains("2023B") || 
-	TString(ds.c_str()).Contains("2023C")) 
-      fjv = new TFile("files/jetveto2023BC.root","READ");
-    if (TString(ds.c_str()).Contains("2023D"))
-      fjv = new TFile("files/jetveto2023D.root","READ");
-  }
-  if (!fjv) cout << "Jetvetomap file not found for " << ds << endl << flush;
-  assert(fjv);
-  
-  // Veto lists for different years (NB: extra MC map for UL16):
-  // h2hot_ul16_plus_hbm2_hbp12_qie11 + h2hot_mc (for UL16)
-  // h2hot_ul17_plus_hep17_plus_hbpw89 (UL17)
-  // h2hot_ul18_plus_hem1516_and_hbp2m1 (UL18)
-  TH2D *h2jv = 0;
-  if (TString(ds.c_str()).Contains("2016")) {
-    h2jv = (TH2D*)fjv->Get("h2hot_ul16_plus_hbm2_hbp12_qie11");
-    assert(h2jv);
-    TH2D *h2mc = (TH2D*)fjv->Get("h2hot_mc");
-    assert(h2mc);
-    h2jv->Add(h2mc);
-  }
-  if (TString(ds.c_str()).Contains("2017"))
-    h2jv = (TH2D*)fjv->Get("h2hot_ul17_plus_hep17_plus_hbpw89");
-  if (TString(ds.c_str()).Contains("2018"))
-    h2jv = (TH2D*)fjv->Get("h2hot_ul18_plus_hem1516_and_hbp2m1");
-  if (TString(ds.c_str()).Contains("2022") ||
-      TString(ds.c_str()).Contains("2023"))
-    h2jv = (TH2D*)fjv->Get("jetvetomap");
-  if (!h2jv) cout << "Jetvetomap histo not found for " << ds << endl << flush;
-  assert(h2jv);
 
   // Setup B and C tagging thresholds according to Z+jet settings (Sami)
   double bthr(0.7527), cthr(0.3985), frac(0.5);
@@ -349,7 +134,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   // Keep only histograms actually used by global fit (reprocess.C)
   TDirectory *curdir = gDirectory;
   TFile *fout = new TFile(Form("rootfiles/GamHistosFill_%s_%s_%s.root",
-			       isMC ? "mc" : "data",
+			       tree->isMC ? "mc" : "data",
 			       dataset.c_str(), version.c_str()),
 			  "RECREATE");
   assert(fout && !fout->IsZombie());
@@ -372,7 +157,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 		 2.650, 2.853, 2.964, 3.139, 3.489, 3.839, 5.191};
   const int ny = sizeof(vy)/sizeof(vy[0])-1;
 
-  string dir = (isMC ? "MC" : "DATA");
+  string dir = (tree->isMC ? "MC" : "DATA");
   
   vector<pair<double,double> > etas;
   etas.push_back(make_pair<double,double>(0,1.305));
@@ -457,8 +242,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   double vht_qcd3[] =
     {0, 40, 70, 100, 200, 400, 600, 800, 1000, 1200, 1500, 2000, 6800};
   const int nht_qcd3 = sizeof(vht_qcd3)/sizeof(vht_qcd3[0])-1;
-  const double *vht_qcd = (isRun3 ? &vht_qcd3[0] : &vht_qcd2[0]);
-  const int nht_qcd = (isRun3 ? nht_qcd3 : nht_qcd2);
+  const double *vht_qcd = (tree->isRun3 ? &vht_qcd3[0] : &vht_qcd2[0]);
+  const int nht_qcd = (tree->isRun3 ? nht_qcd3 : nht_qcd2);
   int nMG_qcd(0);
   double wMG_qcd(0);
   if (isMG && isQCD) {
@@ -483,8 +268,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
        {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Summer22MG, local files
      int vnwgt3[nht_qcd3] =
        {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Summer22MG, local files
-     const int *vnevt = (isRun3 ? &vnevt3[0] : &vnevt2[0]);
-     const int *vnwgt = (isRun3 ? &vnwgt3[0] : &vnevt2[0]);
+     const int *vnevt = (tree->isRun3 ? &vnevt3[0] : &vnevt2[0]);
+     const int *vnwgt = (tree->isRun3 ? &vnwgt3[0] : &vnevt2[0]);
      for (int i = 0; i != nht_qcd; ++i) {
        hnevt->SetBinContent(i+1, vnevt[i]);
        hsumw->SetBinContent(i+1, vnwgt[i]);
@@ -505,7 +290,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	2.520e+07, 1.936e+06, 9.728e+04,
 	1.323e+04, //3.044e+04, //HT 60to800
 	3.027e+03, 8.883e+02, 3.834e+02, 1.253e+02, 2.629e+01};
-     const double *vxsec = (isRun3 ? &vxsec3[0] : &vxsec2[0]);
+     const double *vxsec = (tree->isRun3 ? &vxsec3[0] : &vxsec2[0]);
      for (int i = 0; i != nht_qcd; ++i) {
        hxsec->SetBinContent(i+1, vxsec[i]);
      }
@@ -1020,8 +805,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   // Match ordering to Lyon files (alpha->eta->data/MC) when creating
   // Although otherwise ordering is data/MC->eta->alpha
   // Add PS weight variations
-  unsigned int nps = (isMC ? tree->nPSWeightMax+1 : 1);
-  //unsigned int nps = ((isMC && !isRun3) ? tree->nPSWeightMax+1 : 1);
+  unsigned int nps = (tree->isMC ? tree->nPSWeightMax+1 : 1);
+  //unsigned int nps = ((tree->isMC && !tree->isRun3) ? tree->nPSWeightMax+1 : 1);
   map<int, map<int, map<int, BasicHistos*> > > mBasicHistos;
   for (unsigned int ialpha = 0; ialpha != alphas.size(); ++ialpha) {
     for (unsigned int ieta = 0; ieta != etas.size(); ++ieta) { 
@@ -1118,14 +903,13 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       cout<<Form("%s%1.4g",(i==1 ? "{" : ", "),hsumw->GetBinContent(i));
     }
     cout << "}; // " << dataset << endl << flush;
-  } // isMC && nentries!=nMG
+  } // tree->isMC && nentries!=nMG
   
   //int skip = 21700000; // 2018A first events without 110EB
   //int skip = 55342793; // 2018A first events with 92 photon
   //int skip = 265126992; // 2018A first events with 191 photons, 23 jets
   //int skip = 14648973; // 2017C bad HDM
 
-  Long64_t nbytes = 0, nb = 0;
   for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
     // Skip events, typically for debugging purposes
@@ -1158,8 +942,10 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     }
     if (jentry%10000==0) cout << "." << flush;
     ++nlap;
-    if (!isMC) { // Fast trigger filtering (useful for data)
-      if ((isRun3 &&
+
+    tree->GetEntry(jentry);
+    if (!tree->isMC) { // Fast trigger filtering (useful for data)
+      if ((tree->isRun3 &&
 	   !(tree->HLT_Photon200 ||
 	     tree->HLT_Photon175 || 
 	     tree->HLT_Photon150 || 
@@ -1179,7 +965,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	     tree->HLT_Photon50_R9Id90_HE10_IsoM ||
 	     tree->HLT_Photon30_HoverELoose ||
 	     tree->HLT_Photon20_HoverELoose)) ||
-	  (is18 &&
+	  (tree->is18 &&
 	   !(tree->HLT_Photon200 ||
 	     tree->HLT_Photon175 || 
 	     tree->HLT_Photon150 || 
@@ -1197,7 +983,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	     tree->HLT_Photon50_R9Id90_HE10_IsoM ||
 	     tree->HLT_Photon30_HoverELoose ||
 	     tree->HLT_Photon20_HoverELoose)) ||
-	   (is17 &&
+	   (tree->is17 &&
 	   !(tree->HLT_Photon200 ||
 	     tree->HLT_Photon175 || 
 	     tree->HLT_Photon150 || 
@@ -1216,7 +1002,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	     tree->HLT_Photon40_HoverELoose ||
 	     tree->HLT_Photon30_HoverELoose ||
 	     tree->HLT_Photon20_HoverELoose)) ||
-	  (is16 &&
+	  (tree->is16 &&
 	   !(tree->HLT_Photon175 || 
 	     tree->HLT_Photon120 || 
 	     tree->HLT_Photon90 || 
@@ -1237,9 +1023,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	++_nbadevents_trigger;
 	continue;
       }
-    } // !isMC
+    } // !tree->isMC
 
-    nb = tree->GetEntry(jentry);   nbytes += nb;
     // if (Cut(ientry) < 0) continue;
 
     // Safety check for rho being NaN
@@ -1247,12 +1032,12 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       tree->fixedGridRhoFastjetAll = 34; // average conditions
     
     // Sanity check PS weights
-    if (!isMC) { tree->nPSWeight = 0; }
-    //if (!isMC || is22 || is23) { tree->nPSWeight = 0; }
+    if (!tree->isMC) { tree->nPSWeight = 0; }
+    //if (!tree->isMC || tree->is22 || tree->is23) { tree->nPSWeight = 0; }
     assert(tree->nPSWeight<=tree->nPSWeightMax);
 
     // Does the run/LS pass the latest JSON selection?
-    if (!isMC && _json[tree->run][tree->luminosityBlock]==0) {
+    if (!tree->isMC && _json[tree->run][tree->luminosityBlock]==0) {
       //_badjson.insert(pair<int, int>(run, lbn));
       ++_nbadevents_json;
       continue;
@@ -1282,7 +1067,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     phoj0.SetPtEtaPhiM(0,0,0,0);
 
     // Gen-photon
-    if (isMC && tree->nGenIsolatedPhoton>0) {
+    if (tree->isMC && tree->nGenIsolatedPhoton>0) {
       gengam.SetPtEtaPhiM(tree->GenIsolatedPhoton_pt[0],tree->GenIsolatedPhoton_eta[0],
 			  tree->GenIsolatedPhoton_phi[0],tree->GenIsolatedPhoton_mass[0]);
     }
@@ -1290,7 +1075,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     // Select tight photons and photon matching gen photon
     for (int i = 0; i != tree->nPhoton; ++i) {
 
-      if (isRun3) tree->Photon_mass[i] = 0;
+      if (tree->isRun3) tree->Photon_mass[i] = 0;
       gami.SetPtEtaPhiM(tree->Photon_pt[i],  tree->Photon_eta[i],
 			tree->Photon_phi[i], tree->Photon_mass[i]);
       
@@ -1313,13 +1098,13 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 
     // Correct photon for gain1 and MPF for "footprint" (photon vs PFgamma)
     rawgam = gam;
-    if (iGam!=-1 && tree->Photon_seedGain[iGam]==1 && !isMC) {
+    if (iGam!=-1 && tree->Photon_seedGain[iGam]==1 && !tree->isMC) {
       //gam *= 1./1.01;
       // minitools/drawGainVsPt.C (add R_6/12+R_1/6, take MPF+statTowardsDB)
-      if (!isRun3) gam *= 1./1.011; // MPF=1.13+/-0.04%, DB=1.05+/-0.08%
-      if ( isRun3) gam *= 1./1.017; // MPF=1.74+/-0.07%, DB=1.41+/-0.16%
+      if (!tree->isRun3) gam *= 1./1.011; // MPF=1.13+/-0.04%, DB=1.05+/-0.08%
+      if ( tree->isRun3) gam *= 1./1.017; // MPF=1.74+/-0.07%, DB=1.41+/-0.16%
     }
-    if (iGam!=-1 && !isRun3) {
+    if (iGam!=-1 && !tree->isRun3) {
       // [0]+log(x)*([1]+log(x)*[2]) in range [15,1750] to MC pphoj0
       //1  p0           4.57516e-02   3.91871e-04   1.09043e-07   4.17033e-05
       //2  p1          -1.27462e-02   1.50968e-04   2.08432e-08   3.92715e-03
@@ -1348,7 +1133,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	// 2022 data is missing proper Puppi photon protection for jets
 	// (but MET ok?)
 	//double r22 = max(0.15,min(1.0,(rawgam.Pt()-20.)/180.));
-	//phoj -= (is22v10 ? r22*rawgam : rawgam);
+	//phoj -= (tree->is22v10 ? r22*rawgam : rawgam);
 	phoj -= rawgam; // NanoV12
       }
       else {
@@ -1369,12 +1154,12 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 
       // Calculate L1RC correction
       /*
-      double corrl1rc(1.); // isRun3
+      double corrl1rc(1.); // tree->isRun3
       phoj *= corrl1rc;
 
       // Calculate L1RC correction without "zero suppression"
       double refpt = 30; // phoj.Pt~0 leads to negative offset cutoff
-      double corrl1rc0(1.); // isRun3
+      double corrl1rc0(1.); // tree->isRun3
       double off0 = (corrl1rc0 - 1) * refpt; // corr*ptref = (ptref-off)
       phoj0off.SetPtEtaPhiM(off0,phoj0.Eta(),phoj0.Phi(),0.);
       phoj0 -= phoj0off;
@@ -1407,7 +1192,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 			 tree->Jet_mass[iFox]);
 	fox *= (1-tree->Jet_rawFactor[iFox]);
 	// Calculate L1RC correction
-	double corrl1rc(1.); // isRun3
+	double corrl1rc(1.); // tree->isRun3
 	fox *= corrl1rc;
 	// NB2: should also remove UE clustered into fox. In Minsuk's plot
 	// QCD_CP5 has about 2.5 GeV/A of UE offset at FullSim level
@@ -1421,9 +1206,9 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     } // isQCD
   
     // Event weights (1 for MadGraph)
-    //bool isMC = (run==1);
-    assert((isMC && run==1) || (!isMC && run!=1));
-    double w = (isMC ? tree->genWeight : 1);
+    //bool tree->isMC = (run==1);
+    assert((tree->isMC && tree->run==1) || (!tree->isMC && tree->run!=1));
+    double w = (tree->isMC ? tree->genWeight : 1);
     if (isMG) {
       int iht = hxsec->FindBin(tree->LHE_HT);
       double xsec = hxsec->GetBinContent(iht);
@@ -1437,14 +1222,14 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     }
 
     //bool doPtHatFilter = true;
-    //if (doPtHatFilter && isMC) {
+    //if (doPtHatFilter && tree->isMC) {
     //if ( isMG && 2.*tree->Pileup_pthatmax>LHE_HT) continue;
     //if (!isMG && tree->Pileup_pthatmax>Generator_binvar) continue;
     //}
     
     // Pileup
     double TruePUrms(0);
-    if (!isMC) tree->Pileup_nTrueInt = getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
+    if (!tree->isMC) tree->Pileup_nTrueInt = getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
     double ptgam = gam.Pt();
 
     // Trigger selection. Take care to match pT bin edges
@@ -1454,7 +1239,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     double pt = ptgam; // shorthand to make trigger selection more readable
     int itrg(0); // choose trigger for PU reweighing as side effect (hack...)
     bool pass_trig = 
-      ((is16 && 
+      ((tree->is16 && 
 	((tree->HLT_Photon175                  && pt>=230            && (itrg=175)) ||
 	 //(tree->HLT_Photon165_HE10             && pt>=175 && pt<230) || // not in MC
 	 (tree->HLT_Photon165_R9Id90_HE10_IsoM && pt>=175 && pt<230  && (itrg=165)) ||
@@ -1465,11 +1250,11 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	 (tree->HLT_Photon36_R9Id90_HE10_IsoM  && pt>=40  && pt<60   && (itrg=36)) ||
 	 (tree->HLT_Photon30_R9Id90_HE10_IsoM  && pt>=35  && pt<40   && (itrg=30)) ||
 	 (tree->HLT_Photon22_R9Id90_HE10_IsoM  && pt>=20  && pt<35   && (itrg=22)) ||
-	 (isMC                           && pt>=40  && pt<60   && (itrg=36)) ||
-	 (isMC                           && pt>=35  && pt<40   && (itrg=30)) ||
-	 (isMC                           && pt>=20  && pt<35   && (itrg=22))
+	 (tree->isMC                           && pt>=40  && pt<60   && (itrg=36)) ||
+	 (tree->isMC                           && pt>=35  && pt<40   && (itrg=30)) ||
+	 (tree->isMC                           && pt>=20  && pt<35   && (itrg=22))
 	 )) ||
-       (is17 &&
+       (tree->is17 &&
 	((tree->HLT_Photon200                  && pt>=230            && (itrg=200)) ||
 	 (tree->HLT_Photon165_R9Id90_HE10_IsoM && pt>=175 && pt<230  && (itrg=165)) ||
 	 (tree->HLT_Photon120_R9Id90_HE10_IsoM && pt>=130 && pt<175  && (itrg=120)) ||
@@ -1480,10 +1265,10 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	 (tree->HLT_Photon30_HoverELoose       && pt>=35  && pt<60   && (itrg=30)) ||
 	 (tree->HLT_Photon20_HoverELoose       && pt>=20  && pt<35   && (itrg=20)) ||
 	 //(tree->HLT_Photon20                     && pt>=20  && pt<60 )
-	 (isMC                           && pt>=35  && pt<60   && (itrg=30)) ||
-	 (isMC                           && pt>=20  && pt<35   && (itrg=20))
+	 (tree->isMC                           && pt>=35  && pt<60   && (itrg=30)) ||
+	 (tree->isMC                           && pt>=20  && pt<35   && (itrg=20))
 	 )) ||
-       (is18 &&
+       (tree->is18 &&
 	((tree->HLT_Photon200                    && pt>=230           && (itrg=200))||
 	 (tree->HLT_Photon110EB_TightID_TightIso && pt>=130 && pt<230 && (itrg=110))||
 	 (tree->HLT_Photon100EB_TightID_TightIso && pt>=105 && pt<130 && (itrg=100))||
@@ -1494,11 +1279,11 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	 (tree->HLT_Photon30_HoverELoose         && pt>=35  && pt<60  && (itrg=30)) ||
 	 (tree->HLT_Photon20_HoverELoose         && pt>=20  && pt<35  && (itrg=20)) ||
 	 //(tree->HLT_Photon20                   && pt>=20  && pt<35 )
-	 (isMC                           && pt>=35  && pt<60  && (itrg=30)) ||
-	 (isMC                           && pt>=20  && pt<35  && (itrg=20))
+	 (tree->isMC                           && pt>=35  && pt<60  && (itrg=30)) ||
+	 (tree->isMC                           && pt>=20  && pt<35  && (itrg=20))
 	 )) ||
        // Push triggers to the limit for 22-23 (2022C bad 75,90)
-       (isRun3 &&
+       (tree->isRun3 &&
 	((tree->HLT_Photon200                 && pt>=230            && (itrg=200)) ||
 	 (tree->HLT_Photon110EB_TightID_TightIso && pt>=110&&pt<230 && (itrg=110)) ||
 	 (tree->HLT_Photon90_R9Id90_HE10_IsoM && pt>=90  && pt<110  && (itrg=90))  ||
@@ -1514,7 +1299,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     // Select trigger pT bins by hand for QCD. Error prone...
     if (isQCD && !pass_trig) {
       pass_trig = 
-	((is16 && 
+	((tree->is16 && 
 	  ((pt>=230            && (itrg=175)) ||
 	   (pt>=175 && pt<230  && (itrg=165)) ||
 	   (pt>=130 && pt<175  && (itrg=120)) ||
@@ -1525,7 +1310,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	   (pt>=35  && pt<40   && (itrg=30)) ||
 	   (pt>=20  && pt<35   && (itrg=22))
 	   )) ||
-	 (is17 &&
+	 (tree->is17 &&
 	  ((pt>=230            && (itrg=200)) ||
 	   (pt>=175 && pt<230  && (itrg=165)) ||
 	   (pt>=130 && pt<175  && (itrg=120)) ||
@@ -1535,7 +1320,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	   (pt>=35  && pt<60   && (itrg=30)) ||
 	   (pt>=20  && pt<35   && (itrg=20))
 	   )) ||
-	 (is18 &&
+	 (tree->is18 &&
 	  ((pt>=230           && (itrg=200))||
 	   (pt>=130 && pt<230 && (itrg=110))||
 	   (pt>=105 && pt<130 && (itrg=100))||
@@ -1545,7 +1330,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	   (pt>=35  && pt<60  && (itrg=30)) ||
 	   (pt>=20  && pt<35  && (itrg=20))
 	   )) ||
-	 (isRun3 &&
+	 (tree->isRun3 &&
 	  ((pt>=230            && (itrg=200)) ||
 	   (pt>=110&&pt<230 && (itrg=110)) ||
 	   (pt>=90  && pt<110  && (itrg=90))  ||
@@ -1560,7 +1345,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     assert(itrg>0 || !pass_trig);
 
     // Reweight MC pileup (except for 22-23)
-    if (isMC && pass_trig && !isRun3) {
+    if (tree->isMC && pass_trig && !tree->isRun3) {
       TH1D *hm = _pu[dataset][1]; assert(hm);
       TH1D *hd = _pu[sera][itrg];
       if (!hd) cout << "Missing _pu[sera="<<sera<<"][itrg="<<itrg<<"]"
@@ -1576,7 +1361,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       w *= wt;
     }
     // Normalize data luminosity (except for 22-23)
-    if (!isMC && pass_trig && !isRun3) {
+    if (!tree->isMC && pass_trig && !tree->isRun3) {
       double lumi = _lumi[sera][itrg];
       assert(lumi>0);
       w *= 1./lumi;
@@ -1596,31 +1381,34 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     rawjets.SetPtEtaPhiM(0,0,0,0);
     rcjets.SetPtEtaPhiM(0,0,0,0);
     rcoffsets.SetPtEtaPhiM(0,0,0,0);
-    /*
+    //------------------------------------------------
+    //Apply JEC
+    //------------------------------------------------
     for (int i = 0; i != tree->nJet; ++i) {
-      
-      // Redo JEC on the fly (should be no previous use of corrected jets)
-      if (jec!=0) {
-	
-	double rawJetPt = tree->Jet_pt[i] * (1.0 - tree->Jet_rawFactor[i]);
-	double rawJetMass = tree->Jet_mass[i] * (1.0 - tree->Jet_rawFactor[i]);
-	jec->setJetPt(rawJetPt);
-	jec->setJetEta(tree->Jet_eta[i]);
-	if (isRun2) {
-	  jec->setJetA(tree->Jet_area[i]);
-	  jec->setRho(tree->fixedGridRhoFastjetAll);
-	}
-	//double corr = jec->getCorrection();
-	vector<float> v = jec->getSubCorrections();
-	double corr = v.back();
-	double res = (v.size()>1 ? v[v.size()-1]/v[v.size()-2] : 1.);
+        double rawJetPt = tree->Jet_pt[i] * (1.0 - tree->Jet_rawFactor[i]);
+        double rawJetMass = tree->Jet_mass[i] * (1.0 - tree->Jet_rawFactor[i]);
+        double corrs = 1.0;
+        if(isPrint)cout<<"---: Jet correction :---"<<endl;
+        for(auto l2l3Ref:l2l3Refs){
+            try{ 
+                auto corr = l2l3Ref->evaluate({tree->Jet_eta[i],rawJetPt}); 
+                corrs    = corr*corrs;
+                rawJetPt = corrs*rawJetPt;
+                rawJetMass = corrs*rawJetMass;
+                if(isPrint) cout<<"rawJetPt = "<<rawJetPt<<", corr = "<<corr<<", corrs = "<<corrs<<endl;
+            } catch (const std::exception& e) {
+                cout<<"\nEXCEPTION: in l2l3Ref: "<<e.what()<<endl;
+                break;
+            }
+        }
+	//double res = (v.size()>1 ? v[v.size()-1]/v[v.size()-2] : 1.);
 	//Jet_RES[i] = 1./res;
-	Jet_deltaJES[i] = (1./corr) / (1.0 - tree->Jet_rawFactor[i]);
-	tree->Jet_pt[i] = corr * rawJetPt;
-	tree->Jet_mass[i] = corr * rawJetMass;
-	tree->Jet_rawFactor[i] = (1.0 - 1.0/corr);
+    res  = 1.0;
+	Jet_deltaJES[i] = (1./corrs) / (1.0 - tree->Jet_rawFactor[i]);
+	tree->Jet_pt[i] = rawJetPt ;
+	tree->Jet_mass[i] = rawJetMass; 
+	tree->Jet_rawFactor[i] = (1.0 - 1.0/corrs);
 	Jet_resFactor[i] = (1.0 - 1.0/res);
-      }
   
       // Smear jets
       if (smearJets) {
@@ -1653,7 +1441,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	
 	// Calculate L1RC correction
 	rawjet = (1-tree->Jet_rawFactor[i]) * jeti;
-	double corrl1rc(1.); // isRun3
+	double corrl1rc(1.); // tree->isRun3
 	rcjet = corrl1rc * rawjet;
 	
 	// Corrected type-I chsMET calculation
@@ -1663,13 +1451,12 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	rcoffsets += (rawjet - rcjet);
       } // non-photon jet
     } // for i in nJet
-    */
     
     // Select genjet matching leading and subleading reco jet
     int iGenJet(-1), iGenJet2(-1);
     genjet.SetPtEtaPhiM(0,0,0,0);
     genjet2.SetPtEtaPhiM(0,0,0,0);
-    if (isMC) {
+    if (tree->isMC) {
       for (Int_t i = 0; i != tree->nGenJet; ++i) {
 	geni.SetPtEtaPhiM(tree->GenJet_pt[i],tree->GenJet_eta[i],tree->GenJet_phi[i],
 			  tree->GenJet_mass[i]);
@@ -1682,10 +1469,10 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	  genjet2 = geni;
 	}
       } // for i in tree->nGenJet
-    } // isMC
+    } // tree->isMC
 
     // Set MET vectors
-    if (isRun3) {
+    if (tree->isRun3) {
       rawmet.SetPtEtaPhiM(tree->RawPuppiMET_pt, 0, tree->RawPuppiMET_phi, 0);
     }
     else {
@@ -1742,7 +1529,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       cout << "Difference = " << mpf1+mpfn+mpfu-mpf << endl << flush;
       //assert(false);
       cout << "Skip entry " << jentry
-	   << " ("<<run<<","<<tree->luminosityBlock<<","<<event<<")"
+	   << " ("<<tree->run<<","<<tree->luminosityBlock<<","<<tree->event<<")"
 	   << " in file " << _filename << endl << flush;
       continue;
     }
@@ -1751,8 +1538,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     // UL lists are separate, but all filter recommendations looked the same
     // Run3: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Run_3_recommendations
     bool pass_filt = 
-      (//(isRun3 && tree->Flag_METFilters>0) ||
-       (isRun3 &&
+      (//(tree->isRun3 && tree->Flag_METFilters>0) ||
+       (tree->isRun3 &&
 	tree->Flag_goodVertices &&
 	tree->Flag_globalSuperTightHalo2016Filter &&
 	tree->Flag_EcalDeadCellTriggerPrimitiveFilter &&
@@ -1761,7 +1548,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	tree->Flag_hfNoisyHitsFilter &&
 	tree->Flag_eeBadScFilter &&
 	tree->Flag_ecalBadCalibFilter) ||
-       (!isRun3 &&
+       (!tree->isRun3 &&
 	tree->Flag_goodVertices &&
 	tree->Flag_globalSuperTightHalo2016Filter &&
 	tree->Flag_HBHENoiseFilter &&
@@ -1772,11 +1559,11 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	//tree->Flag_BadChargedCandidateFilter && // not recommended
 	//tree->Flag_globalTightHalo2016Filter && // obsolete?
 	//tree->Flag_CSCTightHaloFilter // obsolete?
-	(is16 || tree->Flag_ecalBadCalibFilter) && //new in UL, not for UL16
-	//(isMC || tree->Flag_eeBadScFilter) // data only
+	(tree->is16 || tree->Flag_ecalBadCalibFilter) && //new in UL, not for UL16
+	//(tree->isMC || tree->Flag_eeBadScFilter) // data only
 	tree->Flag_eeBadScFilter // MC added 7 July 2021
 	));
-    //) || isRun3; // pass_filt
+    //) || tree->isRun3; // pass_filt
     
     // Photon control plots
     h2ngam->Fill(ptgam, nGam, w);
@@ -1787,7 +1574,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     }
     if (ptgam>0 && fabs(gam.Eta()) < 1.3 && pass_filt) {
       hgam->Fill(ptgam, w);
-      if (isMC) pfake->Fill(ptgam, iGam!=iGamGen ? 1 : 0, w);
+      if (tree->isMC) pfake->Fill(ptgam, iGam!=iGamGen ? 1 : 0, w);
       if (isQCD) {
 	bool hasorig = (iGamOrig!=-1 && gam.DeltaR(gamorig)<0.2);
 	bool inwindow = (fabs(gamorig.Pt() / ptgam - 0.9) < 0.2); // [0.8,1.1]
@@ -1809,8 +1596,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       }
 
       // Plots for photon trigger efficiencies
-      if (isMC)  hgam0_mc->Fill(ptgam, w);
-      if (!isMC) hgam0_data->Fill(ptgam, w);
+      if (tree->isMC)  hgam0_mc->Fill(ptgam, w);
+      if (!tree->isMC) hgam0_data->Fill(ptgam, w);
       
       hgam0 ->Fill(ptgam, w);
       // Backup high pT
@@ -1855,8 +1642,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 
       // Summary of combined trigger efficiencies
       if (ptgam>0 && fabs(gam.Eta())<1.3 && pass_trig && pass_filt) {
-	if (isMC)  hgamtrig_mc->Fill(ptgam, w);
-	if (!isMC) hgamtrig_data->Fill(ptgam, w);
+	if (tree->isMC)  hgamtrig_mc->Fill(ptgam, w);
+	if (!tree->isMC) hgamtrig_data->Fill(ptgam, w);
 	hgamtrig->Fill(ptgam, w); // 5 GeV bins to match hgam[trgX]
 	hgamtrg->Fill(ptgam, w); // wider binning to higher pT (=hgam)
       }
@@ -1874,16 +1661,22 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       bool pass_gameta = (fabs(gam.Eta()) < 1.3);
       bool pass_dphi = (fabs(gam.DeltaPhi(jet)) > 2.7); // pi-0.44 as in KIT Z+j
       bool pass_jetid = (iJet!=-1 && tree->Jet_jetId[iJet]>=4); // tightLepVeto
+      //------------------------------------------------
+      //Check if jet to be vetoed
+      //------------------------------------------------
       bool pass_veto = true;
-      if (true) { // jet veto
-        int i1 = h2jv->GetXaxis()->FindBin(jet.Eta());
-        int j1 = h2jv->GetYaxis()->FindBin(jet.Phi());
-        if (h2jv->GetBinContent(i1,j1)>0) {
-          ++_nbadevents_veto;
-	  pass_veto = false;
-	}
-      } // jet veto
-      bool pass_leak = (phoj.Pt()<0.06*ptgam);// || isRun3);
+      try{ 
+          auto jvNumber= jvRef->evaluate({jvKey, jet.Eta(), jet.Phi()});
+          if(jvNumber>0){
+            ++_nbadevents_veto;
+            pass_veto = false;
+          }
+      } catch (const std::exception& e) {
+          cout<<"\nEXCEPTION: in jvRef: "<<e.what()<<endl;
+          break;
+      }
+    
+      bool pass_leak = (phoj.Pt()<0.06*ptgam);// || tree->isRun3);
       bool pass_basic = (pass_trig && pass_filt && pass_ngam && pass_njet &&
 			 pass_gameta && pass_dphi && pass_jetid && pass_veto &&
 			 pass_leak); // add pass_gameta v19 / 202111122 !
@@ -1919,36 +1712,36 @@ GamHistosFill::GamHistosFill(int ac, char** av)
       // Time controls for JES and PF composition
       if (pass_all) {
 	if (itrg==30 && ptgam>30) {
-	  pr30n->Fill(run, w); 
-	  pr30b->Fill(run, bal, w); 
-	  pr30m->Fill(run, mpf, w);
-	  pr30chf->Fill(run, tree->Jet_chHEF[iJet], w);
-	  pr30nhf->Fill(run, tree->Jet_neHEF[iJet], w);
-	  pr30nef->Fill(run, tree->Jet_neEmEF[iJet], w);
+	  pr30n->Fill(tree->run, w); 
+	  pr30b->Fill(tree->run, bal, w); 
+	  pr30m->Fill(tree->run, mpf, w);
+	  pr30chf->Fill(tree->run, tree->Jet_chHEF[iJet], w);
+	  pr30nhf->Fill(tree->run, tree->Jet_neHEF[iJet], w);
+	  pr30nef->Fill(tree->run, tree->Jet_neEmEF[iJet], w);
 	}
 	if (itrg==110 && ptgam>110) {
-	  pr110n->Fill(run, w);
-	  pr110b->Fill(run, bal, w); 
-	  pr110m->Fill(run, mpf, w);
-	  pr110chf->Fill(run, tree->Jet_chHEF[iJet], w);
-	  pr110nhf->Fill(run, tree->Jet_neHEF[iJet], w);
-	  pr110nef->Fill(run, tree->Jet_neEmEF[iJet], w);
+	  pr110n->Fill(tree->run, w);
+	  pr110b->Fill(tree->run, bal, w); 
+	  pr110m->Fill(tree->run, mpf, w);
+	  pr110chf->Fill(tree->run, tree->Jet_chHEF[iJet], w);
+	  pr110nhf->Fill(tree->run, tree->Jet_neHEF[iJet], w);
+	  pr110nef->Fill(tree->run, tree->Jet_neEmEF[iJet], w);
 	}
 	if (itrg==200 && ptgam>230) {
-	  pr230n->Fill(run, w);
-	  pr230b->Fill(run, bal, w); 
-	  pr230m->Fill(run, mpf, w);
-	  pr230chf->Fill(run, tree->Jet_chHEF[iJet], w);
-	  pr230nhf->Fill(run, tree->Jet_neHEF[iJet], w);
-	  pr230nef->Fill(run, tree->Jet_neEmEF[iJet], w);
+	  pr230n->Fill(tree->run, w);
+	  pr230b->Fill(tree->run, bal, w); 
+	  pr230m->Fill(tree->run, mpf, w);
+	  pr230chf->Fill(tree->run, tree->Jet_chHEF[iJet], w);
+	  pr230nhf->Fill(tree->run, tree->Jet_neHEF[iJet], w);
+	  pr230nef->Fill(tree->run, tree->Jet_neEmEF[iJet], w);
 	}
 	if (iGam!=-1 && tree->Photon_seedGain[iGam]==1) {
-	  prg1n->Fill(run, w);
-	  prg1b->Fill(run, bal, w); 
-	  prg1m->Fill(run, mpf, w);
-	  prg1chf->Fill(run, tree->Jet_chHEF[iJet], w);
-	  prg1nhf->Fill(run, tree->Jet_neHEF[iJet], w);
-	  prg1nef->Fill(run, tree->Jet_neEmEF[iJet], w);
+	  prg1n->Fill(tree->run, w);
+	  prg1b->Fill(tree->run, bal, w); 
+	  prg1m->Fill(tree->run, mpf, w);
+	  prg1chf->Fill(tree->run, tree->Jet_chHEF[iJet], w);
+	  prg1nhf->Fill(tree->run, tree->Jet_neHEF[iJet], w);
+	  prg1nef->Fill(tree->run, tree->Jet_neEmEF[iJet], w);
 	}
       }
 
@@ -1995,7 +1788,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	if (pass_mpf && pass_bal) h2mpfc2->Fill(ptgam, mpf, w);
 	if (pass_basic_ext) {
 
-	  if (pass_gen || !isMC) {
+	  if (pass_gen || !tree->isMC) {
 	    h2rjet->Fill(ptgam, jet.Pt() / ptgam, w);
 	    prjet->Fill(ptgam, jet.Pt() / ptgam, w);
 	  }
@@ -2006,7 +1799,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	    prgen->Fill(genjet.Pt(), jet.Pt() / genjet.Pt(), w);
 	  }
 
-	  int flv = (isMC ? tree->GenJet_partonFlavour[iGenJet] : 99);
+	  int flv = (tree->isMC ? tree->GenJet_partonFlavour[iGenJet] : 99);
 	  mvar["counts"] = 1;
 	  mvar["mpfchs1"] = mpf;
 	  mvar["ptchs"] = bal;
@@ -2018,7 +1811,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	  mvar["gjet"] = (ptgam!=0 ? genjet.Pt() / ptgam : 0);
 	  mvar["rgen"] = (genjet.Pt()!=0 ? jet.Pt() / genjet.Pt() : 0);
 
-	  if (isRun3) { // temporary patch
+	  if (tree->isRun3) { // temporary patch
 	    tree->Jet_btagDeepB[iJet] = tree->Jet_btagDeepFlavB[iJet];
 	    tree->Jet_btagDeepC[iJet] = 0.5*(tree->Jet_btagDeepFlavCvB[iJet] +
 				       tree->Jet_btagDeepFlavCvL[iJet]);
@@ -2099,7 +1892,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
           */
 	}
 	if (pass_basic_ext && jet2.Pt()>0) {
-	  if (iGenJet2!=-1 || !isMC) {
+	  if (iGenJet2!=-1 || !tree->isMC) {
 	    h2rjet2->Fill(ptgam, jet2.Pt() / ptgam, w);
 	    prjet2->Fill(ptgam, jet2.Pt() / ptgam, w);
 	  }
@@ -2118,8 +1911,8 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	//     old bin trigger edges  (20,30,60,85,*95*,105,130,230)
 	double pt = ptgam;
 	double mu = tree->Pileup_nTrueInt;
-	if (isMC                             && pt>210)  hmusmc->Fill(mu, w);
-	int nmax = (isMC ? 1 : 100);
+	if (tree->isMC                             && pt>210)  hmusmc->Fill(mu, w);
+	int nmax = (tree->isMC ? 1 : 100);
 	for (int i=0; i!=nmax; ++i) {
 	  mu = gRandom->Gaus(tree->Pileup_nTrueInt,TruePUrms);
 	  double w1 = 0.01*w;
@@ -2188,7 +1981,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	  pnef->Fill(ptgam, tree->Jet_neEmEF[iJet], w);
 	  pcef->Fill(ptgam, tree->Jet_chEmEF[iJet], w);
 	  pmuf->Fill(ptgam, tree->Jet_muEF[iJet], w);
-	  //if (isRun3) tree->Jet_chFPV0EF[iJet] = 0;
+	  //if (tree->isRun3) tree->Jet_chFPV0EF[iJet] = 0;
 	  //ppuf->Fill(ptgam, tree->Jet_chFPV0EF[iJet], w);
 	  
 	  // 2D composition and response
@@ -2205,7 +1998,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	    //p2puf->Fill(eta, phi, tree->Jet_chFPV0EF[iJet], w);
 	  }
 
-	  if (isMC) {
+	  if (tree->isMC) {
 	    if (ptgam>=105 && ptgam<230)
 	      hmus->Fill(tree->Pileup_nTrueInt, w);
 	    h2mus->Fill(ptgam, tree->Pileup_nTrueInt, w);
@@ -2219,9 +2012,9 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 	    } // for i in 100
 	  } // is MC
 	  //if (ptgam>=130 && ptgam<175) {
-	  //if ((is16 && ptgam>175) ||
-	  //  (is17 && ptgam>230) ||
-	  //  (is18 && ptgam>130)) {
+	  //if ((tree->is16 && ptgam>175) ||
+	  //  (tree->is17 && ptgam>230) ||
+	  //  (tree->is18 && ptgam>130)) {
 	  if (ptgam>230 && iGam!=-1) {
 	    pgainvsmu->Fill(tree->Pileup_nTrueInt, tree->Photon_seedGain[iGam], w);
 	    if (tree->Photon_eCorr) // safety for 2016
@@ -2407,7 +2200,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
     	 << (100.*_nbadevents_veto/_nevents) << "%) \n";
 
   // Add extra plot for jet response vs photon pT
-  if (isMC) {
+  if (tree->isMC) {
     fout->cd("control");
     TH1D *hrgenvgen = prgen->ProjectionX("hrgenvgen");
     TH1D *hrgenvgam = prjet->ProjectionX("hrgenvgam");
@@ -2421,7 +2214,6 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   cout << "File written." << endl << flush;
   fout->Close();
   cout << "File closed." << endl << flush;
-
 }
 
 #endif

@@ -7,10 +7,10 @@
 
 ## Step-2: produce ONE skim file from nanofiles 
 * make
-* ./makeSkim -h
+* ./runMakeSkim -h
 
 or 
-* ./makeSkim
+* ./runMakeSkim
 
 ## Step-3: submit condor jobs to produce MANY skims 
 

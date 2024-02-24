@@ -26,8 +26,8 @@ echo "All arguements: "$@
 echo "Number of arguements: "$#
 oName=$1
 outDir=$4
-echo "./makeSkim -o oName"
-./makeSkim -o ${oName}
+echo "./runMakeSkim -o oName"
+./runMakeSkim -o ${oName}
 
 printf "Done skimming at ";/bin/date
 #---------------------------------------------

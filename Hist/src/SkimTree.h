@@ -13,7 +13,7 @@ const Int_t maxP = 600;
 
 class SkimTree{
  public:
-    SkimTree(TString year, vector<string>fileNames, bool isMC); 
+    SkimTree(TString oName, vector<string>fileNames); 
     ~SkimTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);

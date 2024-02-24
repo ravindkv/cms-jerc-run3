@@ -1,7 +1,7 @@
 #include<iostream>
 #include "SkimTree.h"
 
-SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
+SkimTree::SkimTree(TString oName, vector<string>fileNames){
     fChain = new TChain("Events");
     std::cout << "Start SkimTree" << std::endl;
     fChain->SetCacheSize(100*1024*1024);
@@ -18,6 +18,12 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
    fChain->SetBranchAddress("run", &run);
    fChain->SetBranchAddress("luminosityBlock", &luminosityBlock);
    fChain->SetBranchAddress("event", &event);
+
+   
+  if(oName.Contains("2022")) is22 = true;
+  if(oName.Contains("2023")) is23 = true;
+  if(is22 || is23) isRun3 = true;
+  if(!oName.Contains("Data")) isMC = true;
 
    if (isRun2) {
      fChain->SetBranchAddress("ChsMET_phi", &ChsMET_phi);
@@ -174,7 +180,6 @@ SkimTree::SkimTree(TString year, vector<string>fileNames, bool isMC){
    } // is16
 
    if (is17 || is18 || is22 || is23) {
-
    // also in 2016
    fChain->SetBranchAddress("HLT_Photon300_NoHE", &HLT_Photon300_NoHE);
 
