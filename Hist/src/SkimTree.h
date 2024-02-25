@@ -245,7 +245,7 @@ class SkimTree{
     //Int_t           GenJet_partonFlavour[nGenJetMax]; //[nGenJet] // NanoV10,11
     Short_t         GenJet_partonFlavour[nGenJetMax]; //[nGenJet] // NanoV12
 
-    UInt_t          nGenIsolatedPhoton;
+    Int_t          nGenIsolatedPhoton;
     Float_t         GenIsolatedPhoton_pt[nPhotonMax];
     Float_t         GenIsolatedPhoton_eta[nPhotonMax];
     Float_t         GenIsolatedPhoton_phi[nPhotonMax];
@@ -266,5 +266,6 @@ class SkimTree{
     std::map<int, std::map<int, int> > _json;
     map<string, map<int, TH1D*> > _pu;
     map<string, map<int, double> >  _lumi;
+    std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
 };
 #endif

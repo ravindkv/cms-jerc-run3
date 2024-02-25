@@ -88,7 +88,7 @@ public:
 
 class GamHistosFill {
  public :
-    GamHistosFill(int ac, char** av);
+    GamHistosFill(int argc, char* argv[]);
 
  private :
 
@@ -290,6 +290,7 @@ void GamHistosFill::LoadPU() {
 
   return;
 } // LoadPU
+
 
 void GamHistosFill::InitBranches(){
 }

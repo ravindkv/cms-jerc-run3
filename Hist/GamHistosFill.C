@@ -1,6 +1,8 @@
 #include "GamHistosFill.h"
 #include "parsePileUpJSON.C"
 #define GamHistosFill_cxx
+#include <nlohmann/json.hpp>
+#include <boost/algorithm/string.hpp>
 
 bool _gh_debug = false;
 bool _gh_debug100 = false;
@@ -12,14 +14,99 @@ bool smearJets = false;
 // Error counters
 int cntErrDR(0);
 #ifdef GamHistosFill_cxx
-GamHistosFill::GamHistosFill(int ac, char** av)
+GamHistosFill::GamHistosFill(int argc, char* argv[])
 {
-  vector<string> fileNames;
-  fileNames.push_back("/eos/user/r/rverma/www/public/cms-jerc-run3/Skim/2022/Data_2022C__2022__1of264.root");
-   
-  TString oName = "Data_2022C";
+    std::ifstream file("sample/FilesSkim_cff.json");
+    nlohmann::json js = nlohmann::json::parse(file);
+    //--------------------------------
+    // Parse command-line options
+    //--------------------------------
+    int opt;
+    std::string oN; //output Name
+    oN = js.begin().key()+"__1of100.root"; //defualt value
+    while ((opt = getopt(argc, argv, "o:h")) != -1) {
+        switch (opt) {
+            case 'o':
+                oN = optarg;
+                break;
+            case 'h':
+                std::cout << "Usage: ./runGamHistosFill -o sKey__1of1000.root\n" << std::endl;
+                cout<<"Choose sKey from the following:"<<endl;
+                for (auto& element : js.items()) {
+                    std::cout << element.key() << std::endl;
+                }
+                std::abort();
+            default:
+                std::cerr << "Invalid option" << std::endl;
+                std::abort();
+        }
+    }
+    cout<<"--------------------------------------------"<<endl;
+    cout<<"Inputs: ./runGamHistosFill -o " <<oN<<endl;
+    cout<<"--------------------------------------------"<<endl;
+	
+    // Extracting he sample key 
+    std::string sKey = oN.substr(0, oN.find("__"));
+    
+    // Extracting year
+    TString year = oN.substr(oN.find("__") + 2, 4);
+    sKey = sKey+"__"+year;
+    std::cout << "sKey: " << sKey << std::endl;
+    
+	// Finding the position of the second "__"
+    std::size_t pos_second_double_underscore = oN.find("__", oN.find("__") + 1);
+    if (pos_second_double_underscore == std::string::npos) {
+        std::cerr << "Second '__' not found." << std::endl;
+        std::abort();
+    }
+    // Extracting the part after the second "__"
+    std::string fraction_str = oN.substr(pos_second_double_underscore + 2);
+    std::cout << "Fraction: " << fraction_str << std::endl;
+    TString oName = oN;
 
-  tree = new SkimTree(oName, fileNames); 
+	// Finding the position of "of"
+    std::size_t pos_of = fraction_str.find("of");
+    
+    // Extracting the numerator before "of"
+    std::string numerator_str = fraction_str.substr(0, pos_of);
+    int nthJob = std::stoi(numerator_str);
+    std::cout << "nthJob: " << nthJob << std::endl;
+    
+	// Extracting the denominator after "of" and before "."
+    std::string denominator_str = fraction_str.substr(pos_of + 2, fraction_str.find(".") - pos_of - 2);
+    int totJob = std::stoi(denominator_str);
+    std::cout << "totJob: " << totJob << std::endl;
+
+    //--------------------------------
+    // files to run for each job
+    //--------------------------------
+    std::vector<std::string> fileNames;
+    js.at(sKey).get_to(fileNames);
+  //fileNames.push_back("/eos/user/r/rverma/www/public/cms-jerc-run3/Skim/2022/Data_2022C__2022__1of264.root");
+    int nFiles  = fileNames.size();
+   
+    cout<<"Total files = "<<nFiles<<endl;
+    if (totJob > nFiles){
+        cout<<"Since totJob > nFiles, setting it to the nFiles, totJob = "<<nFiles<<endl;
+        totJob = nFiles;
+    }
+    if (nthJob > totJob){
+        cout<<"Error: Make sure nthJob < totJob"<<endl;
+        std::abort();
+    }
+	if (nthJob>0 && totJob>0){
+	    cout <<"jobs: " <<nthJob << " of " << totJob << endl;
+		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
+	    cout << "new output file name: "<< oName << endl;
+	}
+    else{
+        cout<<"\n Error: Make sure nthJob > 0 and totJob > 0\n ";
+        std::abort();
+    }
+
+
+  std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
+  tree = new SkimTree(oName, smallVectors[nthJob-1]); 
 
   TStopwatch fulltime, laptime;
   fulltime.Start();
@@ -133,10 +220,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
   // Create histograms. Copy format from existing files from Lyon
   // Keep only histograms actually used by global fit (reprocess.C)
   TDirectory *curdir = gDirectory;
-  TFile *fout = new TFile(Form("rootfiles/GamHistosFill_%s_%s_%s.root",
-			       tree->isMC ? "mc" : "data",
-			       dataset.c_str(), version.c_str()),
-			  "RECREATE");
+  TFile *fout = new TFile(oName, "RECREATE");
   assert(fout && !fout->IsZombie());
   
   // Original gamma+jet binning
@@ -1398,7 +1482,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
                 if(isPrint) cout<<"rawJetPt = "<<rawJetPt<<", corr = "<<corr<<", corrs = "<<corrs<<endl;
             } catch (const std::exception& e) {
                 cout<<"\nEXCEPTION: in l2l3Ref: "<<e.what()<<endl;
-                break;
+                std::abort();
             }
         }
 	//double res = (v.size()>1 ? v[v.size()-1]/v[v.size()-2] : 1.);
@@ -1673,7 +1757,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
           }
       } catch (const std::exception& e) {
           cout<<"\nEXCEPTION: in jvRef: "<<e.what()<<endl;
-          break;
+          std::abort();
       }
     
       bool pass_leak = (phoj.Pt()<0.06*ptgam);// || tree->isRun3);
@@ -2217,7 +2301,7 @@ GamHistosFill::GamHistosFill(int ac, char** av)
 }
 
 #endif
-int main(int ac, char** av){
-  GamHistosFill(ac, av);
+int main(int argc, char* argv[]){
+  GamHistosFill(argc, argv);
   return 0;
 }

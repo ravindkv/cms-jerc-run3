@@ -18,7 +18,7 @@ else
     cd CMSSW_13_3_0/src
     eval `scramv1 runtime -sh`
     cd ../..
-	tar --strip-components=1 -zxf Skim.tar.gz
+	tar --strip-components=1 -zxf Hist.tar.gz
 fi
 
 #Run for Base, Signal region
@@ -26,8 +26,8 @@ echo "All arguements: "$@
 echo "Number of arguements: "$#
 oName=$1
 outDir=$2
-echo "./runMakeSkim -o oName"
-./runMakeSkim -o ${oName}
+echo "./runGamHistosFill -o oName"
+./runGamHistosFill -o ${oName}
 
 printf "Done skimming at ";/bin/date
 #---------------------------------------------

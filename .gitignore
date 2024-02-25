@@ -9,7 +9,13 @@ Skim/src/*.o
 Skim/condor/tmpSub
 
 Hist/runGamHistosFill
+Hist/*.root
 Hist/src/*.o
+Hist/sample/FilesSkim_cff.json
+Hist/sample/FilesHist_cff.json
+Hist/condor/tmpSub
+Hist/condor/__pycache__
+
 
 Hist/files
 Hist/POG

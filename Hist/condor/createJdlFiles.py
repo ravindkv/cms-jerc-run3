@@ -11,10 +11,9 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     'Universe   = vanilla\n\
     should_transfer_files = YES\n\
     when_to_transfer_output = ON_EXIT\n\
-    Transfer_Input_Files = Skim.tar.gz, runMakeSkims.sh\n\
+    Transfer_Input_Files = Hist.tar.gz, runMakeHists.sh\n\
     x509userproxy        = %s\n\
     +MaxRuntime = 60*60*24\n\
-    max_retries = 2\n\
     use_x509userproxy = true\n\
     Output = %s/log_$(cluster)_$(process).stdout\n\
     Log = %s/log_$(cluster)_$(process).log\n\
@@ -24,13 +23,13 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     #Create jdl (job discription language) files
     #---------------------------------------------
     data = json.load(jsonFile)
-    jdlFile.write('Executable =  runMakeSkims.sh \n')
+    jdlFile.write('Executable =  runMakeHists.sh \n')
     jdlFile.write(common_command)
-    for sKey, skims in data.items():
+    for sKey, hists in data.items():
         jdlFile.write("\n")
-        for skim in skims:
-            outDir  = skim.split(sKey)[0]
-            restStr = skim.split(sKey)[1]
+        for hist in hists:
+            outDir  = hist.split(sKey)[0]
+            restStr = hist.split(sKey)[1]
             oName   = "%s%s"%(sKey, restStr)
             args =  'Arguments  = %s %s\n' %(oName, outDir)
             args += "Queue 1\n"
@@ -42,11 +41,13 @@ if __name__=="__main__":
         os.system("rm -r tmpSub")
         print("Deleted dir: tmpSub")
     os.system("mkdir -p tmpSub/log")
-    tarFile = "tmpSub/Skim.tar.gz"
-    os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Skim"%tarFile)
-    os.system("cp runMakeSkims.sh tmpSub/")
+    tarFile = "tmpSub/Hist.tar.gz"
+    os.system("tar --exclude condor --exclude mikko -zcvf %s ../../Hist"%tarFile)
+    #os.system("tar --exclude condor --exclude mikko --exclude *.root -zcvf %s ../../Hist"%tarFile)
+    #os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Hist"%tarFile)
+    os.system("cp runMakeHists.sh tmpSub/")
     print("Created dir: tmpSub")
-    jsonFile = open("../sample/FilesSkim_cff.json", "r")
+    jsonFile = open("../sample/FilesHist_cff.json", "r")
     jdlFile  = open('tmpSub/submitJobs_cff.jdl','w')
     logDir   = "log"
     createJobs(jsonFile, jdlFile, logDir)

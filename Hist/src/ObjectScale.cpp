@@ -65,7 +65,7 @@ vector<string> ObjectScale::getL2L3Names(TString oName){
     }
   }
   else{
-      jNs.push_back("Summer22Run3_V1_MC_L2Relative_AK4PUPPI");
+    jNs.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
   }
   cout<<"\nINFO: ObjectScale::getL2L3Names()"<<endl;
   for(string jN: jNs){ cout<<jN<<endl;}
@@ -73,26 +73,32 @@ vector<string> ObjectScale::getL2L3Names(TString oName){
 } 
 
 string ObjectScale::getJvName(TString oName){
-  string jvN;//Jet Veto Name
-  if (isData){
-    if(oName.Contains("2022C") || oName.Contains("2022D")){
-        //jvN = "Summer22_23Sep2023_RunCD_V1";
-        //jvN = "Summer22EE_23Sep2023_RunEFG_V1";
+    string jvN;//Jet Veto Name
+    if (isData){
+        if(oName.Contains("2022C") || oName.Contains("2022D")){
+            //jvN = "Summer22_23Sep2023_RunCD_V1";
+            //jvN = "Summer22EE_23Sep2023_RunEFG_V1";
+            jvN = "Winter22Run3_RunCD_V1";
+        }
+    }
+    else{
         jvN = "Winter22Run3_RunCD_V1";
     }
-  }
   cout<<"\nINFO: ObjectScale::getJvName()"<<endl;
   cout<<jvN<<endl;
   return jvN;
 } 
 
 string ObjectScale::getJvKey(TString oName){
-  string jvK;//Jet Veto Key
-  if (isData){
-    if(oName.Contains("2022") || oName.Contains("2023")){
+    string jvK;//Jet Veto Key
+    if (isData){
+        if(oName.Contains("2022") || oName.Contains("2023")){
+            jvK = "jetvetomap";
+        }
+    }
+    else{
         jvK = "jetvetomap";
     }
-  }
   cout<<"\nINFO: ObjectScale::getJvKey()"<<endl;
   cout<<jvK<<endl;
   return jvK;

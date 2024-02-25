@@ -3,7 +3,7 @@
 
 SkimTree::SkimTree(TString oName, vector<string>fileNames){
     fChain = new TChain("Events");
-    std::cout << "Start SkimTree" << std::endl;
+    std::cout << "\nINFO: SkimTree::SkimTree()" << std::endl;
     fChain->SetCacheSize(100*1024*1024);
     int nFiles = fileNames.size();
     //string dir = "root://cms-xrd-global.cern.ch/";
@@ -236,6 +236,24 @@ SkimTree::SkimTree(TString oName, vector<string>fileNames){
    } // is22 is23
 }
 
+std::vector<std::vector<std::string>> SkimTree::splitVector(const std::vector<std::string>& strings, int n) {
+    int size = strings.size() / n;  // Size of each small vector
+    int remainder = strings.size() % n;  // Remaining elements
+    std::vector<std::vector<std::string>> smallVectors;
+    int index = 0;
+    for (int i = 0; i < n; ++i) {
+        if (i < remainder) {
+            smallVectors.push_back(std::vector<std::string>(
+                        strings.begin() + index, strings.begin() + index + size + 1));
+            index += size + 1;
+        } else {
+            smallVectors.push_back(std::vector<std::string>(
+                        strings.begin() + index, strings.begin() + index + size));
+            index += size;
+        }
+    }
+    return smallVectors;
+}
 
 SkimTree::~SkimTree(){
     delete fChain;
