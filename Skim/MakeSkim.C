@@ -15,7 +15,7 @@
 #include <nlohmann/json.hpp>
 #include <boost/algorithm/string.hpp>
 
-    #include <iostream>
+#include <iostream>
 #include <string>
 #include <sstream>
 
@@ -28,15 +28,15 @@ int main(int argc, char* argv[]){
     // Parse command-line options
     //--------------------------------
     int opt;
-    std::string oN; //output Name
-    oN = js.begin().key()+"__1of100.root"; //defualt value
+    std::string outName; //output Name
+    outName = js.begin().key()+"__Skim_1of100.root"; //defualt value
     while ((opt = getopt(argc, argv, "o:h")) != -1) {
         switch (opt) {
             case 'o':
-                oN = optarg;
+                outName = optarg;
                 break;
             case 'h':
-                std::cout << "Usage: ./runMakeSkim -o sKey__1of1000.root\n" << std::endl;
+                std::cout << "Usage: ./runMakeSkim -o sKey__Skim_1of1000.root\n" << std::endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
@@ -48,39 +48,23 @@ int main(int argc, char* argv[]){
         }
     }
     cout<<"--------------------------------------------"<<endl;
-    cout<<"Inputs: ./runMakeSkim -o " <<oN<<endl;
+    cout<<"Inputs: ./runMakeSkim -o " <<outName<<endl;
     cout<<"--------------------------------------------"<<endl;
-    // Extracting he sample key 
-    std::string sKey = oN.substr(0, oN.find("__"));
-    
-    // Extracting year
-    TString year = oN.substr(oN.find("__") + 2, 4);
-    sKey = sKey+"__"+year;
+    // outName = sKey__Skim_nofN.root
+	NanoTree* tree;
+    std::vector<std::string> v_outName      = tree->splitString(outName, "__Skim_");
+    std::string sKey        = v_outName.at(0); 
     std::cout << "sKey: " << sKey << std::endl;
-    
-	// Finding the position of the second "__"
-    std::size_t pos_second_double_underscore = oN.find("__", oN.find("__") + 1);
-    if (pos_second_double_underscore == std::string::npos) {
-        std::cerr << "Second '__' not found." << std::endl;
-        return 1;
-    }
-    // Extracting the part after the second "__"
-    std::string fraction_str = oN.substr(pos_second_double_underscore + 2);
-    std::cout << "Fraction: " << fraction_str << std::endl;
-    TString oName = oN;
-
-	// Finding the position of "of"
-    std::size_t pos_of = fraction_str.find("of");
-    
-    // Extracting the numerator before "of"
-    std::string numerator_str = fraction_str.substr(0, pos_of);
-    int nthJob = std::stoi(numerator_str);
-    std::cout << "nthJob: " << nthJob << std::endl;
-    
-	// Extracting the denominator after "of" and before "."
-    std::string denominator_str = fraction_str.substr(pos_of + 2, fraction_str.find(".") - pos_of - 2);
-    int totJob = std::stoi(denominator_str);
-    std::cout << "totJob: " << totJob << std::endl;
+    std::string nofN_root   = v_outName.at(1); 
+    std::vector<std::string> v_nofN_root    = tree->splitString(nofN_root, ".root"); 
+    std::string nofN        = v_nofN_root.at(0); 
+    std::cout << "nofN: " << nofN << std::endl;
+    std::vector<std::string> v_nofN         = tree->splitString(nofN, "of"); 
+    std::string n           =   v_nofN.at(0);
+    std::string N           =   v_nofN.at(1);
+    int nthJob = std::stoi(n);
+    int totJob = std::stoi(N);
+    TString oName = outName;
 
     //--------------------------------
     // files to run for each job
@@ -110,7 +94,6 @@ int main(int argc, char* argv[]){
     //--------------------------------
     // Read input files
     //--------------------------------
-	NanoTree* tree;
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
 	bool isMC = true;
 	if( sKey.find("Data") != std::string::npos){

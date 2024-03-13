@@ -5,7 +5,7 @@
 * python3 getFiles.py  
 * cd ..
 
-## Step-2: produce ONE hist file from nanofiles 
+## Step-2: produce ONE hist file from skim files 
 * make
 * ./runGamHistosFill -h
 

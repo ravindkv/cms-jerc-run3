@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import numpy as np
+import itertools
 import json
 sys.dont_write_bytecode = True
 from SamplesNano import sampleDict 
@@ -36,37 +37,41 @@ def formatNum(num):
 
 if __name__=="__main__":
     f1 = open("FilesNano_cff.json", "w")
-    f2 = open("JobsSkim_cff.py", "w")
+    f2 = open("JobsSkim_cff.json", "w")
     f3 = open("FilesSkim_cff.json", "w")
     allJobs = 0
     toNano = {}
     toSkim = {}
     toJobs = {}
-    for year in Years:
+    for ch, year in itertools.product(Channels, Years):
         print('---------------------------------------')
-        print(year)
+        print(ch, year)
         print("nFiles\t  nJobs\t nEvents\t Samples")
         print('---------------------------------------')
         jobs = 0
-        for sKey, sName in sampleDict(year).items():
+        for sKey, sName in sampleDict().items():
+            if not ch in sKey: continue
+            if not year in sKey: continue
             fNano = getFiles(sName)
             if not fNano:
                 print(f'PROBLEM: {sName}\n')
                 continue
-            sKeyNew = "%s__%s"%(sKey, year)
-            toNano[sKeyNew] = fNano
+            toNano[sKey] = fNano
             nFiles = len(fNano)
             evt     = getEvents(sName)
             evtStr  = formatNum(evt) 
-            nJob = int(np.ceil(evt/evtPerJob))
+            if "Data" in sKey:
+                nJob = int(np.ceil(evt/evtPerJobData))
+            else:
+                nJob = int(np.ceil(evt/evtPerJobMC))
             if nFiles<nJob: 
                 nJob = nFiles
-            toJobs[sKeyNew] = [nJob, evtStr, evt, nFiles]
+            toJobs[sKey] = [nJob, evtStr, evt, nFiles]
             jobs += nJob
             fSkim = []
             for i in range(nJob):
-                fSkim.append("%s/%s/%s__%sof%s.root"%(eosSkimDir, year, sKeyNew, i+1, nJob))
-            toSkim[sKeyNew] = fSkim
+                fSkim.append("%s/%s/%s/%s__Skim_%sof%s.root"%(eosSkimDir, ch, year, sKey, i+1, nJob))
+            toSkim[sKey] = fSkim
             print("%i\t %i\t %s\t %s"%(nFiles, nJob, evtStr, sKey))
         print("AllJobs_%s = %i"%(year, jobs))
         allJobs += jobs

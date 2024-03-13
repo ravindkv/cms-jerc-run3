@@ -76,6 +76,8 @@ class NanoTree{
     Bool_t HLT_Photon32_OneProng32_M50To105 = false;
 
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
+    std::vector<std::string> splitString(const std::string& s, const std::string& delimiter);
+
 };
 
 #endif

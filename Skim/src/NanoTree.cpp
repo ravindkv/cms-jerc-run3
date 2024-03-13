@@ -186,3 +186,16 @@ std::vector<std::vector<std::string>> NanoTree::splitVector(const std::vector<st
     }
     return smallVectors;
 }
+
+std::vector<std::string> NanoTree::splitString(const std::string& s, const std::string& delimiter) {
+    std::vector<std::string> tokens;
+    size_t start = 0, end = 0;
+    
+    while ((end = s.find(delimiter, start)) != std::string::npos) {
+        tokens.push_back(s.substr(start, end - start));
+        start = end + delimiter.length();
+    }
+    tokens.push_back(s.substr(start)); // Last token
+    
+    return tokens;
+}
