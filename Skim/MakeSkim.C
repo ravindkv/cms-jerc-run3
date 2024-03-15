@@ -19,10 +19,20 @@
 #include <string>
 #include <sstream>
 
-int main(int argc, char* argv[]){
+#include <sys/stat.h>
+#include <sys/types.h>
 
-    std::ifstream file("sample/FilesNano_cff.json");
-    nlohmann::json js = nlohmann::json::parse(file);
+int main(int argc, char* argv[]){
+    std::string fileDefault = "sample/json/FilesNano__2023__GamJet.json";//default file
+    std::ifstream fileDefault_(fileDefault.c_str());
+    nlohmann::json js; 
+    try{
+        js = nlohmann::json::parse(fileDefault_);
+    } catch (const std::exception& e) {
+        cout<<"\nEXCEPTION: Check the input json fileDefault: "<<fileDefault<<endl;
+        cout<<e.what()<<endl;
+        std::abort();
+    }
 
     //--------------------------------
     // Parse command-line options
@@ -36,7 +46,8 @@ int main(int argc, char* argv[]){
                 outName = optarg;
                 break;
             case 'h':
-                std::cout << "Usage: ./runMakeSkim -o sKey__Skim_1of1000.root\n" << std::endl;
+                cout<<"Default input json: "<<fileDefault<<endl;
+                std::cout << "Usage: ./runMakeSkim -o sKey__Skim_1of100.root\n" << std::endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
@@ -51,17 +62,29 @@ int main(int argc, char* argv[]){
     cout<<"Inputs: ./runMakeSkim -o " <<outName<<endl;
     cout<<"--------------------------------------------"<<endl;
     // outName = sKey__Skim_nofN.root
+    std::string sKey;
+    std::string n;
+    std::string N;
 	NanoTree* tree;
-    std::vector<std::string> v_outName      = tree->splitString(outName, "__Skim_");
-    std::string sKey        = v_outName.at(0); 
-    std::cout << "sKey: " << sKey << std::endl;
-    std::string nofN_root   = v_outName.at(1); 
-    std::vector<std::string> v_nofN_root    = tree->splitString(nofN_root, ".root"); 
-    std::string nofN        = v_nofN_root.at(0); 
-    std::cout << "nofN: " << nofN << std::endl;
-    std::vector<std::string> v_nofN         = tree->splitString(nofN, "of"); 
-    std::string n           =   v_nofN.at(0);
-    std::string N           =   v_nofN.at(1);
+    try{
+        std::vector<std::string> v_outName      = tree->splitString(outName, "__Skim_");
+        sKey = v_outName.at(0); 
+        std::cout << "sKey: " << sKey << std::endl;
+        std::string nofN_root   = v_outName.at(1); 
+        std::vector<std::string> v_nofN_root    = tree->splitString(nofN_root, ".root"); 
+        std::string nofN        = v_nofN_root.at(0); 
+        std::cout << "nofN: " << nofN << std::endl;
+        std::vector<std::string> v_nofN         = tree->splitString(nofN, "of"); 
+        n = v_nofN.at(0);
+        N = v_nofN.at(1);
+    }catch(const std::exception &e){
+        cout<<"\nEXCEPTION: Check the outName: "<<outName<<endl;
+        cout<<"outName format should be: DataOrMC__Year__Channel__Sample__Skim_nofN.rooot"<<endl;
+        cout<<"Run ./runMakeSkim -h for more details"<<endl;
+        cout<<e.what()<<endl;
+        std::abort();
+    }
+
     int nthJob = std::stoi(n);
     int totJob = std::stoi(N);
     TString oName = outName;
@@ -69,8 +92,33 @@ int main(int argc, char* argv[]){
     //--------------------------------
     // files to run for each job
     //--------------------------------
+    std::string fileName;
+    std::string year = "2022";
+    if(oName.Contains("2023")) year = "2023";
+    std::string channel = tree->splitString(sKey, "__").at(2);
+    fileName = "sample/json/FilesNano__"+year+"__"+channel+".json";
+    cout<<"json: "<<fileName<<endl;
+    std::ifstream fileName_(fileName.c_str());
+    try{
+        js = nlohmann::json::parse(fileName_);
+    } catch (const std::exception& e) {
+        cout<<"\nEXCEPTION: Check the input json fileName: "<<fileName<<endl;
+        cout<<e.what()<<endl;
+        std::abort();
+    }
+    
     std::vector<std::string> fileNames;
-    js.at(sKey).get_to(fileNames);
+    try{
+        js.at(sKey).get_to(fileNames);
+    }catch (const std::exception & e){
+        cout<<"\nEXCEPTION: Check the sKey: "<<sKey<<endl;
+        cout<<e.what()<<endl;
+        cout<<"Choose sKey from the following:"<<endl;
+        for (auto& element : js.items()) {
+            std::cout << element.key() << std::endl;
+        }
+        std::abort();
+    }
     int nFiles  = fileNames.size();
     cout<<"Total files = "<<nFiles<<endl;
     if (totJob > nFiles){
@@ -84,7 +132,6 @@ int main(int argc, char* argv[]){
 	if (nthJob>0 && totJob>0){
 	    cout <<"jobs: " <<nthJob << " of " << totJob << endl;
 		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
-	    cout << "new output file name: "<< oName << endl;
 	}
     else{
         cout<<"\n Error: Make sure nthJob > 0 and totJob > 0\n ";
@@ -95,14 +142,12 @@ int main(int argc, char* argv[]){
     // Read input files
     //--------------------------------
     std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
-	bool isMC = true;
-	if( sKey.find("Data") != std::string::npos){
-	    cout << "IsData" << endl;
-	    isMC = false;
-	}
-	tree = new NanoTree(oName, smallVectors[nthJob-1], isMC);
+	tree = new NanoTree(oName, smallVectors[nthJob-1]);
 
-	TFile* outFile = TFile::Open( oName ,"RECREATE","",207 );
+	std::string outDir = "output";
+    mkdir(outDir.c_str(), S_IRWXU);
+    cout << "new output file name: "<< outDir+"/"+oName << endl;
+	TFile* outFile = TFile::Open( outDir+"/"+oName ,"RECREATE");
     outFile->cd();
 	TTree* newTree = tree->chain->GetTree()->CloneTree(0);
 	newTree->SetCacheSize(50*1024*1024);
@@ -128,7 +173,7 @@ int main(int argc, char* argv[]){
     bool passTrig = false;
 	for(Long64_t entry= startEntry; entry < endEntry; entry++){
         //if(entry>4235) break;
-		if(entry%(eventsPerJob/100) == 0){// print after every 1% of events
+		if(endEntry > 100  && entry%(eventsPerJob/100) == 0){// print after every 1% of events
             totalTime+= std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-startClock).count();
             int sec = (int)(totalTime)%60;
             int min = (int)(totalTime)/60;
@@ -137,8 +182,8 @@ int main(int argc, char* argv[]){
 		}
 		tree->GetEntry(entry);
 		hEvents_->Fill(0);
-        if(oName.Contains("2022")){
-		passTrig =
+        if(oName.Contains("2022") && oName.Contains("GamJet")){ 
+		    passTrig =
             tree->HLT_Photon300_NoHE                                                ||
             tree->HLT_Photon20                                                      ||
             tree->HLT_Photon33                                                      ||
@@ -173,8 +218,8 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ||
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3           ;
         }
-        if(oName.Contains("2023")){
-		passTrig =
+        if(oName.Contains("2023") && oName.Contains("GamJet")){ 
+		    passTrig =
             tree->HLT_Photon300_NoHE                                     ||
             tree->HLT_Photon33                                           ||
             tree->HLT_Photon50                                           ||
@@ -207,6 +252,34 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon30_HoverELoose                               ||
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ||
             tree->HLT_Photon32_OneProng32_M50To105                       ;
+        }
+        if(oName.Contains("DiJet")){
+		    passTrig =
+            tree->HLT_PFJet40             ||
+            tree->HLT_PFJet60             ||
+            tree->HLT_PFJet80             ||
+            tree->HLT_PFJet140            ||
+            tree->HLT_PFJet200            ||
+            tree->HLT_PFJet260            ||
+            tree->HLT_PFJet320            ||
+            tree->HLT_PFJet400            ||
+            tree->HLT_PFJet450            ||
+            tree->HLT_PFJet500            ||
+            tree->HLT_DiPFJetAve40        ||
+            tree->HLT_DiPFJetAve60        ||
+            tree->HLT_DiPFJetAve80        ||
+            tree->HLT_DiPFJetAve140       ||
+            tree->HLT_DiPFJetAve200       ||
+            tree->HLT_DiPFJetAve260       ||
+            tree->HLT_DiPFJetAve320       ||
+            tree->HLT_DiPFJetAve400       ||
+            tree->HLT_DiPFJetAve500       ||
+            tree->HLT_DiPFJetAve60_HFJEC  ||
+            tree->HLT_DiPFJetAve80_HFJEC  ||
+            tree->HLT_DiPFJetAve100_HFJEC ||
+            tree->HLT_DiPFJetAve160_HFJEC ||
+            tree->HLT_DiPFJetAve220_HFJEC ||
+            tree->HLT_DiPFJetAve300_HFJEC ;
         }
 		if(passTrig){
             hEvents_->Fill(1);

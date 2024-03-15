@@ -5,8 +5,7 @@ import numpy as np
 import itertools
 import json
 sys.dont_write_bytecode = True
-from SamplesNano import sampleDict 
-sys.path.insert(0, os.getcwd().replace("sample",""))
+sys.path.insert(0, os.getcwd().replace("input",""))
 from Inputs import *
 
 def getFiles(dataset):
@@ -36,22 +35,24 @@ def formatNum(num):
     return f"{round(num, 1)}{suffixes[magnitude]}"
 
 if __name__=="__main__":
-    f1 = open("FilesNano_cff.json", "w")
-    f2 = open("JobsSkim_cff.json", "w")
-    f3 = open("FilesSkim_cff.json", "w")
     allJobs = 0
     toNano = {}
     toSkim = {}
     toJobs = {}
-    for ch, year in itertools.product(Channels, Years):
+    if not os.path.exists("json"):
+        os.makedirs("json")
+    for year, ch in itertools.product(Years, Channels):
+        f1 = open(f"json/FilesNano__{year}__{ch}.json", "w")
+        f2 = open(f"json/JobsSkim__{year}__{ch}.json", "w")
+        f3 = open(f"json/FilesSkim__{year}__{ch}.json", "w")
         print('---------------------------------------')
-        print(ch, year)
+        print(f"\t{year}: {ch}")
         print("nFiles\t  nJobs\t nEvents\t Samples")
         print('---------------------------------------')
         jobs = 0
+        exec(f"from SamplesNano_{year} import sampleDict") 
         for sKey, sName in sampleDict().items():
             if not ch in sKey: continue
-            if not year in sKey: continue
             fNano = getFiles(sName)
             if not fNano:
                 print(f'PROBLEM: {sName}\n')
@@ -75,9 +76,12 @@ if __name__=="__main__":
             print("%i\t %i\t %s\t %s"%(nFiles, nJob, evtStr, sKey))
         print("AllJobs_%s = %i"%(year, jobs))
         allJobs += jobs
-    json.dump(toNano, f1, indent=4)
-    json.dump(toJobs, f2, indent=4)
-    json.dump(toSkim, f3, indent=4)
+        json.dump(toNano, f1, indent=4)
+        json.dump(toJobs, f2, indent=4)
+        json.dump(toSkim, f3, indent=4)
+        f1.close()
+        f2.close()
+        f3.close()
     print('---------------------------------------')
     print("AllJobs_AllYears = %s \n"%str(allJobs))
     print('---------------------------------------')

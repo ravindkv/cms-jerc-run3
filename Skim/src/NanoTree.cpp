@@ -1,6 +1,6 @@
 #include "NanoTree.h"
 
-NanoTree::NanoTree(TString oName, vector<string>fileNames, bool isMC){
+NanoTree::NanoTree(TString oName, vector<string>fileNames){
     chain = new TChain("Events");
     std::cout << "Start NanoTree" << std::endl;
     chain->SetCacheSize(100*1024*1024);
@@ -25,17 +25,23 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames, bool isMC){
     }
     std::cout << "Begin" << std::endl;
     chain->SetBranchStatus("*",0);
-    chain->SetBranchStatus("HLT_Photon*", 1);
     // event
     chain->SetBranchStatus("run",1);
     chain->SetBranchStatus("event",1);
     chain->SetBranchStatus("luminosityBlock",1);
 
+    if(oName.Contains("GamJet")){
+        chain->SetBranchStatus("HLT_Photon*", 1);
+        chain->SetBranchStatus("Photon_*",1);
+        chain->SetBranchStatus("nPhoton",1);
+    }
+    if(oName.Contains("DiJet")){
+        chain->SetBranchStatus("HLT_PFJet*", 1);
+        chain->SetBranchStatus("HLT_DiPFJetAve*", 1);
+    }
     //main branches
     chain->SetBranchStatus("Jet_*",1);
-    chain->SetBranchStatus("Photon_*",1);
     chain->SetBranchStatus("nJet",1);
-    chain->SetBranchStatus("nPhoton",1);
     chain->SetBranchStatus("Flag_*",1);
     chain->SetBranchStatus("PV_*",1);
     chain->SetBranchStatus("MET*",1);
@@ -53,7 +59,7 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames, bool isMC){
     chain->SetBranchStatus("nFatJet",1);
 	*/
  
-    if (isMC){
+    if (oName.Contains("MC")){
 		chain->SetBranchStatus("genWeight");
 		chain->SetBranchStatus("nPSWeight");
 		chain->SetBranchStatus("PSWeight");
@@ -83,8 +89,8 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames, bool isMC){
         chain->SetBranchStatus("genWeight",1);
 		*/
     }
-    //2022
-    if(oName.Contains("2022")){ 
+    //GamJet
+    if(oName.Contains("2022") && oName.Contains("GamJet")){ 
         chain->SetBranchAddress("HLT_Photon300_NoHE"                                                , & HLT_Photon300_NoHE);
         chain->SetBranchAddress("HLT_Photon20"                                                      , & HLT_Photon20);
         chain->SetBranchAddress("HLT_Photon33"                                                      , & HLT_Photon33);
@@ -120,7 +126,7 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames, bool isMC){
         chain->SetBranchAddress("HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3"            , & HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3);
     }
     //2023
-    if(oName.Contains("2023")){ 
+    if(oName.Contains("2023") && oName.Contains("GamJet")){ 
         chain->SetBranchAddress("HLT_Photon300_NoHE"                                    , & HLT_Photon300_NoHE                                    );
         chain->SetBranchAddress("HLT_Photon33"                                          , & HLT_Photon33                                          );
         chain->SetBranchAddress("HLT_Photon50"                                          , & HLT_Photon50                                          );
@@ -154,6 +160,35 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames, bool isMC){
         chain->SetBranchAddress("HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3", & HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3);
         chain->SetBranchAddress("HLT_Photon32_OneProng32_M50To105"                      , & HLT_Photon32_OneProng32_M50To105                      );
     }
+    //DiJet
+    if(oName.Contains("DiJet")){
+        chain->SetBranchAddress("HLT_PFJet40"            , & HLT_PFJet40            );
+        chain->SetBranchAddress("HLT_PFJet60"            , & HLT_PFJet60            );
+        chain->SetBranchAddress("HLT_PFJet80"            , & HLT_PFJet80            );
+        chain->SetBranchAddress("HLT_PFJet140"           , & HLT_PFJet140           );
+        chain->SetBranchAddress("HLT_PFJet200"           , & HLT_PFJet200           );
+        chain->SetBranchAddress("HLT_PFJet260"           , & HLT_PFJet260           );
+        chain->SetBranchAddress("HLT_PFJet320"           , & HLT_PFJet320           );
+        chain->SetBranchAddress("HLT_PFJet400"           , & HLT_PFJet400           );
+        chain->SetBranchAddress("HLT_PFJet450"           , & HLT_PFJet450           );
+        chain->SetBranchAddress("HLT_PFJet500"           , & HLT_PFJet500           );
+        chain->SetBranchAddress("HLT_DiPFJetAve40"       , & HLT_DiPFJetAve40       );
+        chain->SetBranchAddress("HLT_DiPFJetAve60"       , & HLT_DiPFJetAve60       );
+        chain->SetBranchAddress("HLT_DiPFJetAve80"       , & HLT_DiPFJetAve80       );
+        chain->SetBranchAddress("HLT_DiPFJetAve140"      , & HLT_DiPFJetAve140      );
+        chain->SetBranchAddress("HLT_DiPFJetAve200"      , & HLT_DiPFJetAve200      );
+        chain->SetBranchAddress("HLT_DiPFJetAve260"      , & HLT_DiPFJetAve260      );
+        chain->SetBranchAddress("HLT_DiPFJetAve320"      , & HLT_DiPFJetAve320      );
+        chain->SetBranchAddress("HLT_DiPFJetAve400"      , & HLT_DiPFJetAve400      );
+        chain->SetBranchAddress("HLT_DiPFJetAve500"      , & HLT_DiPFJetAve500      );
+        chain->SetBranchAddress("HLT_DiPFJetAve60_HFJEC" , & HLT_DiPFJetAve60_HFJEC );
+        chain->SetBranchAddress("HLT_DiPFJetAve80_HFJEC" , & HLT_DiPFJetAve80_HFJEC );
+        chain->SetBranchAddress("HLT_DiPFJetAve100_HFJEC", & HLT_DiPFJetAve100_HFJEC);
+        chain->SetBranchAddress("HLT_DiPFJetAve160_HFJEC", & HLT_DiPFJetAve160_HFJEC);
+        chain->SetBranchAddress("HLT_DiPFJetAve220_HFJEC", & HLT_DiPFJetAve220_HFJEC);
+        chain->SetBranchAddress("HLT_DiPFJetAve300_HFJEC", & HLT_DiPFJetAve300_HFJEC);
+    }
+
 }
 
 NanoTree::~NanoTree(){

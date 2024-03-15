@@ -1,7 +1,7 @@
 # Produce skim file from NanoAOD
 
-## Step-1: get root files of samples from DAS
-* cd sample
+## Step-1: get input root files of samples from DAS
+* cd input
 * python3 getFiles.py  
 * cd ..
 
