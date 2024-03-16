@@ -42,9 +42,9 @@ if __name__=="__main__":
     if not os.path.exists("json"):
         os.makedirs("json")
     for year, ch in itertools.product(Years, Channels):
-        f1 = open(f"json/FilesNano__{year}__{ch}.json", "w")
-        f2 = open(f"json/JobsSkim__{year}__{ch}.json", "w")
-        f3 = open(f"json/FilesSkim__{year}__{ch}.json", "w")
+        f1 = open(f"json/FilesNano_{year}_{ch}.json", "w")
+        f2 = open(f"json/JobsSkim_{year}_{ch}.json", "w")
+        f3 = open(f"json/FilesSkim_{year}_{ch}.json", "w")
         print('---------------------------------------')
         print(f"\t{year}: {ch}")
         print("nFiles\t  nJobs\t nEvents\t Samples")
@@ -71,10 +71,10 @@ if __name__=="__main__":
             jobs += nJob
             fSkim = []
             for i in range(nJob):
-                fSkim.append("%s/%s/%s/%s__Skim_%sof%s.root"%(eosSkimDir, ch, year, sKey, i+1, nJob))
+                fSkim.append("%s/%s/%s/%s_Skim_%sof%s.root"%(eosSkimDir, year, ch, sKey, i+1, nJob))
             toSkim[sKey] = fSkim
             print("%i\t %i\t %s\t %s"%(nFiles, nJob, evtStr, sKey))
-        print("AllJobs_%s = %i"%(year, jobs))
+        print("AllJobs_%s_%s = %i"%(year, ch, jobs))
         allJobs += jobs
         json.dump(toNano, f1, indent=4)
         json.dump(toJobs, f2, indent=4)
@@ -83,6 +83,6 @@ if __name__=="__main__":
         f2.close()
         f3.close()
     print('---------------------------------------')
-    print("AllJobs_AllYears = %s \n"%str(allJobs))
+    print("AllJobs_AllYears = %s"%str(allJobs))
     print('---------------------------------------')
  

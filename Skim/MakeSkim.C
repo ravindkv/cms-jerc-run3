@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "sample/json/FilesNano__2023__GamJet.json";//default file
+    std::string fileDefault = "input/json/FilesNano_2023_GamJet.json";//default file
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]){
     //--------------------------------
     int opt;
     std::string outName; //output Name
-    outName = js.begin().key()+"__Skim_1of100.root"; //defualt value
+    outName = js.begin().key()+"_Skim_1of100.root"; //defualt value
     while ((opt = getopt(argc, argv, "o:h")) != -1) {
         switch (opt) {
             case 'o':
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
                 break;
             case 'h':
                 cout<<"Default input json: "<<fileDefault<<endl;
-                std::cout << "Usage: ./runMakeSkim -o sKey__Skim_1of100.root\n" << std::endl;
+                std::cout << "Usage: ./runMakeSkim -o sKey_Skim_1of100.root\n" << std::endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
@@ -61,13 +61,13 @@ int main(int argc, char* argv[]){
     cout<<"--------------------------------------------"<<endl;
     cout<<"Inputs: ./runMakeSkim -o " <<outName<<endl;
     cout<<"--------------------------------------------"<<endl;
-    // outName = sKey__Skim_nofN.root
+    // outName = sKey_Skim_nofN.root
     std::string sKey;
     std::string n;
     std::string N;
 	NanoTree* tree;
     try{
-        std::vector<std::string> v_outName      = tree->splitString(outName, "__Skim_");
+        std::vector<std::string> v_outName      = tree->splitString(outName, "_Skim_");
         sKey = v_outName.at(0); 
         std::cout << "sKey: " << sKey << std::endl;
         std::string nofN_root   = v_outName.at(1); 
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
         N = v_nofN.at(1);
     }catch(const std::exception &e){
         cout<<"\nEXCEPTION: Check the outName: "<<outName<<endl;
-        cout<<"outName format should be: DataOrMC__Year__Channel__Sample__Skim_nofN.rooot"<<endl;
+        cout<<"outName format should be: DataOrMC_Year_Channel_Sample_Skim_nofN.rooot"<<endl;
         cout<<"Run ./runMakeSkim -h for more details"<<endl;
         cout<<e.what()<<endl;
         std::abort();
@@ -95,8 +95,8 @@ int main(int argc, char* argv[]){
     std::string fileName;
     std::string year = "2022";
     if(oName.Contains("2023")) year = "2023";
-    std::string channel = tree->splitString(sKey, "__").at(2);
-    fileName = "sample/json/FilesNano__"+year+"__"+channel+".json";
+    std::string channel = tree->splitString(sKey, "_").at(2);
+    fileName = "input/json/FilesNano_"+year+"_"+channel+".json";
     cout<<"json: "<<fileName<<endl;
     std::ifstream fileName_(fileName.c_str());
     try{
@@ -182,6 +182,7 @@ int main(int argc, char* argv[]){
 		}
 		tree->GetEntry(entry);
 		hEvents_->Fill(0);
+        //GamJet
         if(oName.Contains("2022") && oName.Contains("GamJet")){ 
 		    passTrig =
             tree->HLT_Photon300_NoHE                                                ||
@@ -253,6 +254,18 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ||
             tree->HLT_Photon32_OneProng32_M50To105                       ;
         }
+
+        //DiEleJet
+        if(oName.Contains("DiEleJet")){
+		    passTrig = tree->HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ ;
+        }
+
+        //DiMuJet
+        if(oName.Contains("DiMuJet")){
+		    passTrig = tree->HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8 ;
+        }
+
+        //DiJet
         if(oName.Contains("DiJet")){
 		    passTrig =
             tree->HLT_PFJet40             ||

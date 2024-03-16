@@ -31,42 +31,84 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames){
     chain->SetBranchStatus("luminosityBlock",1);
 
     if(oName.Contains("GamJet")){
-        chain->SetBranchStatus("HLT_Photon*", 1);
-        chain->SetBranchStatus("Photon_*",1);
+   		chain->SetBranchStatus("Photon_eCorr",1); 
+   		chain->SetBranchStatus("Photon_energyErr",1);
+   		chain->SetBranchStatus("Photon_eta",1);
+   		chain->SetBranchStatus("Photon_hoe",1);
+   		chain->SetBranchStatus("Photon_mass",1);
+   		chain->SetBranchStatus("Photon_phi",1);
+   		chain->SetBranchStatus("Photon_pt",1);
+   		chain->SetBranchStatus("Photon_r9",1);
+   		chain->SetBranchStatus("Photon_cutBased",1);
+   		chain->SetBranchStatus("Photon_jetIdx",1);
+   		chain->SetBranchStatus("Photon_seedGain",1);
         chain->SetBranchStatus("nPhoton",1);
+        chain->SetBranchStatus("HLT_Photon*", 1);
+    	if (oName.Contains("MC")){
+        chain->SetBranchStatus("GenIsolatedPhoton_eta",1);
+        chain->SetBranchStatus("GenIsolatedPhoton_mass",1);
+        chain->SetBranchStatus("GenIsolatedPhoton_phi",1);
+        chain->SetBranchStatus("GenIsolatedPhoton_pt",1);
+        chain->SetBranchStatus("nGenIsolatedPhoton",1);
+		}
+    }
+    if(oName.Contains("DiEleJet")){
+        chain->SetBranchStatus("Electron_*",1);
+        chain->SetBranchStatus("nElectron",1);
+        chain->SetBranchStatus("HLT_Ele23_Ele12_CaloIdL_TrackIdL*", 1);
+    }
+    if(oName.Contains("DiMuJet")){
+        chain->SetBranchStatus("Muon_*",1);
+        chain->SetBranchStatus("nMuon",1);
+        chain->SetBranchStatus("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL*", 1);
     }
     if(oName.Contains("DiJet")){
         chain->SetBranchStatus("HLT_PFJet*", 1);
         chain->SetBranchStatus("HLT_DiPFJetAve*", 1);
     }
-    //main branches
-    chain->SetBranchStatus("Jet_*",1);
+    //common branches
+    chain->SetBranchStatus("Jet_btagDeep*",1);
+    chain->SetBranchStatus("Jet_chEmEF",1);
+    chain->SetBranchStatus("Jet_chHEF" ,1);
+    chain->SetBranchStatus("Jet_eta"   ,1);
+    chain->SetBranchStatus("Jet_mass"  ,1);
+    chain->SetBranchStatus("Jet_muEF"  ,1);
+    chain->SetBranchStatus("Jet_neEmEF",1);
+    chain->SetBranchStatus("Jet_neHEF" ,1);
+    chain->SetBranchStatus("Jet_phi"   ,1);
+    chain->SetBranchStatus("Jet_pt"    ,1);
+    chain->SetBranchStatus("Jet_qgl",1);
+    chain->SetBranchStatus("Jet_rawFactor",1);
+    chain->SetBranchStatus("Jet_jetId",1);
+    chain->SetBranchStatus("Jet_area",1);
     chain->SetBranchStatus("nJet",1);
+
+    chain->SetBranchStatus("PV_npvs",1);
+    chain->SetBranchStatus("PV_npvsGood",1);
+
+    chain->SetBranchStatus("MET_pt",1);
+    chain->SetBranchStatus("MET_phi",1);
+    chain->SetBranchStatus("ChsMET_pt",1);
+    chain->SetBranchStatus("ChsMET_phi",1);
+    chain->SetBranchStatus("RawPuppiMET_pt",1);
+    chain->SetBranchStatus("RawPuppiMET_phi",1);
+
     chain->SetBranchStatus("Flag_*",1);
-    chain->SetBranchStatus("PV_*",1);
-    chain->SetBranchStatus("MET*",1);
-    chain->SetBranchStatus("ChsMET*",1);
-    chain->SetBranchStatus("RawPuppiMET*",1);
 	chain->SetBranchStatus("Rho_fixedGridRhoFastjetAll");
 	/*
-    chain->SetBranchStatus("Electron_*",1);
     chain->SetBranchStatus("TrigObj_*",1);
-    chain->SetBranchStatus("Muon_*",1);
-    chain->SetBranchStatus("FatJet_*",1);
-    chain->SetBranchStatus("nElectron",1)
     chain->SetBranchStatus("nTrigObj",1);
-    chain->SetBranchStatus("nMuon",1);
+    chain->SetBranchStatus("FatJet_*",1);
     chain->SetBranchStatus("nFatJet",1);
 	*/
  
     if (oName.Contains("MC")){
+        chain->SetBranchStatus("Jet_genJetIdx",1);
 		chain->SetBranchStatus("genWeight");
 		chain->SetBranchStatus("nPSWeight");
 		chain->SetBranchStatus("PSWeight");
 		chain->SetBranchStatus("LHE_HT");
 		chain->SetBranchStatus("Pileup_nTrueInt");
-        chain->SetBranchStatus("GenIsolatedPhoton*",1);
-        chain->SetBranchStatus("nGenIsolatedPhoton",1);
         chain->SetBranchStatus("GenJet_*",1);
         chain->SetBranchStatus("nGenJet",1);
 		/*
@@ -160,6 +202,17 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames){
         chain->SetBranchAddress("HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3", & HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3);
         chain->SetBranchAddress("HLT_Photon32_OneProng32_M50To105"                      , & HLT_Photon32_OneProng32_M50To105                      );
     }
+
+    //DiEleJet
+    if(oName.Contains("DiEleJet")){
+        chain->SetBranchAddress("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"            , & HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ);
+    }
+
+    //DiMuJet
+    if(oName.Contains("DiMuJet")){
+        chain->SetBranchAddress("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8"            , & HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8);
+    }
+
     //DiJet
     if(oName.Contains("DiJet")){
         chain->SetBranchAddress("HLT_PFJet40"            , & HLT_PFJet40            );

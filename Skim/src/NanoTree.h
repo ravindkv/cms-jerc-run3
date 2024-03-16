@@ -102,6 +102,10 @@ class NanoTree{
     Bool_t HLT_DiPFJetAve220_HFJEC = false;
     Bool_t HLT_DiPFJetAve300_HFJEC = false;
 
+    //2022+23, DiEleJet
+    Bool_t HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ = false;
+    //2022+23, DiMuJet
+    Bool_t HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8 = false; 
 
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
     std::vector<std::string> splitString(const std::string& s, const std::string& delimiter);
