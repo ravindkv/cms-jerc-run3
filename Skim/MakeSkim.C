@@ -11,7 +11,7 @@
 #include<iomanip>
 #include <fstream>
 
-#include "src/NanoTree.h"
+#include "NanoTree.h"
 #include <nlohmann/json.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
         N = v_nofN.at(1);
     }catch(const std::exception &e){
         cout<<"\nEXCEPTION: Check the outName: "<<outName<<endl;
-        cout<<"outName format should be: DataOrMC_Year_Channel_Sample_Skim_nofN.rooot"<<endl;
+        cout<<"outName format should be: DataOrMC_Year_Channel_Sample_Skim_nofN.root"<<endl;
         cout<<"Run ./runMakeSkim -h for more details"<<endl;
         cout<<e.what()<<endl;
         std::abort();
@@ -119,6 +119,7 @@ int main(int argc, char* argv[]){
         }
         std::abort();
     }
+    
     int nFiles  = fileNames.size();
     cout<<"Total files = "<<nFiles<<endl;
     if (totJob > nFiles){
@@ -172,7 +173,7 @@ int main(int argc, char* argv[]){
 	auto startClock = std::chrono::high_resolution_clock::now();
     bool passTrig = false;
 	for(Long64_t entry= startEntry; entry < endEntry; entry++){
-        //if(entry>4235) break;
+        //if(entry>100000) break;
 		if(endEntry > 100  && entry%(eventsPerJob/100) == 0){// print after every 1% of events
             totalTime+= std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-startClock).count();
             int sec = (int)(totalTime)%60;
@@ -180,10 +181,43 @@ int main(int argc, char* argv[]){
 	        std::cout<<setw(10)<<100*entry/endEntry<<" %"<<setw(10)<<min<<"m "<<sec<<"s"<<std::endl;
 			startClock = std::chrono::high_resolution_clock::now();
 		}
-		tree->GetEntry(entry);
 		hEvents_->Fill(0);
         //GamJet
         if(oName.Contains("2022") && oName.Contains("GamJet")){ 
+            tree->b_HLT_Photon300_NoHE                                                ->GetEntry(entry);
+            tree->b_HLT_Photon20                                                      ->GetEntry(entry);
+            tree->b_HLT_Photon33                                                      ->GetEntry(entry);
+            tree->b_HLT_Photon50                                                      ->GetEntry(entry);
+            tree->b_HLT_Photon75                                                      ->GetEntry(entry);
+            tree->b_HLT_Photon90                                                      ->GetEntry(entry);
+            tree->b_HLT_Photon120                                                     ->GetEntry(entry);
+            tree->b_HLT_Photon150                                                     ->GetEntry(entry);
+            tree->b_HLT_Photon175                                                     ->GetEntry(entry);
+            tree->b_HLT_Photon200                                                     ->GetEntry(entry);
+            tree->b_HLT_Photon30EB_TightID_TightIso                                   ->GetEntry(entry);
+            tree->b_HLT_Photon100EB_TightID_TightIso                                  ->GetEntry(entry);
+            tree->b_HLT_Photon110EB_TightID_TightIso                                  ->GetEntry(entry);
+            tree->b_HLT_Photon120EB_TightID_TightIso                                  ->GetEntry(entry);
+            tree->b_HLT_Photon100EBHE10                                               ->GetEntry(entry);
+            tree->b_HLT_Photon100EEHE10                                               ->GetEntry(entry);
+            tree->b_HLT_Photon100EE_TightID_TightIso                                  ->GetEntry(entry);
+            tree->b_HLT_Photon50_R9Id90_HE10_IsoM                                     ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM                                     ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 ->GetEntry(entry);
+            tree->b_HLT_Photon90_R9Id90_HE10_IsoM                                     ->GetEntry(entry);
+            tree->b_HLT_Photon120_R9Id90_HE10_IsoM                                    ->GetEntry(entry);
+            tree->b_HLT_Photon165_R9Id90_HE10_IsoM                                    ->GetEntry(entry);
+            tree->b_HLT_Photon35_TwoProngs35                                          ->GetEntry(entry);
+            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL                                  ->GetEntry(entry);
+            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL                     ->GetEntry(entry);
+            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350MinPFJet15   ->GetEntry(entry);
+            tree->b_HLT_Photon20_HoverELoose                                          ->GetEntry(entry);
+            tree->b_HLT_Photon30_HoverELoose                                          ->GetEntry(entry);
+            tree->b_HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50    ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3            ->GetEntry(entry);
+
 		    passTrig =
             tree->HLT_Photon300_NoHE                                                ||
             tree->HLT_Photon20                                                      ||
@@ -220,6 +254,39 @@ int main(int argc, char* argv[]){
             tree->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3           ;
         }
         if(oName.Contains("2023") && oName.Contains("GamJet")){ 
+            tree->b_HLT_Photon300_NoHE                                     ->GetEntry(entry);
+            tree->b_HLT_Photon33                                           ->GetEntry(entry);
+            tree->b_HLT_Photon50                                           ->GetEntry(entry);
+            tree->b_HLT_Photon75                                           ->GetEntry(entry);
+            tree->b_HLT_Photon90                                           ->GetEntry(entry);
+            tree->b_HLT_Photon120                                          ->GetEntry(entry);
+            tree->b_HLT_Photon150                                          ->GetEntry(entry);
+            tree->b_HLT_Photon175                                          ->GetEntry(entry);
+            tree->b_HLT_Photon200                                          ->GetEntry(entry);
+            tree->b_HLT_Photon30EB_TightID_TightIso                        ->GetEntry(entry);
+            tree->b_HLT_Photon50EB_TightID_TightIso                        ->GetEntry(entry);
+            tree->b_HLT_Photon75EB_TightID_TightIso                        ->GetEntry(entry);
+            tree->b_HLT_Photon90EB_TightID_TightIso                        ->GetEntry(entry);
+            tree->b_HLT_Photon110EB_TightID_TightIso                       ->GetEntry(entry);
+            tree->b_HLT_Photon130EB_TightID_TightIso                       ->GetEntry(entry);
+            tree->b_HLT_Photon150EB_TightID_TightIso                       ->GetEntry(entry);
+            tree->b_HLT_Photon175EB_TightID_TightIso                       ->GetEntry(entry);
+            tree->b_HLT_Photon200EB_TightID_TightIso                       ->GetEntry(entry);
+            tree->b_HLT_Photon100EBHE10                                    ->GetEntry(entry);
+            tree->b_HLT_Photon50_R9Id90_HE10_IsoM                          ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM                          ->GetEntry(entry);
+            tree->b_HLT_Photon90_R9Id90_HE10_IsoM                          ->GetEntry(entry);
+            tree->b_HLT_Photon120_R9Id90_HE10_IsoM                         ->GetEntry(entry);
+            tree->b_HLT_Photon165_R9Id90_HE10_IsoM                         ->GetEntry(entry);
+            tree->b_HLT_Photon35_TwoProngs35                               ->GetEntry(entry);
+            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350  ->GetEntry(entry);
+            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT380  ->GetEntry(entry);
+            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT400  ->GetEntry(entry);
+            tree->b_HLT_Photon20_HoverELoose                               ->GetEntry(entry);
+            tree->b_HLT_Photon30_HoverELoose                               ->GetEntry(entry);
+            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ->GetEntry(entry);
+            tree->b_HLT_Photon32_OneProng32_M50To105                       ->GetEntry(entry);
+
 		    passTrig =
             tree->HLT_Photon300_NoHE                                     ||
             tree->HLT_Photon33                                           ||
@@ -257,16 +324,44 @@ int main(int argc, char* argv[]){
 
         //DiEleJet
         if(oName.Contains("DiEleJet")){
-		    passTrig = tree->HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ ;
+		    tree->b_HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ->GetEntry(entry);
+		    passTrig = tree->HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;
         }
 
         //DiMuJet
         if(oName.Contains("DiMuJet")){
-		    passTrig = tree->HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8 ;
+		    tree->b_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8->GetEntry(entry);
+		    passTrig = tree->HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8;
         }
 
         //DiJet
         if(oName.Contains("DiJet")){
+            tree->b_HLT_PFJet40             ->GetEntry(entry);
+            tree->b_HLT_PFJet60             ->GetEntry(entry);
+            tree->b_HLT_PFJet80             ->GetEntry(entry);
+            tree->b_HLT_PFJet140            ->GetEntry(entry);
+            tree->b_HLT_PFJet200            ->GetEntry(entry);
+            tree->b_HLT_PFJet260            ->GetEntry(entry);
+            tree->b_HLT_PFJet320            ->GetEntry(entry);
+            tree->b_HLT_PFJet400            ->GetEntry(entry);
+            tree->b_HLT_PFJet450            ->GetEntry(entry);
+            tree->b_HLT_PFJet500            ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve40        ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve60        ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve80        ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve140       ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve200       ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve260       ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve320       ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve400       ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve500       ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve60_HFJEC  ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve80_HFJEC  ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve100_HFJEC ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve160_HFJEC ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve220_HFJEC ->GetEntry(entry);
+            tree->b_HLT_DiPFJetAve300_HFJEC ->GetEntry(entry);
+
 		    passTrig =
             tree->HLT_PFJet40             ||
             tree->HLT_PFJet60             ||
@@ -295,6 +390,7 @@ int main(int argc, char* argv[]){
             tree->HLT_DiPFJetAve300_HFJEC ;
         }
 		if(passTrig){
+		    tree->GetEntry(entry);
             hEvents_->Fill(1);
 			newTree->Fill();
 		}

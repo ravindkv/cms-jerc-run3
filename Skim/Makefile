@@ -1,9 +1,24 @@
-all: src/NanoTree.o  runMakeSkim 
-runMakeSkim:   src/NanoTree.o  MakeSkim.C
-	g++ -o runMakeSkim `root-config --libs` -I `root-config --incdir` -std=c++17 src/NanoTree.o  MakeSkim.C 
 
-src/NanoTree.o: src/NanoTree.cpp src/NanoTree.h
-	g++ -c -I `root-config --incdir` -std=c++17 src/NanoTree.cpp -o src/NanoTree.o
+ROOT_L=`root-config --libs`
+ROOT_I=-I`root-config --incdir` -I./header
+GCC=g++ -std=c++17
+
+SRCDIR   = src
+OBJDIR   = obj
+SOURCES     := $(wildcard $(SRCDIR)/*.cpp)
+OBJECTS     := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
+BINS        := runMakeSkim
+
+$(BINS): $(OBJECTS) MakeSkim.C
+	@echo "--> Creating executables $@"
+	@$(GCC) -o $@ MakeSkim.C ${ROOT_I} ${ROOT_L} $(OBJECTS)
+
+$(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp header/%.h
+	@echo "--> Creating object $@"
+	@mkdir -p $(OBJDIR)
+	@$(GCC) -c $< -o $@  ${ROOT_I} ${ROOT_L}
 
 clean:
-	rm src/*.o 
+	rm -f $(wildcard $(OBJDIR)/*.o) $(BINS)
+
+.PHONY: all clean

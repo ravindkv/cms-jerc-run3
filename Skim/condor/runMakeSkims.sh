@@ -6,7 +6,6 @@ myArray=( "$@" )
 
 printf "Start skimming at ";/bin/date
 printf "Worker node hostname ";/bin/hostname
-printf "Worker node OS " ; lsb_release -d
 
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then 
     echo "Running Interactively" ; 
@@ -36,9 +35,9 @@ printf "Done skimming at ";/bin/date
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f ${oName} ${outDir}
+    xrdcp -f output/${oName} ${outDir}
     echo "Cleanup"
     rm -rf CMSSW*
-    rm *.root 
+    rm output/*.root 
 fi
 printf "Done ";/bin/date

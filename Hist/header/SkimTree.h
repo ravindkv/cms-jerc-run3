@@ -28,14 +28,6 @@ class SkimTree{
     bool            is22v10;
     bool            is23;
     bool            isRun2, isRun3;
-    bool            isQCD;
-    bool            isMG;
-    string          dataset;
-    string          version;
-    string          _filename; // file name for debugging purposes
-    static const bool debugFiles = true;
-    
-//  Fixed size dimensions of array or collections stored in the TTree if any.
     // nCorrT1MetJet, nFatJet, nJet, nSoftActivityJet, nSubJet
     static const int nJetMax = 200;
     // nPhoton, nFsrPhoton, nGenIsolatedPhoton
@@ -104,28 +96,111 @@ class SkimTree{
 
     //Int_t           Jet_genJetIdx[nJetMax]; // NanoV11,10
     Short_t           Jet_genJetIdx[nJetMax]; // NanoV12
-    
+   
+    //--------------------------------------- 
+    // Photon (for GamJet)
+    //--------------------------------------- 
     //UInt_t          nPhoton; // NanoV11,10
     Int_t           nPhoton; // NanoV12
     Float_t         Photon_pt[nPhotonMax];
     Float_t         Photon_eta[nPhotonMax];
     Float_t         Photon_phi[nPhotonMax];
     Float_t         Photon_mass[nPhotonMax]; // Run2
-
     Float_t         Photon_hoe[nPhotonMax];
     //Int_t           Photon_cutBased[nPhotonMax]; // NanoV11,10
     UChar_t         Photon_cutBased[nPhotonMax];   // NanoV12
     Int_t           Photon_cutBasedBitmap[nPhotonMax];   // EXTRA
     //Int_t           Photon_jetIdx[nPhotonMax];   // NanoV10,V11
     Short_t         Photon_jetIdx[nPhotonMax];     // NanoV12
-
     UChar_t         Photon_seedGain[nPhotonMax];
     Float_t         Photon_r9[nPhotonMax];
     Float_t         Photon_eCorr[nPhotonMax];
     Float_t         Photon_energyErr[nPhotonMax];
-    
-    Float_t         fixedGridRhoFastjetAll; // Run2,Run3
+    //Gen photon
+    Int_t           nGenIsolatedPhoton;
+    Float_t         GenIsolatedPhoton_pt[nPhotonMax];
+    Float_t         GenIsolatedPhoton_eta[nPhotonMax];
+    Float_t         GenIsolatedPhoton_phi[nPhotonMax];
+    Float_t         GenIsolatedPhoton_mass[nPhotonMax];
+    // Triggers from 2016
+    Bool_t          HLT_Photon250_NoHE;
+    Bool_t          HLT_Photon300_NoHE;
+    // Triggers from 2016
+    Bool_t          HLT_Photon22;
+    Bool_t          HLT_Photon30;
+    Bool_t          HLT_Photon36;
+    Bool_t          HLT_Photon50;
+    Bool_t          HLT_Photon75;
+    Bool_t          HLT_Photon90;
+    Bool_t          HLT_Photon120;
+    Bool_t          HLT_Photon175;
+    Bool_t          HLT_Photon165_HE10;
+    Bool_t          HLT_Photon22_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon30_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon36_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon50_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon75_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon90_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon120_R9Id90_HE10_IsoM;
+    Bool_t          HLT_Photon165_R9Id90_HE10_IsoM;
+    // Triggers and branches from 22-23
+    Bool_t          HLT_Photon100EBHE10;
+    Bool_t          HLT_Photon30EB_TightID_TightIso;
+    // Triggers and branches from 2018
+    Bool_t          HLT_Photon100EB_TightID_TightIso;
+    Bool_t          HLT_Photon110EB_TightID_TightIso;
+    Bool_t          HLT_Photon120EB_TightID_TightIso;
+    Bool_t          HLT_Photon200;
+    Bool_t          HLT_Photon20_HoverELoose;
+    Bool_t          HLT_Photon30_HoverELoose;
+    Bool_t          HLT_Photon150;
+    Bool_t          HLT_Photon33;
+    Bool_t          HLT_Photon20;
+    // Triggers from 2017
+    Bool_t          HLT_Photon40_HoverELoose;
+    Bool_t          HLT_Photon50_HoverELoose;
+    Bool_t          HLT_Photon60_HoverELoose;
 
+    //--------------------------------------- 
+    // Electron (for DiEleJet)
+    //--------------------------------------- 
+    UInt_t          nEle_;
+    Float_t         elePhi_[100];
+    Float_t         elePt_[100];
+    Float_t         eleEta_[100];
+    Float_t         eleDeltaEtaSC_[100];
+    Int_t           eleCharge_[100];
+    Float_t         eleMass_[100];
+    Int_t           eleID_[100];
+    Bool_t  HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;
+
+    UInt_t  nGenDressedLepton;
+    Float_t GenDressedLepton_pt[100];
+    Float_t GenDressedLepton_phi[100];
+    Float_t GenDressedLepton_mass[100];
+    Float_t GenDressedLepton_eta[100];
+    Int_t   GenDressedLepton_pdgId[100];
+
+    
+    //--------------------------------------- 
+    // Muon (for DiMuJet)
+    //--------------------------------------- 
+    UInt_t          nMuon_;
+    Float_t         muPhi_[100];
+    Float_t         muPt_[100];
+    Float_t         muEta_[100];
+    Int_t           muCharge_[100];
+    Float_t         muMass_[100];
+    Float_t         muPFRelIso_[100];
+    Float_t         muTkRelIso_[100];
+    Bool_t          muMediumId_[100];
+    Bool_t          muTightId_[100];
+    Bool_t          muHighPurity_[100];
+    Float_t         muDxy_[100];
+    Float_t         muDz_[100];
+    Bool_t  HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8;
+
+    Float_t         fixedGridRhoFastjetAll; // Run2,Run3
     //UInt_t          nTrigObj; // NanoV11,10
     //Int_t          nTrigObj; // NanoV12
     //Float_t         TrigObj_pt[nTrigObjMax];   //[nTrigObj]
@@ -181,60 +256,6 @@ class SkimTree{
     Bool_t          Flag_trkPOG_logErrorTooManyClusters;
     Bool_t          Flag_METFilters;
 
-    // Triggers from 2016
-    Bool_t          HLT_Photon250_NoHE;
-    Bool_t          HLT_Photon300_NoHE;
-
-    // Triggers from 2016
-    Bool_t          HLT_Photon22;
-    Bool_t          HLT_Photon30;
-    Bool_t          HLT_Photon36;
-    Bool_t          HLT_Photon50;
-    Bool_t          HLT_Photon75;
-    Bool_t          HLT_Photon90;
-    Bool_t          HLT_Photon120;
-    Bool_t          HLT_Photon175;
-    Bool_t          HLT_Photon165_HE10;
-    Bool_t          HLT_Photon22_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon30_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon36_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon50_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon75_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon90_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon120_R9Id90_HE10_IsoM;
-    Bool_t          HLT_Photon165_R9Id90_HE10_IsoM;
-
-    //Bool_t          HLT_HISinglePhoton10;
-    //Bool_t          HLT_HISinglePhoton15;
-    //Bool_t          HLT_HISinglePhoton20;
-    //Bool_t          HLT_HISinglePhoton40;
-    //Bool_t          HLT_HISinglePhoton60;
-    //Bool_t          HLT_EcalCalibration;
-    //Bool_t          HLT_HcalCalibration;
-
-    //Bool_t          HLT_Photon500;
-    //Bool_t          HLT_Photon600;
-
-    // Triggers and branches from 22-23
-    Bool_t          HLT_Photon100EBHE10;
-    Bool_t          HLT_Photon30EB_TightID_TightIso;
-    
-    // Triggers and branches from 2018
-    Bool_t          HLT_Photon100EB_TightID_TightIso;
-    Bool_t          HLT_Photon110EB_TightID_TightIso;
-    Bool_t          HLT_Photon120EB_TightID_TightIso;
-    Bool_t          HLT_Photon200;
-    Bool_t          HLT_Photon20_HoverELoose;
-    Bool_t          HLT_Photon30_HoverELoose;
-    Bool_t          HLT_Photon150;
-    Bool_t          HLT_Photon33;
-    Bool_t          HLT_Photon20;
-
-    // Triggers from 2017
-    Bool_t          HLT_Photon40_HoverELoose;
-    Bool_t          HLT_Photon50_HoverELoose;
-    Bool_t          HLT_Photon60_HoverELoose;
-
     // Extras for MC
     //UInt_t          nGenJet; // NanoV11,10
     Int_t          nGenJet; // NanoV12
@@ -245,12 +266,6 @@ class SkimTree{
     //Int_t           GenJet_partonFlavour[nGenJetMax]; //[nGenJet] // NanoV10,11
     Short_t         GenJet_partonFlavour[nGenJetMax]; //[nGenJet] // NanoV12
 
-    Int_t          nGenIsolatedPhoton;
-    Float_t         GenIsolatedPhoton_pt[nPhotonMax];
-    Float_t         GenIsolatedPhoton_eta[nPhotonMax];
-    Float_t         GenIsolatedPhoton_phi[nPhotonMax];
-    Float_t         GenIsolatedPhoton_mass[nPhotonMax];
-
     Float_t         LHE_HT;
     
     Float_t         genWeight;
@@ -259,13 +274,7 @@ class SkimTree{
     Int_t           nPSWeight; // NanoV12
     Float_t         PSWeight[nPSWeightMax];   //[nPSWeight]
 
-    // Code originally from jetphys/HistosFill.C
-    void PrintInfo(string info, bool printcout);
-    bool LoadJSON(string json);
-    void LoadPU();
-    std::map<int, std::map<int, int> > _json;
-    map<string, map<int, TH1D*> > _pu;
-    map<string, map<int, double> >  _lumi;
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
+    std::vector<std::string> splitString(const std::string& s, const std::string& delimiter);
 };
 #endif

@@ -4,9 +4,10 @@ import json
 import itertools
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.getcwd().replace("condor",""))
-from Inputs import vomsProxy
+from Inputs import *
 
 def createJobs(jsonFile, jdlFile, logDir="log"):
+    os.system(f"mkdir -p tmpSub/{logDir}")
     common_command = \
     'Universe   = vanilla\n\
     should_transfer_files = YES\n\
@@ -41,12 +42,19 @@ if __name__=="__main__":
     if os.path.exists("tmpSub"):
         os.system("rm -r tmpSub")
         print("Deleted dir: tmpSub")
-    os.system("mkdir -p tmpSub/log")
+    os.system("mkdir -p tmpSub")
     tarFile = "tmpSub/Skim.tar.gz"
     os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Skim"%tarFile)
     os.system("cp runMakeSkims.sh tmpSub/")
     print("Created dir: tmpSub")
-    jsonFile = open("../sample/FilesSkim_cff.json", "r")
-    jdlFile  = open('tmpSub/submitJobs_cff.jdl','w')
-    logDir   = "log"
-    createJobs(jsonFile, jdlFile, logDir)
+    submitAll = open("tmpSub/submitAll.sh", "w") 
+    for year, ch in itertools.product(Years, Channels):
+        outPath = f"{eosSkimDir}/{year}/{ch}"
+        os.system(f"mkdir -p {outPath}")
+        print(f"Created dir: {outPath}")
+        jsonFile = open(f"../input/json/FilesSkim_{year}_{ch}.json", "r")
+        jdlName  = f'submitJobs_{year}_{ch}.jdl'
+        jdlFile  = open(f'tmpSub/{jdlName}','w')
+        logDir   = "log"
+        createJobs(jsonFile, jdlFile, logDir)
+        submitAll.write(f'condor_submit {jdlName}\n')

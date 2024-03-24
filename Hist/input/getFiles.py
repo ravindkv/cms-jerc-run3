@@ -1,14 +1,15 @@
 import os
 import sys
 import json
+import itertools
 sys.dont_write_bytecode = True
-sys.path.insert(0, os.getcwd().replace("sample",""))
+sys.path.insert(0, os.getcwd().replace("input",""))
 from Inputs import *
 
 #Reduce number of condor jobs w.r.t Skim by a factor of rData and rMC
 def reducedJob(nJob, sKey):
-    rData   = 10
-    rMC     = 2
+    rData   = reduceJobsDataBy
+    rMC     = reduceJobsMCBy
     if "Data" in sKey:
         if nJob>rData:
             n = nJob/rData
@@ -23,15 +24,20 @@ def reducedJob(nJob, sKey):
 
 path = "/afs/cern.ch/work/r/rverma/public/jerc/CMSSW_13_3_0/src/cms-jerc-run3/Skim/sample"
 if __name__=="__main__":
-    os.system(f"cp  {path}/FilesSkim_cff.json .")
-    fSkim = open("FilesSkim_cff.json", "r")
-    jSkim = json.load(fSkim)
-    fHist = open("FilesHist_cff.json", "w")
-    dHist = {}
+    skimDir = "../../Skim/input/json/"
+    if not os.path.exists("json"):
+        os.makedirs("json")
     allJobs = 0
-    for year in Years:
-        print(f"{eosHistDir}/{year}")
-        os.system(f"mkdir -p {eosHistDir}/{year}")
+    for year, ch in itertools.product(Years, Channels):
+        skimFile = f"FilesSkim_{year}_{ch}.json"
+        os.system(f"cp  {skimDir}/{skimFile} json/")
+        
+        fSkim = open(f"json/{skimFile}", "r")
+        jSkim = json.load(fSkim)
+        fHist = open(f"json/FilesHist_{year}_{ch}.json", "w")
+        dHist = {}
+        os.system(f"mkdir -p {eosHistDir}/{year}/{ch}")
+        print(f"{eosHistDir}/{year}/{ch}")
         yJobs = 0
         for sKey in jSkim.keys():
             if year not in sKey:
@@ -41,11 +47,11 @@ if __name__=="__main__":
             yJobs = yJobs+nJob
             lHist = []
             for i in range(nJob):
-                lHist.append("%s/%s/%s__%sof%s.root"%(eosHistDir, year, sKey, i+1, nJob))
+                lHist.append("%s/%s/%s/%s_Hist_%sof%s.root"%(eosHistDir, year, ch, sKey, i+1, nJob))
             dHist[sKey] = lHist
-            print(f"{year}: {sKey}: nJob = {nJob}")
-        print(f"\n{year}: nJobs  = {yJobs}\n")
-    allJobs = allJobs + yJobs
+            print(f"{year}: {ch}: {sKey}: nJob = {nJob}")
+        print(f"\n{year} : {ch}: nJobs  = {yJobs}\n")
+        allJobs = allJobs + yJobs
     print(f"All jobs =  {allJobs}")
     json.dump(dHist, fHist, indent=4) 
     
