@@ -25,7 +25,10 @@
 
 class ObjectScale{
     public: 
-	ObjectScale();
+	ObjectScale(){
+        debug  = false;
+        isData = false;
+    };
     ~ObjectScale();
     void applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar);
 
@@ -35,11 +38,12 @@ class ObjectScale{
     string getJvName(TString oName);
     string getJvKey(TString oName);
     
-    bool isData = false;
     void PrintInfo(string info, bool printcout);
     std::map<int, std::map<int, int>> LoadJSON(string json);
     map<string, map<int, double> >  LoadLumi(std::vector<std::string> &eras, map<string, vector<string> > &trigs);
     map<string, map<int, TH1D*> > LoadPU(std::vector<std::string> &eras, map<string, vector<string> > &trigs);
+    
+    void setIsData(bool value);
 
     struct lumiInfo {
       double lum;
@@ -52,7 +56,8 @@ class ObjectScale{
     double getTruePU(map<int, map<int, lumiInfo> >_mus, int run, int ls, double *rms);
 
     private:
-    bool debug = false;//true;
+    bool debug ;
+    bool isData;
 };
 
 

@@ -13,7 +13,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
      //------------------------------------------------
      // Object scaling (=correction)
      //------------------------------------------------
-     if(oName.Contains("Data")) objS->isData = true;
+     //if(oName.Contains("Data")) objS->isData = true;
    
      //Jet energy resolution and correction
      auto jercJson  = correction::CorrectionSet::from_file("POG/JME/2022_Summer22/jet_jerc.json.gz");

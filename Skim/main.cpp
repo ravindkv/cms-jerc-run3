@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesNano_2023_GamJet.json";//default file
+    std::string fileDefault = "input/json/FilesNano_2022_GamJet.json";//default file
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -110,6 +110,7 @@ int main(int argc, char* argv[]){
     std::vector<std::string> fileNames;
     try{
         js.at(sKey).get_to(fileNames);
+        //fileNames.push_back("e5762711-8726-4523-8891-32efa9ddb381.root"); 
     }catch (const std::exception & e){
         cout<<"\nEXCEPTION: Check the sKey: "<<sKey<<endl;
         cout<<e.what()<<endl;
@@ -148,8 +149,6 @@ int main(int argc, char* argv[]){
 	std::string outDir = "output";
     mkdir(outDir.c_str(), S_IRWXU);
     cout << "new output file name: "<< outDir+"/"+oName << endl;
-	TFile* outFile = TFile::Open( outDir+"/"+oName ,"RECREATE");
-    outFile->cd();
 	TTree* newTree = tree->chain->GetTree()->CloneTree(0);
 	newTree->SetCacheSize(50*1024*1024);
 	Long64_t nEntr = tree->GetEntries();
@@ -194,29 +193,29 @@ int main(int argc, char* argv[]){
             tree->b_HLT_Photon150                                                     ->GetEntry(entry);
             tree->b_HLT_Photon175                                                     ->GetEntry(entry);
             tree->b_HLT_Photon200                                                     ->GetEntry(entry);
-            tree->b_HLT_Photon30EB_TightID_TightIso                                   ->GetEntry(entry);
-            tree->b_HLT_Photon100EB_TightID_TightIso                                  ->GetEntry(entry);
+            //tree->b_HLT_Photon30EB_TightID_TightIso                                   ->GetEntry(entry);
+            //tree->b_HLT_Photon100EB_TightID_TightIso                                  ->GetEntry(entry);
             tree->b_HLT_Photon110EB_TightID_TightIso                                  ->GetEntry(entry);
-            tree->b_HLT_Photon120EB_TightID_TightIso                                  ->GetEntry(entry);
+            //tree->b_HLT_Photon120EB_TightID_TightIso                                  ->GetEntry(entry);
             tree->b_HLT_Photon100EBHE10                                               ->GetEntry(entry);
-            tree->b_HLT_Photon100EEHE10                                               ->GetEntry(entry);
-            tree->b_HLT_Photon100EE_TightID_TightIso                                  ->GetEntry(entry);
+            //tree->b_HLT_Photon100EEHE10                                               ->GetEntry(entry);
+            //tree->b_HLT_Photon100EE_TightID_TightIso                                  ->GetEntry(entry);
             tree->b_HLT_Photon50_R9Id90_HE10_IsoM                                     ->GetEntry(entry);
             tree->b_HLT_Photon75_R9Id90_HE10_IsoM                                     ->GetEntry(entry);
-            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 ->GetEntry(entry);
-            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 ->GetEntry(entry);
+            //tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ300_PFJetsMJJ400DEta3 ->GetEntry(entry);
+            //tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_CaloMJJ400_PFJetsMJJ600DEta3 ->GetEntry(entry);
             tree->b_HLT_Photon90_R9Id90_HE10_IsoM                                     ->GetEntry(entry);
             tree->b_HLT_Photon120_R9Id90_HE10_IsoM                                    ->GetEntry(entry);
             tree->b_HLT_Photon165_R9Id90_HE10_IsoM                                    ->GetEntry(entry);
             tree->b_HLT_Photon35_TwoProngs35                                          ->GetEntry(entry);
-            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL                                  ->GetEntry(entry);
-            tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL                     ->GetEntry(entry);
+            //tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL                                  ->GetEntry(entry);
+            //tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL                     ->GetEntry(entry);
             tree->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350MinPFJet15   ->GetEntry(entry);
             tree->b_HLT_Photon20_HoverELoose                                          ->GetEntry(entry);
             tree->b_HLT_Photon30_HoverELoose                                          ->GetEntry(entry);
-            tree->b_HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50    ->GetEntry(entry);
+            //tree->b_HLT_Photon50_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3_PFMET50    ->GetEntry(entry);
             tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ->GetEntry(entry);
-            tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3            ->GetEntry(entry);
+            //tree->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3            ->GetEntry(entry);
 
 		    passTrig =
             tree->HLT_Photon300_NoHE                                                ||
@@ -396,6 +395,8 @@ int main(int argc, char* argv[]){
 		}
 	}
     std::cout<<"nEvents_Skim = "<<newTree->GetEntries()<<endl;
+	TFile* outFile = TFile::Open( outDir+"/"+oName ,"RECREATE");
+    outFile->cd();
     newTree->Write();
 	hEvents_->Write();
 	outFile->Close();

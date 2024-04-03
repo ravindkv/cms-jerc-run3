@@ -10,7 +10,7 @@
 #include <boost/algorithm/string.hpp>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesSkim_2023_DiEleJet.json";//default file
+    std::string fileDefault = "input/json/FilesSkim_2022_GamJet.json";//default file
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -131,7 +131,8 @@ int main(int argc, char* argv[]){
   std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
   tree = new SkimTree(oName, smallVectors[nthJob-1]); 
 
-  ObjectScale *objS;
+  ObjectScale *objS = new ObjectScale();
+  if(oName.Contains("Data")) objS->setIsData(true);
 
   std::string outDir = "output";
   mkdir(outDir.c_str(), S_IRWXU);
@@ -142,30 +143,34 @@ int main(int argc, char* argv[]){
   // Run to Fill GamJet Histos
   //--------------------------------------
   if(oName.Contains("GamJet")){
-    HistGamJet *gamJet;
+    cout<<"=======: Running GamJet :======="<<endl;
+    HistGamJet *gamJet = new HistGamJet();
     gamJet->Run(oName, tree, objS, fout);  
   }
   //--------------------------------------
   // Run to Fill DiEleJet Histos
   //--------------------------------------
-  //if(oName.Contains("DiEleJet")){
-    HistDiEleJet *diEleJet;
-    diEleJet->Run(oName, tree, objS, fout);  
-  //}
+  if(oName.Contains("DiEleJet")){
+    cout<<"=======: Running DiEleJet :======="<<endl;
+    //HistDiEleJet *diEleJet = new HistDiEleJet();
+    //diEleJet->Run(oName, tree, objS, fout);  
+  }
 
   //--------------------------------------
   // Run to Fill DiMuJet Histos
   //--------------------------------------
   if(oName.Contains("DiMuJet")){
-    //HistDiMuJet *diMuJet;
+    cout<<"=======: Running DiMuJet :======="<<endl;
+    //HistDiMuJet *diMuJet = new HistDiMuJet();
     //diMuJet->Run(oName, tree, objS, fout);  
   }
   //--------------------------------------
   // Run to Fill DiJet Histos
   //--------------------------------------
   if(oName.Contains("DiJet")){
-    HistDiJet *diJet;
-    diJet->Run(oName, tree, objS, fout);  
+    cout<<"=======: Running DiJet :======="<<endl;
+    //HistDiJet *diJet = new HistDiJet();
+    //diJet->Run(oName, tree, objS, fout);  
   }
 
   return 0;

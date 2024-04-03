@@ -1,23 +1,25 @@
-# Produce skim file from NanoAOD
+## Produce skim file from NanoAOD
 
-## Step-1: get input root files of samples from DAS
+### Step-1: get input root files of samples from DAS
 * cd input
 * python3 getFiles.py  
-* cd ..
 
-## Step-2: produce ONE skim file from nanofiles 
+Have a look at the files produced from the above command
+
+### Step-2: produce ONE skim file from nanofiles 
+* cd ..
 * make
-* ./runMakeSkim -h
+* ./makeSkim -h
 
 or 
-* ./runMakeSkim
+* ./makeSkim
 
-## Step-3: submit condor jobs to produce MANY skims 
+### Step-3: submit condor jobs to produce MANY skims 
 
 * cd condor
-* python createJdlFiles.py
+* python createJobFiles.py
 * cd tmpSub
-* condor_submit submitJobs_cff.jdl
+* source submitAll.sh
 
 Monitor the condor jobs on linux terminal
 * condor_q 
@@ -30,4 +32,4 @@ Once condor_q is DONE. Check the finished jobs
 This will open each file and perform many checks. It  will  create JDL files for the failed 
 jobs which can be resubmitted
 * cd tmpSub
-* condor_submit resub_submitJobs_cff.jdl
+* condor_submit resubJobs.jdl

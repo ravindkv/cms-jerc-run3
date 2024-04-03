@@ -88,9 +88,16 @@ public:
 
 class HistGamJet {
  public :
-    HistGamJet();
-    int Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fout);
+    HistGamJet(){
+        _gh_debug   = false;
+        _gh_debug100 = false;
+        doGamjet = true;
+        doGamjet2 = true;
+        smearJets = false;
+        debug = false;//true;
+    };
     ~HistGamJet();
+    int Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fout);
 
  private :
 
@@ -98,25 +105,24 @@ class HistGamJet {
     ObjectPick* objectPick;   
     //ObjectScale* objectScale;
 	
-    bool _gh_debug = false;
-    bool _gh_debug100 = false;
-
-    bool doGamjet = true;
-    bool doGamjet2 = true;
-    bool smearJets = false;
+    bool _gh_debug;
+    bool _gh_debug100;
+    bool doGamjet;
+    bool doGamjet2;
+    bool smearJets;
 
     // Error counters
-    int cntErrDR = 0;
-    bool            isQCD;
-    bool            isMG;
-    //string          dataset;
-    string          version;
-    string          _filename; // file name for debugging purposes
+    int cntErrDR;
+    bool    isQCD;
+    bool    isMG;
+    //string  dataset;
+    string  version;
+    string  _filename; // file name for debugging purposes
     static const bool debugFiles = true;
-    bool debug = false;//true;
+    bool debug;
     string systematicType;
 
-    int eventNum = -1;
+    int eventNum;
 
     bool isSystematicRun;
 

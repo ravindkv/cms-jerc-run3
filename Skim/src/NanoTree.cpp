@@ -6,8 +6,9 @@ NanoTree::NanoTree(TString oName, vector<string>fileNames){
     chain->SetCacheSize(100*1024*1024);
     bool isCopy = false;
     int nFiles = fileNames.size();
-    //string dir = "root://cms-xrd-global.cern.ch/";
-    string dir = "root://cmsxrootd.fnal.gov/";
+    string dir = "root://cms-xrd-global.cern.ch/";
+    //string dir = "root://cmsxrootd.fnal.gov/";
+    //string dir = "./"; 
     for(int fileI=0; fileI<nFiles; fileI++){
         string fName = fileNames[fileI];
         if(isCopy){

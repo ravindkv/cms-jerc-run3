@@ -8,11 +8,11 @@ SRCDIR   = src
 OBJDIR   = obj
 SOURCES     := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS     := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
-BINS        := runMakeHist
+BINS        := makeHist
 
-$(BINS): $(OBJECTS) MakeHist.C
+$(BINS): $(OBJECTS) main.cpp
 	@echo "--> Creating executables $@"
-	@$(GCC) -o $@ MakeHist.C ${CORR_A} ${ROOT_L} ${ROOT_I} $(OBJECTS)
+	@$(GCC) -o $@ main.cpp ${CORR_A} ${ROOT_L} ${ROOT_I} $(OBJECTS)
 
 $(OBJECTS): $(OBJDIR)/%.o : $(SRCDIR)/%.cpp header/%.h
 	@echo "--> Creating object $@"

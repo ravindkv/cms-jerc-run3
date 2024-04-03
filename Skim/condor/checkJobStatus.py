@@ -54,10 +54,10 @@ def checkJobs(jsonFile):
 # Open the skim files, check each of them and
 # create new job file for the failed jobs 
 #-------------------------------------------------
-logDir = "Resubmit_log"
+logDir = "resubLog"
 dResubs = {}
-fResub  = "tmpSub/Resubmit_FilesSkim.json"
-jdlFile_ = open('tmpSub/Resubmit_Jobs.jdl', 'w')
+fResub  = "tmpSub/resubFilesSkim.json"
+jdlFile_ = open('tmpSub/resubJobs.jdl', 'w')
 if os.path.exists(fResub):
     fResub_  = open(fResub, "r")
     jsonFile = json.load(fResub_)

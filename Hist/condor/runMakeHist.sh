@@ -4,8 +4,9 @@
 myArray=( "$@" )
 #Array: Size=$#, an element=$1, all element = $@
 
-printf "Start skimming at ";/bin/date
+printf "Start histograming at ";/bin/date
 printf "Worker node hostname ";/bin/hostname
+printf "Worker node OS " ; lsb_release -d
 
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then 
     echo "Running Interactively" ; 
@@ -17,7 +18,7 @@ else
     cd CMSSW_13_3_0/src
     eval `scramv1 runtime -sh`
     cd ../..
-	tar --strip-components=1 -zxf Skim.tar.gz
+	tar --strip-components=1 -zxf Hist.tar.gz
 fi
 
 #Run for Base, Signal region
@@ -25,19 +26,19 @@ echo "All arguements: "$@
 echo "Number of arguements: "$#
 oName=$1
 outDir=$2
-echo "./runMakeSkim -o oName"
-./runMakeSkim -o ${oName}
+echo "./makeHist -o oName"
+./makeHist -o ${oName}
 
-printf "Done skimming at ";/bin/date
+printf "Done histograming at ";/bin/date
 #---------------------------------------------
 #Copy the ouput root files
 #---------------------------------------------
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f output/${oName} ${outDir}
+    xrdcp -f ${oName} ${outDir}
     echo "Cleanup"
     rm -rf CMSSW*
-    rm output/*.root 
+    rm *.root 
 fi
 printf "Done ";/bin/date

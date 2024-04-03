@@ -1,13 +1,6 @@
 #include"ObjectScale.h"
 #include<iostream>
    
-   
-ObjectScale::ObjectScale(){
-}
-
-ObjectScale::~ObjectScale(){
-}
-  
 void ObjectScale::applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar){
        /*
    	TLorentzVector tMET;
@@ -396,3 +389,6 @@ double ObjectScale::getTruePU(map<int, map<int, ObjectScale::lumiInfo> > _mus, i
      return _mus[run][ls].muavg;
 }
    
+void ObjectScale::setIsData(bool value) {
+    isData = value;
+}

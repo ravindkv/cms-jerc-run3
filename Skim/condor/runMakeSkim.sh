@@ -6,7 +6,6 @@ myArray=( "$@" )
 
 printf "Start skimming at ";/bin/date
 printf "Worker node hostname ";/bin/hostname
-printf "Worker node OS " ; lsb_release -d
 
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then 
     echo "Running Interactively" ; 
@@ -18,7 +17,7 @@ else
     cd CMSSW_13_3_0/src
     eval `scramv1 runtime -sh`
     cd ../..
-	tar --strip-components=1 -zxf Hist.tar.gz
+	tar --strip-components=1 -zxf Skim.tar.gz
 fi
 
 #Run for Base, Signal region
@@ -26,8 +25,8 @@ echo "All arguements: "$@
 echo "Number of arguements: "$#
 oName=$1
 outDir=$2
-echo "./runGamHistosFill -o oName"
-./runGamHistosFill -o ${oName}
+echo "./makeSkim -o oName"
+./makeSkim -o ${oName}
 
 printf "Done skimming at ";/bin/date
 #---------------------------------------------
@@ -36,9 +35,9 @@ printf "Done skimming at ";/bin/date
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f ${oName} ${outDir}
+    xrdcp -f output/${oName} ${outDir}
     echo "Cleanup"
     rm -rf CMSSW*
-    rm *.root 
+    rm output/*.root 
 fi
 printf "Done ";/bin/date

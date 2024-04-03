@@ -1,23 +1,25 @@
-# Produce Histos file from Skim
+## Produce Histos file from Skim
 
-## Step-1: get list of Skim files
-* cd sample
+### Step-1: get list of Skim files
+* cd input
 * python3 getFiles.py  
-* cd ..
 
-## Step-2: produce ONE hist file from skim files 
+Have a look at the files produced from the above command
+
+### Step-2: produce ONE hist file from skim files 
+* cd ..
 * make
-* ./runGamHistosFill -h
+* ./makeHist -h
 
 or 
-* ./runGamHistosFill
+* ./makeHist
 
-## Step-3: submit condor jobs to produce MANY hist files 
+### Step-3: submit condor jobs to produce MANY hist files 
 
 * cd condor
-* python createJdlFiles.py
+* python createJobsFiles.py
 * cd tmpSub
-* condor_submit submitJobs_cff.jdl
+* source submitAll.sh
 
 Monitor the condor jobs on linux terminal
 * condor_q 
@@ -30,7 +32,7 @@ Once condor_q is DONE. Check the finished jobs
 This will open each file and perform many checks. It  will  create JDL files for the failed 
 jobs which can be resubmitted
 * cd tmpSub
-* condor_submit resub_submitJobs_cff.jdl
+* condor_submit resubJobs.jdl
 
 
 Once ALL jobs are finished, merge them:

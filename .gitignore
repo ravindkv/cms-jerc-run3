@@ -1,4 +1,4 @@
-Skim/runMakeSkim
+Skim/makeSkim
 Skim/obj
 Skim/output
 Skim/input/json
@@ -6,7 +6,7 @@ Skim/condor/tmpSub
 Skim/input/__pycache__
 Skim/condor/__pycache__
 
-Hist/runMakeHist
+Hist/makeHist
 Hist/obj
 Hist/output
 Hist/input/json

@@ -22,11 +22,9 @@ def reducedJob(nJob, sKey):
             n = 1
     return int(n)
 
-path = "/afs/cern.ch/work/r/rverma/public/jerc/CMSSW_13_3_0/src/cms-jerc-run3/Skim/sample"
 if __name__=="__main__":
     skimDir = "../../Skim/input/json/"
-    if not os.path.exists("json"):
-        os.makedirs("json")
+    os.system("mkdir -p json")
     allJobs = 0
     for year, ch in itertools.product(Years, Channels):
         skimFile = f"FilesSkim_{year}_{ch}.json"
