@@ -9,23 +9,24 @@
 #include <nlohmann/json.hpp>
 #include <boost/algorithm/string.hpp>
 
+using namespace std;
+
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesSkim_2022_GamJet.json";//default file
-    std::ifstream fileDefault_(fileDefault.c_str());
+    string fileDefault = "input/json/FilesSkim_2022_GamJet.json";//default file
+    ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
         js = nlohmann::json::parse(fileDefault_);
-    } catch (const std::exception& e) {
+    } catch (const exception& e) {
         cout<<"\nEXCEPTION: Check the input json fileDefault: "<<fileDefault<<endl;
         cout<<e.what()<<endl;
-        std::abort();
+        abort();
     }
-
     //--------------------------------
     // Parse command-line options
     //--------------------------------
     int opt;
-    std::string outName; //output Name
+    string outName; //output Name
     outName = js.begin().key()+"_Hist_1of100.root"; //defualt value
     while ((opt = getopt(argc, argv, "o:h")) != -1) {
         switch (opt) {
@@ -34,144 +35,97 @@ int main(int argc, char* argv[]){
                 break;
             case 'h':
                 cout<<"Default input json: "<<fileDefault<<endl;
-                std::cout << "Usage: ./runMakeHist -o sKey_Hist_1of100.root\n" << std::endl;
+                cout << "Usage: ./makeHist -o sKey_Hist_1of100.root\n" << endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
-                    std::cout << element.key() << std::endl;
+                    cout << element.key() << endl;
                 }
                 return 0;
             default:
-                std::cerr << "Invalid option" << std::endl;
+                cerr << "Invalid option" << endl;
                 return 1;
         }
     }
-    cout<<"--------------------------------------------"<<endl;
-    cout<<"Inputs: ./runMakeHist -o " <<outName<<endl;
-    cout<<"--------------------------------------------"<<endl;
-    // outName = sKey_Hist_nofN.root
-    std::string sKey;
-    std::string n;
-    std::string N;
-    SkimTree *tree; 
-    try{
-        std::vector<std::string> v_outName      = tree->splitString(outName, "_Hist_");
-        sKey = v_outName.at(0); 
-        std::cout << "sKey: " << sKey << std::endl;
-        std::string nofN_root   = v_outName.at(1); 
-        std::vector<std::string> v_nofN_root    = tree->splitString(nofN_root, ".root"); 
-        std::string nofN        = v_nofN_root.at(0); 
-        std::cout << "nofN: " << nofN << std::endl;
-        std::vector<std::string> v_nofN         = tree->splitString(nofN, "of"); 
-        n = v_nofN.at(0);
-        N = v_nofN.at(1);
-    }catch(const std::exception &e){
-        cout<<"\nEXCEPTION: Check the outName: "<<outName<<endl;
-        cout<<"outName format should be: DataOrMC_Year_Channel_Sample_Hist_nofN.rooot"<<endl;
-        cout<<"Run ./runMakeHist -h for more details"<<endl;
-        cout<<e.what()<<endl;
-        std::abort();
+    cout<<"\n./makeHist -o " <<outName<<endl;
+
+    cout<<"\n--------------------------------------"<<endl;
+    cout<<" Set and load SkimTree.cpp"<<endl;
+    cout<<"--------------------------------------"<<endl;
+    SkimTree *skimT = new SkimTree();
+    skimT->setInput(outName);
+    skimT->loadInput();
+    skimT->setInputJsonPath("input/json/");
+    skimT->loadInputJson();
+    skimT->loadJobFileNames();
+    skimT->loadTree();
+
+    TString oName = outName;
+    string outDir = "output";
+    mkdir(outDir.c_str(), S_IRWXU);
+    cout << "new output file name: "<< outDir+"/"+oName << endl;
+    TFile *fout = new TFile(outDir+"/"+oName, "RECREATE");
+    
+    cout<<"\n--------------------------------------"<<endl;
+    cout<<" Set and load ObjectScale.cpp"<<endl;
+    cout<<"--------------------------------------"<<endl;
+    ObjectScale *objS = new ObjectScale();
+    if(oName.Contains("2022")) objS->setIs22(true);
+    if(oName.Contains("2023")) objS->setIs23(true);
+    if(oName.Contains("2024")) objS->setIs24(true);
+    if(oName.Contains("Data")) objS->setIsData(true);
+
+    //Jet veto 
+    objS->setJetVetoKey(oName); 
+    objS->setJetVetoName(oName); 
+    objS->setJetVetoJsonPath(oName); 
+    objS->loadJetVetoRef(); 
+
+    //Jet L2L3 
+    objS->setJetL2L3Names(oName); 
+    objS->setJetL2L3JsonPath(oName); 
+    objS->loadJetL2L3Refs(); 
+
+    //Lumi
+    objS->setLumiJsonPath(oName); 
+    objS->loadLumiJson(); 
+
+    //PU Text
+    objS->setPuTextPath(oName); 
+    objS->setPuMinbXsec(69200);
+    objS->loadPuText(); 
+
+    //PU Hist
+    objS->setPuHistPath(oName); 
+    objS->setPuHistEras(oName); 
+    objS->setPuHistTrigs(oName); 
+    objS->loadPuHist(); 
+
+    cout<<"\n--------------------------------------"<<endl;
+    cout<<" Loop over events and fill Histos"<<endl;
+    cout<<"--------------------------------------"<<endl;
+    if(oName.Contains("GamJet")){
+      cout<<"==> Running GamJet"<<endl;
+      HistGamJet *gamJet = new HistGamJet();
+      gamJet->Run(oName, skimT, objS, fout);  
     }
 
-    int nthJob = std::stoi(n);
-    int totJob = std::stoi(N);
-    TString oName = outName;
-
-    //--------------------------------
-    // files to run for each job
-    //--------------------------------
-    std::string fileName;
-    std::string year = "2022";
-    if(oName.Contains("2023")) year = "2023";
-    std::string channel = tree->splitString(sKey, "_").at(2);
-    fileName = "input/json/FilesSkim_"+year+"_"+channel+".json";
-    cout<<"json: "<<fileName<<endl;
-    std::ifstream fileName_(fileName.c_str());
-    try{
-        js = nlohmann::json::parse(fileName_);
-    } catch (const std::exception& e) {
-        cout<<"\nEXCEPTION: Check the input json fileName: "<<fileName<<endl;
-        cout<<e.what()<<endl;
-        std::abort();
+    if(oName.Contains("DiEleJet")){
+      cout<<"==> Running DiEleJet"<<endl;
+      //HistDiEleJet *diEleJet = new HistDiEleJet();
+      //diEleJet->Run(oName, skimT, objS, fout);  
     }
     
-    std::vector<std::string> fileNames;
-    try{
-        js.at(sKey).get_to(fileNames);
-    }catch (const std::exception & e){
-        cout<<"\nEXCEPTION: Check the sKey: "<<sKey<<endl;
-        cout<<e.what()<<endl;
-        cout<<"Choose sKey from the following:"<<endl;
-        for (auto& element : js.items()) {
-            std::cout << element.key() << std::endl;
-        }
-        std::abort();
-    }
-    int nFiles  = fileNames.size();
-   
-    cout<<"Total files = "<<nFiles<<endl;
-    if (totJob > nFiles){
-        cout<<"Since totJob > nFiles, setting it to the nFiles, totJob = "<<nFiles<<endl;
-        totJob = nFiles;
-    }
-    if (nthJob > totJob){
-        cout<<"Error: Make sure nthJob < totJob"<<endl;
-        std::abort();
-    }
-	if (nthJob>0 && totJob>0){
-	    cout <<"jobs: " <<nthJob << " of " << totJob << endl;
-		cout << "Processing " << (1.*nFiles)/totJob << " files per job on average" << endl;
-	    cout << "new output file name: "<< oName << endl;
-	}
-    else{
-        cout<<"\n Error: Make sure nthJob > 0 and totJob > 0\n ";
-        std::abort();
+    if(oName.Contains("DiMuJet")){
+      cout<<"==> Running DiMuJet"<<endl;
+      //HistDiMuJet *diMuJet = new HistDiMuJet();
+      //diMuJet->Run(oName, skimT, objS, fout);  
     }
 
-
-  std::vector<std::vector<std::string>> smallVectors = tree->splitVector(fileNames, totJob);
-  tree = new SkimTree(oName, smallVectors[nthJob-1]); 
-
-  ObjectScale *objS = new ObjectScale();
-  if(oName.Contains("Data")) objS->setIsData(true);
-
-  std::string outDir = "output";
-  mkdir(outDir.c_str(), S_IRWXU);
-  cout << "new output file name: "<< outDir+"/"+oName << endl;
-  TFile *fout = new TFile(outDir+"/"+oName, "RECREATE");
-  
-  //--------------------------------------
-  // Run to Fill GamJet Histos
-  //--------------------------------------
-  if(oName.Contains("GamJet")){
-    cout<<"=======: Running GamJet :======="<<endl;
-    HistGamJet *gamJet = new HistGamJet();
-    gamJet->Run(oName, tree, objS, fout);  
-  }
-  //--------------------------------------
-  // Run to Fill DiEleJet Histos
-  //--------------------------------------
-  if(oName.Contains("DiEleJet")){
-    cout<<"=======: Running DiEleJet :======="<<endl;
-    //HistDiEleJet *diEleJet = new HistDiEleJet();
-    //diEleJet->Run(oName, tree, objS, fout);  
-  }
-
-  //--------------------------------------
-  // Run to Fill DiMuJet Histos
-  //--------------------------------------
-  if(oName.Contains("DiMuJet")){
-    cout<<"=======: Running DiMuJet :======="<<endl;
-    //HistDiMuJet *diMuJet = new HistDiMuJet();
-    //diMuJet->Run(oName, tree, objS, fout);  
-  }
-  //--------------------------------------
-  // Run to Fill DiJet Histos
-  //--------------------------------------
-  if(oName.Contains("DiJet")){
-    cout<<"=======: Running DiJet :======="<<endl;
-    //HistDiJet *diJet = new HistDiJet();
-    //diJet->Run(oName, tree, objS, fout);  
-  }
+    if(oName.Contains("DiJet")){
+      cout<<"==> Running DiJet"<<endl;
+      //HistDiJet *diJet = new HistDiJet();
+      //diJet->Run(oName, skimT, objS, fout);  
+    }
 
   return 0;
 }

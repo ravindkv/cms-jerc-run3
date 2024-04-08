@@ -1,16 +1,98 @@
 #include<iostream>
 #include "SkimTree.h"
 
-SkimTree::SkimTree(TString oName, vector<string>fileNames){
-    fChain = new TChain("Events");
-    std::cout << "\nINFO: SkimTree::SkimTree()" << std::endl;
+void SkimTree::setInput(string oName){
+    iName  = oName;
+    cout<<"+ setInput() = "<<iName<<endl;
+} 
+void SkimTree::loadInput(){
+    cout<<"==> loadInput()"<<endl;
+    try{
+        std::vector<std::string> v_iName      = splitString(iName, "_Hist_");
+        loadedSampKey = v_iName.at(0); 
+        std::cout << "loadedSampKey: " << loadedSampKey << std::endl;
+        std::string nofN_root   = v_iName.at(1); 
+        std::vector<std::string> v_nofN_root    = splitString(nofN_root, ".root"); 
+        std::string nofN        = v_nofN_root.at(0); 
+        std::cout << "nofN: " << nofN << std::endl;
+        std::vector<std::string> v_nofN         = splitString(nofN, "of"); 
+        loadedNthJob = std::stoi(v_nofN.at(0));
+        loadedTotJob = std::stoi(v_nofN.at(1));
+    }catch(const std::exception &e){
+        cout<<"\nEXCEPTION: Check the iName_: "<<iName<<endl;
+        cout<<"iName format should be: DataOrMC_Year_Channel_Sample_Hist_nofN.rooot"<<endl;
+        cout<<"Run ./runMakeHist -h for more details"<<endl;
+        cout<<e.what()<<endl;
+        std::abort();
+    }
+} 
+void SkimTree::setInputJsonPath(string inDir){
+    string year = "2022";
+    TString oN = iName;
+    if(oN.Contains("2023")) year = "2023";
+    string channel = splitString(loadedSampKey, "_").at(2);
+    inputJsonPath = inDir+"/FilesSkim_"+year+"_"+channel+".json";
+    cout<<"+ setInputJsonPath() = "<<inputJsonPath<<endl;
+}
+
+void SkimTree:: loadInputJson(){
+    cout<<"==> loadInputJson()"<<endl;
+    ifstream fileName_(inputJsonPath.c_str());
+    nlohmann::json js;
+    try{
+        js = nlohmann::json::parse(fileName_);
+    } catch (const exception& e) {
+        cout<<"\nEXCEPTION: Check the input json inputJsonPath: "<<inputJsonPath<<endl;
+        cout<<e.what()<<endl;
+        abort();
+    }
+    try{
+        js.at(loadedSampKey).get_to(loadedAllFileNames);
+    }catch (const exception & e){
+        cout<<"\nEXCEPTION: Check the loadedSampKey: "<<loadedSampKey<<endl;
+        cout<<e.what()<<endl;
+        cout<<"Choose loadedSampKey from the following:"<<endl;
+        for (auto& element : js.items()) {
+            cout << element.key() << endl;
+        }
+        abort();
+    }//
+}
+
+void SkimTree::loadJobFileNames(){
+    cout<<"==> loadJobFileNames()"<<endl;
+    int nFiles  = loadedAllFileNames.size();
+    cout<<"Total files = "<<nFiles<<endl;
+    if (loadedTotJob > nFiles){
+        cout<<"Since loadedTotJob > nFiles, setting it to the nFiles, loadedTotJob = "<<nFiles<<endl;
+        loadedTotJob = nFiles;
+    }
+    if (loadedNthJob > loadedTotJob){
+        cout<<"Error: Make sure loadedNthJob < loadedTotJob"<<endl;
+        std::abort();
+    }
+	if (loadedNthJob>0 && loadedTotJob>0){
+	    cout <<"jobs: " <<loadedNthJob << " of " << loadedTotJob << endl;
+		cout << (1.*nFiles)/loadedTotJob << " files per job on average" << endl;
+	}
+    else{
+        cout<<"\n Error: Make sure loadedNthJob > 0 and loadedTotJob > 0\n ";
+        std::abort();
+    }
+    std::vector<std::vector<std::string>> smallVectors = splitVector(loadedAllFileNames, loadedTotJob);
+    loadedJobFileNames = smallVectors[loadedNthJob-1];
+}
+
+void SkimTree::loadTree(){
+    cout<<"==> loadTree()"<<endl;
+    TString oN = iName;
     fChain->SetCacheSize(100*1024*1024);
-    int nFiles = fileNames.size();
+    int nFiles = loadedJobFileNames.size();
     //string dir = "root://cms-xrd-global.cern.ch/";
     //string dir = "root://cmsxrootd.fnal.gov/";
     string dir = "";
     for(int fileI=0; fileI<nFiles; fileI++){
-        string fName = fileNames[fileI];
+        string fName = loadedJobFileNames[fileI];
         fChain->Add( (dir + fName).c_str());
         cout << dir+fName << "  " << fChain->GetEntries() << endl;
     }
@@ -19,10 +101,10 @@ SkimTree::SkimTree(TString oName, vector<string>fileNames){
 	fChain->SetBranchAddress("luminosityBlock", &luminosityBlock);
 	fChain->SetBranchAddress("event", &event);
 
-	if(oName.Contains("2022")) is22 = true;
-	if(oName.Contains("2023")) is23 = true;
+	if(oN.Contains("2022")) is22 = true;
+	if(oN.Contains("2023")) is23 = true;
 	if(is22 || is23) isRun3 = true;
-	if(!oName.Contains("Data")) isMC = true;
+	if(!oN.Contains("Data")) isMC = true;
 
     //--------------------------------------- 
     //Jet for all channels 
@@ -55,7 +137,7 @@ SkimTree::SkimTree(TString oName, vector<string>fileNames){
     //--------------------------------------- 
     // Photon (for GamJet)
     //--------------------------------------- 
-	if(oName.Contains("GamJet")){
+	if(oN.Contains("GamJet")){
 		fChain->SetBranchAddress("nPhoton", &nPhoton);
 		fChain->SetBranchAddress("Photon_eCorr", &Photon_eCorr);
 		fChain->SetBranchAddress("Photon_energyErr", &Photon_energyErr);
@@ -96,7 +178,7 @@ SkimTree::SkimTree(TString oName, vector<string>fileNames){
     //--------------------------------------- 
     // Electron (for DiEleJet)
     //--------------------------------------- 
-	if(oName.Contains("DiEleJet")){
+	if(oN.Contains("DiEleJet")){
 		//status
 		fChain->SetBranchStatus("nElectron",1);
 		fChain->SetBranchStatus("Electron_*",1);
@@ -122,7 +204,7 @@ SkimTree::SkimTree(TString oName, vector<string>fileNames){
     //--------------------------------------- 
     // Muon (for DiMuJet)
     //--------------------------------------- 
-    if (oName.Contains("DiMuJet")){
+    if (oN.Contains("DiMuJet")){
 		//status
 		fChain->SetBranchStatus("nMuon",1);
 		fChain->SetBranchStatus("Muon_*",1);
@@ -211,7 +293,7 @@ SkimTree::SkimTree(TString oName, vector<string>fileNames){
      if (is22 || is23)
        fChain->SetBranchAddress("LHE_HT", &LHE_HT);
 
-     if (!oName.Contains("QCD")) {
+     if (!oN.Contains("QCD")) {
        fChain->SetBranchAddress("nGenIsolatedPhoton", &nGenIsolatedPhoton);
        fChain->SetBranchAddress("GenIsolatedPhoton_eta", &GenIsolatedPhoton_eta);
        fChain->SetBranchAddress("GenIsolatedPhoton_mass", &GenIsolatedPhoton_mass);
@@ -251,6 +333,9 @@ std::vector<std::string> SkimTree::splitString(const std::string& s, const std::
     tokens.push_back(s.substr(start)); // Last token
     
     return tokens;
+}
+
+SkimTree::SkimTree(){
 }
 
 SkimTree::~SkimTree(){

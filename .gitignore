@@ -20,4 +20,6 @@ Hist/mikko
 Hist/pileup
 Hist/rootfiles
 
+Hist/Logger.h
+Hist/Logger.cpp
 Fit

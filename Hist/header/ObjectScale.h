@@ -1,63 +1,104 @@
 #ifndef OBJECTSCALE_H
 #define OBJECTSCALE_H
         
-#include<vector>
+#include <set>
 #include<iostream>
-#include<algorithm>
-#include<TH1F.h>
-#include<TMath.h>
-#include<TLorentzVector.h>
+#include <fstream>
+
 #include "SkimTree.h"
 #include "correction.h"
 
-#include "TH1D.h"
+#include "TH2D.h"
 #include "TRandom.h"
 #include "TCanvas.h"
-#include "TH2D.h"
-#include "TChain.h"
-#include "TFile.h"
-
-#include <fstream>
-#include <iostream>
-#include <map>
-#include <set>
-#include <utility> // std::pair
 
 class ObjectScale{
     public: 
-	ObjectScale(){
-        debug  = false;
-        isData = false;
-    };
-    ~ObjectScale();
-    void applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar);
+        ObjectScale(){
+            is22   = false;
+            is23   = false;
+            is24   = false;
+            isData = false;
+            debug  = false;
+            jetVetoKey      ="jetvetomap";
+            jetVetoName     = "Winter22Run3_RunCD_V1";
+            jetL2L3JsonPath = "./jet_jerc.json";
+            jetVetoJsonPath = "./jetvetomaps.json";
+            jetL2L3Names    = {};
+            lumiJsonPath    = "./Cert_Collisions2022_355100_362760_Golden.json";
+            puTextPath      = "./pileup_ASCII_UL16-UL18.txt";
+            minbXsec        = 69200;
+            puHistPath      = "pileup.root";
+            puHistEras      = {};
+            puHistTrigs     = {};
+        };
+        ~ObjectScale();
+        struct lumiInfo {
+          double lum;
+          double muavg;
+          double murms;
+          lumiInfo(double lum_=0, double muavg_=0, double murms_=0)
+            : lum(lum_), muavg(muavg_), murms(murms_) {};
+        };
+        // Year, Data
+        bool is22;
+        bool is23;
+        bool is24;
+        bool isData;
+        void setIs22(bool value);
+        void setIs23(bool value);
+        void setIs24(bool value);
+        void setIsData(bool value);
+        
+        // Jet veto
+        string jetVetoKey;
+        string jetVetoName;
+        string jetVetoJsonPath;
+        void setJetVetoKey(TString oName);
+        void setJetVetoName(TString oName);
+        void setJetVetoJsonPath(TString oName);
+        void loadJetVetoRef();
+        correction::Correction::Ref loadedJetVetoRef;
 
-    // Jet energy scale: (L2L3)
-    vector<string> getL2L3Names(TString oName);
-    // Jet veto
-    string getJvName(TString oName);
-    string getJvKey(TString oName);
-    
-    void PrintInfo(string info, bool printcout);
-    std::map<int, std::map<int, int>> LoadJSON(string json);
-    map<string, map<int, double> >  LoadLumi(std::vector<std::string> &eras, map<string, vector<string> > &trigs);
-    map<string, map<int, TH1D*> > LoadPU(std::vector<std::string> &eras, map<string, vector<string> > &trigs);
-    
-    void setIsData(bool value);
+        // Jet L2L3
+        vector<string> jetL2L3Names;
+        string jetL2L3JsonPath;
+        void setJetL2L3Names(TString oName);
+        void setJetL2L3JsonPath(TString oName);
+        void loadJetL2L3Refs();
+        vector<correction::Correction::Ref> loadedJetL2L3Refs;
 
-    struct lumiInfo {
-      double lum;
-      double muavg;
-      double murms;
-      lumiInfo(double lum_=0, double muavg_=0, double murms_=0)
-        : lum(lum_), muavg(muavg_), murms(murms_) {};
-    };
-    map<int, map<int, lumiInfo> > parsePileUpJSON(string filename, string json, double minbXsec);
-    double getTruePU(map<int, map<int, lumiInfo> >_mus, int run, int ls, double *rms);
+        // Lumi
+        void PrintInfo(string info, bool printcout);
+        string lumiJsonPath;
+        void setLumiJsonPath(TString oName);
+        void loadLumiJson();
+        std::map<int, std::map<int, int>> loadedLumiJson;
+
+        // Pileup Text
+        string puTextPath;
+        void setPuTextPath(TString oName);
+        void setPuMinbXsec(double xsec);
+        void loadPuText();
+        map<int, map<int, lumiInfo> > loadedPuText;
+        double getTruePU(int run, int ls, double *rms);
+
+        // Pileup Hist
+        string puHistPath;
+        std::vector<std::string> puHistEras;
+        map<string, vector<string> > puHistTrigs;
+        void setPuHistPath(TString oName);
+        void setPuHistEras(TString oName);
+        void setPuHistTrigs(TString oName);
+        void loadPuHist();
+        map<string, map<int, TH1D*> >  loadedPuHist;
+        map<string, map<int, double> > loadedPuLumi;
+    
+        void applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar);
 
     private:
-    bool debug ;
-    bool isData;
+        bool debug;
+        double minbXsec;
 };
 
 

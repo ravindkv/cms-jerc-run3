@@ -10,31 +10,9 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
      int _nbadevents_veto(0);
      
      bool isPrint = false;
-     //------------------------------------------------
-     // Object scaling (=correction)
-     //------------------------------------------------
-     //if(oName.Contains("Data")) objS->isData = true;
    
-     //Jet energy resolution and correction
-     auto jercJson  = correction::CorrectionSet::from_file("POG/JME/2022_Summer22/jet_jerc.json.gz");
-     vector<string> l2l3Names = objS->getL2L3Names(oName);
-     vector<correction::Correction::Ref> l2l3Refs;
-     for(auto name: l2l3Names) l2l3Refs.push_back(jercJson->at(name));
-   
-     //Jet veto maps
-     auto jvJson   = correction::CorrectionSet::from_file("POG/JME/2022_Prompt/jetvetomaps.json.gz");
-     string jvName = objS->getJvName(oName);
-     string jvKey  = objS->getJvKey(oName);
-     correction::Correction::Ref jvRef = jvJson->at(jvName);
-   
-     //PU
-   
-   
-     cout<<"AA"<<endl;
      string dataset = "2022C"; 
-     cout<<"AA0"<<endl;
      string& ds = dataset;
-     cout<<"AA1"<<endl;
      // Select appropriate L1RC for type-I MET L1L2L3-RC calculation
      string sera("");
      cout<<"AA2"<<endl;
@@ -63,43 +41,8 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        sera = "2023";
      assert(sera!="");
    
-     cout<<"BB"<<endl;
-     // Load JSON files
-     std::string jsonName;
-     std::map<int, std::map<int, int>> jsonLoaded;
-     if (TString(ds.c_str()).Contains("2016"))
-       jsonName = "files/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt";
-     if (TString(ds.c_str()).Contains("2017"))
-       jsonName = "files/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt";
-     if (TString(ds.c_str()).Contains("2018"))
-       jsonName = "files/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt";
-     if (TString(ds.c_str()).Contains("2022"))
-       jsonName = "files/Cert_Collisions2022_355100_362760_Golden.json";
-     if (TString(ds.c_str()).Contains("2023"))
-       jsonName = "files/Cert_Collisions2023_366442_370790_Golden.json";
-     
-       jsonLoaded = objS->LoadJSON(jsonName);
-     //Cert_Collisions2023_370354_370790_Golden.json");
-   
-     // Load pileup JSON
-     map<int, map<int, ObjectScale::lumiInfo> > puParsed;
-     puParsed = objS->parsePileUpJSON("files/pileup_ASCII_UL16-UL18.txt", "", 69200);
-   
-     cout<<"CC"<<endl;
-     // Load pileup profiles
-   
      
      cout<<"DD"<<endl;
-       std::vector<std::string> eras;
-       eras.push_back("2022");
-       eras.push_back("2023");
-       map<string, vector<string> > trigs;
-       trigs["2022"].push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
-       //trigs["2023"] = trigs["2022"];
-       map<string, map<int, TH1D*> > puLoaded = objS->LoadPU(eras, trigs);
-   
-       map<string, map<int, double> >  lumiLoaded;
-       lumiLoaded = objS->LoadLumi(eras, trigs);
    
      // Setup B and C tagging thresholds according to Z+jet settings (Sami)
      double bthr(0.7527), cthr(0.3985), frac(0.5);
@@ -922,7 +865,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        assert(tree->nPSWeight<=tree->nPSWeightMax);
    
        // Does the run/LS pass the latest JSON selection?
-       if (!tree->isMC && jsonLoaded[tree->run][tree->luminosityBlock]==0) {
+       if (!tree->isMC && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
          //_badjson.insert(pair<int, int>(run, lbn));
          ++_nbadevents_json;
          continue;
@@ -1151,7 +1094,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        
        // Pileup
        double TruePUrms(0);
-       if (!tree->isMC) tree->Pileup_nTrueInt = objS->getTruePU(puParsed, tree->run,tree->luminosityBlock,&TruePUrms);
+       if (!tree->isMC) tree->Pileup_nTrueInt = objS->getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
        double ptZ = Z.Pt();
    
        // Trigger selection. Take care to match pT bin edges
@@ -1213,9 +1156,9 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    
        // Reweight MC pileup (except for 22-23)
        if (tree->isMC && pass_trig && !tree->isRun3) {
-         TH1D *hm = puLoaded[dataset][1]; assert(hm);
-         TH1D *hd = puLoaded[sera][itrg];
-         if (!hd) cout << "Missing puLoaded[sera="<<sera<<"][itrg="<<itrg<<"]"
+         TH1D *hm = objS->loadedPuHist[dataset][1]; assert(hm);
+         TH1D *hd = objS->loadedPuHist[sera][itrg];
+         if (!hd) cout << "Missing objS->loadedPuHist[sera="<<sera<<"][itrg="<<itrg<<"]"
    		    << endl << flush;
          assert(hd);
          assert(hm->GetNbinsX()==hd->GetNbinsX());
@@ -1229,7 +1172,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        }
        // Normalize data luminosity (except for 22-23)
        if (!tree->isMC && pass_trig && !tree->isRun3) {
-         double lumi = lumiLoaded[sera][itrg];
+         double lumi = objS->loadedPuLumi[sera][itrg];
          assert(lumi>0);
          w *= 1./lumi;
        }
@@ -1256,7 +1199,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
            double rawJetMass = tree->Jet_mass[i] * (1.0 - tree->Jet_rawFactor[i]);
            double corrs = 1.0;
            if(isPrint)cout<<"---: Jet correction :---"<<endl;
-           for(auto l2l3Ref:l2l3Refs){
+           for(auto l2l3Ref:objS->loadedJetL2L3Refs){
                try{ 
                    auto corr = l2l3Ref->evaluate({tree->Jet_eta[i],rawJetPt}); 
                    corrs    = corr*corrs;
@@ -1496,13 +1439,13 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
          //------------------------------------------------
          bool pass_veto = true;
          try{ 
-             auto jvNumber= jvRef->evaluate({jvKey, jet.Eta(), jet.Phi()});
+             auto jvNumber= objS->loadedJetVetoRef->evaluate({objS->jetVetoKey, jet.Eta(), jet.Phi()});
              if(jvNumber>0){
                ++_nbadevents_veto;
                pass_veto = false;
              }
          } catch (const std::exception& e) {
-             cout<<"\nEXCEPTION: in jvRef: "<<e.what()<<endl;
+             cout<<"\nEXCEPTION: in objS->loadedJetVetoRef: "<<e.what()<<endl;
              std::abort();
          }
        

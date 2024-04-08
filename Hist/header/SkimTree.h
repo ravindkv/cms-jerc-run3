@@ -5,6 +5,8 @@
 #include<TTree.h>
 #include<TChain.h>
 #include<TH1D.h>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 #include<vector>
 
@@ -13,11 +15,10 @@ const Int_t maxP = 600;
 
 class SkimTree{
  public:
-    SkimTree(TString oName, vector<string>fileNames); 
+    SkimTree(); 
     ~SkimTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
-    TChain          *fChain;   //!pointer to the analyzed TTree or TChain
     Int_t           fCurrent; //!current Tree number in a TChain
 
     int             isMC;     // data=0, PythiaPtFlat=1, MadGraphHT=2
@@ -258,7 +259,7 @@ class SkimTree{
 
     // Extras for MC
     //UInt_t          nGenJet; // NanoV11,10
-    Int_t          nGenJet; // NanoV12
+    Int_t           nGenJet; // NanoV12
     Float_t         GenJet_eta[nGenJetMax];   //[nGenJet]
     Float_t         GenJet_mass[nGenJetMax];   //[nGenJet]
     Float_t         GenJet_phi[nGenJetMax];   //[nGenJet]
@@ -274,7 +275,28 @@ class SkimTree{
     Int_t           nPSWeight; // NanoV12
     Float_t         PSWeight[nPSWeightMax];   //[nPSWeight]
 
+    //Inputs
+    string iName;
+    void setInput(string oName);
+    void loadInput();
+    string loadedSampKey = "MC_Year_Channel_Name";
+    int loadedNthJob = 1;
+    int loadedTotJob =100;
+
+    //Inputs json
+    string inputJsonPath = "./FilesSkim_2022_GamJet.json";
+    void setInputJsonPath(string inDir); 
+    void loadInputJson();
+    vector<string> loadedAllFileNames;
+
+    //Skim files and tree
+    vector<string> loadedJobFileNames;
+    void loadJobFileNames();
+    TChain *fChain = new TChain("Events");   
+    void loadTree();
+    
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
     std::vector<std::string> splitString(const std::string& s, const std::string& delimiter);
+
 };
 #endif

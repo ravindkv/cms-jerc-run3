@@ -2,11 +2,13 @@
 #define SKIMTREE_H
 
 #include<iostream>
+#include <fstream>
 #include<TFile.h>
 #include<TTree.h>
 #include<TChain.h>
 #include<TMath.h>
 #include <map>
+#include <nlohmann/json.hpp>
 
 #include<vector>
 
@@ -15,11 +17,10 @@ const Int_t maxP = 600;
 
 class NanoTree{
  public:
-    NanoTree(TString oName, vector<string> fileNames);
+    NanoTree();
     ~NanoTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
-    TChain* chain;
     
     UInt_t    run_;
     ULong64_t event_;
@@ -182,6 +183,25 @@ class NanoTree{
     Bool_t HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8 = false; 
     TBranch *b_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8; 
 
+    //Inputs
+    string iName;
+    void setInput(string oName);
+    void loadInput();
+    string loadedSampKey = "MC_Year_Channel_Name";
+    int loadedNthJob = 1;
+    int loadedTotJob =100;
+
+    //Inputs json
+    string inputJsonPath = "./FilesNano_2022_GamJet.json";
+    void setInputJsonPath(string inDir); 
+    void loadInputJson();
+    vector<string> loadedAllFileNames;
+
+    //Nano files and tree
+    vector<string> loadedJobFileNames;
+    void loadJobFileNames();
+    TChain *fChain = new TChain("Events");   
+    void loadTree();
     std::vector<std::vector<std::string>> splitVector(const std::vector<std::string>& strings, int n);
     std::vector<std::string> splitString(const std::string& s, const std::string& delimiter);
 
