@@ -847,7 +847,9 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        if (jentry%10000==0) cout << "." << flush;
        ++nlap;
    
-       tree->GetEntry(jentry);
+       Long64_t ientry = tree->loadEntry(jentry);
+       if (ientry < 0) break; 
+       tree->fChain->GetTree()->GetEntry(ientry);
         if(tree->HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ){
    	        ++_nbadevents_trigger;
    	        continue;

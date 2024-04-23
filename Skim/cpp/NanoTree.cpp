@@ -103,6 +103,10 @@ void NanoTree::loadTree(){
             cout << singleFile << "  " << fChain->GetEntries() << endl;
         }
         else{
+            std::filesystem::path filePath = "/eos/cms/" + fName;
+            if (std::filesystem::exists(filePath)) {
+    			dir = "/eos/cms/"; 
+			}
             fChain->Add( (dir + fName).c_str());
             cout << dir+fName << "  " << fChain->GetEntries() << endl;
         }
@@ -127,10 +131,12 @@ void NanoTree::loadTree(){
     fChain->SetBranchStatus("Jet_neHEF" ,1);
     fChain->SetBranchStatus("Jet_phi"   ,1);
     fChain->SetBranchStatus("Jet_pt"    ,1);
-    fChain->SetBranchStatus("Jet_qgl",1);
     fChain->SetBranchStatus("Jet_rawFactor",1);
     fChain->SetBranchStatus("Jet_jetId",1);
     fChain->SetBranchStatus("Jet_area",1);
+    if(oN.Contains("2023")){ 
+        fChain->SetBranchStatus("Jet_qgl",1);
+    }
     fChain->SetBranchStatus("nJet",1);
 
     //common branches
@@ -187,11 +193,9 @@ void NanoTree::loadTree(){
     // Photon (for GamJet)
     //--------------------------------------- 
     if(oN.Contains("GamJet")){
-   		fChain->SetBranchStatus("Photon_eCorr",1); 
    		fChain->SetBranchStatus("Photon_energyErr",1);
    		fChain->SetBranchStatus("Photon_eta",1);
    		fChain->SetBranchStatus("Photon_hoe",1);
-   		fChain->SetBranchStatus("Photon_mass",1);
    		fChain->SetBranchStatus("Photon_phi",1);
    		fChain->SetBranchStatus("Photon_pt",1);
    		fChain->SetBranchStatus("Photon_r9",1);
@@ -199,6 +203,10 @@ void NanoTree::loadTree(){
    		fChain->SetBranchStatus("Photon_jetIdx",1);
    		fChain->SetBranchStatus("Photon_seedGain",1);
         fChain->SetBranchStatus("nPhoton",1);
+        if(oN.Contains("2023")){ 
+   		    fChain->SetBranchStatus("Photon_eCorr",1); 
+   		    fChain->SetBranchStatus("Photon_mass",1);
+        }
         fChain->SetBranchStatus("HLT_Photon*", 1);
     	if (oN.Contains("MC")){
             fChain->SetBranchStatus("GenIsolatedPhoton_*",1);
@@ -286,6 +294,7 @@ void NanoTree::loadTree(){
 		fChain->SetBranchStatus("Electron_phi", 1);
 		fChain->SetBranchStatus("Electron_mass", 1);
 		fChain->SetBranchStatus("Electron_cutBased", 1);
+		fChain->SetBranchStatus("Electron_seedGain", 1);
         fChain->SetBranchStatus("nElectron",1);
         fChain->SetBranchStatus("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ*", 1);
     	if (oN.Contains("MC")){
@@ -348,6 +357,7 @@ void NanoTree::loadTree(){
 }
 
 NanoTree::NanoTree(){
+    fCurrent  = -1;
 }
 NanoTree::~NanoTree(){
     delete fChain;
@@ -359,6 +369,19 @@ Long64_t NanoTree::GetEntries(){
 
 Int_t NanoTree::GetEntry(Long64_t entry){
     return fChain->GetEntry(entry);
+}
+
+Long64_t NanoTree::loadEntry(Long64_t entry)                                  
+{                                                                              
+// Set the environment to read one entry                                                  
+   if (!fChain) return -5;                                                     
+   Long64_t centry = fChain->LoadTree(entry);                                  
+   if (centry < 0) return centry;                                              
+   if (fChain->GetTreeNumber() != fCurrent) {                                  
+      fCurrent = fChain->GetTreeNumber();                                      
+   }                                                                           
+   //cout<<entry<<", "<<centry<<", "<<fCurrent<<endl;
+   return centry;                                                              
 }
 
 std::vector<std::vector<std::string>> NanoTree::splitVector(const std::vector<std::string>& strings, int n) {

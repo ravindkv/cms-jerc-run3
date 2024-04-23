@@ -54,10 +54,14 @@ int main(int argc, char* argv[]){
     SkimTree *skimT = new SkimTree();
     skimT->setInput(outName);
     skimT->loadInput();
+    cout<<endl;
     skimT->setInputJsonPath("input/json/");
     skimT->loadInputJson();
+    cout<<endl;
     skimT->loadJobFileNames();
+    cout<<endl;
     skimT->loadTree();
+    cout<<endl;
 
     TString oName = outName;
     string outDir = "output";
@@ -79,20 +83,36 @@ int main(int argc, char* argv[]){
     objS->setJetVetoName(oName); 
     objS->setJetVetoJsonPath(oName); 
     objS->loadJetVetoRef(); 
+    cout<<endl;
 
     //Jet L2L3 
     objS->setJetL2L3Names(oName); 
     objS->setJetL2L3JsonPath(oName); 
     objS->loadJetL2L3Refs(); 
+    cout<<endl;
+
+    //Photon SS 
+    objS->setPhoSsName(oName); 
+    objS->setPhoSsJsonPath(oName); 
+    objS->loadPhoSsRef(); 
+    cout<<endl;
+
+    //Electron SS 
+    objS->setEleSsName(oName); 
+    objS->setEleSsJsonPath(oName); 
+    objS->loadEleSsRef(); 
+    cout<<endl;
 
     //Lumi
     objS->setLumiJsonPath(oName); 
     objS->loadLumiJson(); 
+    cout<<endl;
 
     //PU Text
     objS->setPuTextPath(oName); 
     objS->setPuMinbXsec(69200);
     objS->loadPuText(); 
+    cout<<endl;
 
     //PU Hist
     objS->setPuHistPath(oName); 

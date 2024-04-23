@@ -14,7 +14,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      string& ds = dataset;
      // Select appropriate L1RC for type-I MET L1L2L3-RC calculation
      string sera("");
-     cout<<"AA2"<<endl;
      if (ds=="2016APVP8" || ds=="2016APVQCD") sera = "2016APV";
      if (ds=="2016P8" || ds=="2016QCD") sera = "2016FGH";
      if (ds=="2017P8" || ds=="2017QCD") sera = "2017";
@@ -39,9 +38,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      if (ds=="2023B" || ds=="2023Cv123" || ds=="2023Cv4" || ds=="2023D")
        sera = "2023";
      assert(sera!="");
-   
-     
-     cout<<"DD"<<endl;
    
      // Setup B and C tagging thresholds according to Z+jet settings (Sami)
      double bthr(0.7527), cthr(0.3985), frac(0.5);
@@ -118,6 +114,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      const int nht_gam = sizeof(vht_gam)/sizeof(vht_gam[0])-1;
      int nMG_gam(0);
      double wMG_gam(0);
+     isMG = false;
      if (isMG && !isQCD) {
    
        hxsec = new TH1D("hxsec",";H_{T} (GeV);pb",nht_gam,vht_gam);
@@ -440,6 +437,29 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      TH2D *h2cgam = new TH2D("h2cgam","",nx,vx,100,0.90,1.10);
      TProfile *pcgam = new TProfile("pcgam","",nx,vx);
    
+    //--------------------------
+    // Photon scale and smearing
+    //--------------------------
+    TH1D *hPhoScaleSF = new TH1D("hPhoScaleSF", "hPhoScaleSF", 100, 0.8, 1.2);
+    TH1D *hPhoScaleSF_Up = new TH1D("hPhoScaleSF_Up", "hPhoScaleSF_Up", 100, 0.8, 1.2);
+    TH1D *hPhoScaleSF_Down = new TH1D("hPhoScaleSF_Down", "hPhoScaleSF_Down", 100, 0.8, 1.2);
+    TH1D *hPhoSmearSF = new TH1D("hPhoSmearSF", "hPhoSmearSF", 100, 0.8, 1.2);
+    TH1D *hPhoSmearSF_Up = new TH1D("hPhoSmearSF_Up", "hPhoSmearSF_Up", 100, 0.8, 1.2);
+    TH1D *hPhoSmearSF_Down = new TH1D("hPhoSmearSF_Down", "hPhoSmearSF_Down", 100, 0.8, 1.2);
+    //TProfile
+    TProfile *tPhoScaleSF = new TProfile("tPhoScaleSF", "tPhoScaleSF", 50, 0, 1000);
+    // in eta bins
+    TProfile *tPhoScaleSF_1 = new TProfile("tPhoScaleSF_1", "tPhoScaleSF_1", 50, 0, 1000);
+    TProfile *tPhoScaleSF_2 = new TProfile("tPhoScaleSF_2", "tPhoScaleSF_2", 50, 0, 1000);
+    TProfile *tPhoScaleSF_3 = new TProfile("tPhoScaleSF_3", "tPhoScaleSF_3", 50, 0, 1000);
+    TProfile *tPhoScaleSF_4 = new TProfile("tPhoScaleSF_4", "tPhoScaleSF_4", 50, 0, 1000);
+    //----
+    TProfile *tPhoScaleSF_Up = new TProfile("tPhoScaleSF_Up", "tPhoScaleSF_Up", 50, 0, 1000);
+    TProfile *tPhoScaleSF_Down = new TProfile("tPhoScaleSF_Down", "tPhoScaleSF_Down", 50, 0, 1000);
+    TProfile *tPhoSmearSF = new TProfile("tPhoSmearSF", "tPhoSmearSF", 50, 0, 1000);
+    TProfile *tPhoSmearSF_Up = new TProfile("tPhoSmearSF_Up", "tPhoSmearSF_Up", 50, 0, 1000);
+    TProfile *tPhoSmearSF_Down = new TProfile("tPhoSmearSF_Down", "tPhoSmearSF_Down", 50, 0, 1000);
+
      // Plots for jet properties
      TH2D *h2gjet = new TH2D("h2gjet","",nx,vx,100,0.90,1.10);
      TProfile *pgjet = new TProfile("pgjet","",nx,vx);
@@ -854,9 +874,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    
        // Skip events, typically for debugging purposes
        //if (jentry<skip) continue;
-       if (jentry>100) break;
        //if (_gh_debug && jentry%10000==0) cout << "," << endl << flush;
-       
        ++_ntot;
        if (jentry==100000 || jentry==1000000 || jentry==1000000 ||
    	(jentry%1000000==0 && jentry<10000000) ||
@@ -884,7 +902,9 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        if (jentry%10000==0) cout << "." << flush;
        ++nlap;
    
-       tree->GetEntry(jentry);
+       Long64_t ientry = tree->loadEntry(jentry);
+       if (ientry < 0) break; 
+       tree->fChain->GetTree()->GetEntry(ientry);
        if (!tree->isMC) { // Fast trigger filtering (useful for data)
          if ((tree->isRun3 &&
    	   !(tree->HLT_Photon200 ||
@@ -1012,7 +1032,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
          gengam.SetPtEtaPhiM(tree->GenIsolatedPhoton_pt[0],tree->GenIsolatedPhoton_eta[0],
    			  tree->GenIsolatedPhoton_phi[0],tree->GenIsolatedPhoton_mass[0]);
        }
-   
+        //https://twiki.cern.ch/twiki/bin/viewauth/CMS/EgammSFandSSRun3#Scale_And_Smearings_Correctionli 
        // Select tight photons and photon matching gen photon
        for (int i = 0; i != tree->nPhoton; ++i) {
    
@@ -1027,13 +1047,12 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
          
          // Leading tight photon(s)
          // R9>0.94 to avoid bias wrt R9Id90 triggers and from photon conversions
-         if (tree->Photon_pt[i]>15 && tree->Photon_cutBased[i]==3 && tree->Photon_hoe[i]<0.02148 &&
-   	  tree->Photon_r9[i]>0.94) {
-   	++nGam;
-   	if (iGam==-1) {
-   	  iGam = i;
-   	  gam = gami;
-   	}
+        if (tree->Photon_pt[i]>15 && tree->Photon_cutBased[i]==3 && tree->Photon_hoe[i]<0.02148 && tree->Photon_r9[i]>0.94) {
+            ++nGam;
+   	        if (iGam==-1) {
+   	            iGam = i;
+   	            gam = gami;
+   	        }
          } // tight photon
        } // for i in tree->nPhoton
    
@@ -1879,6 +1898,64 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	h2phoj0->Fill(ptgam, footprint, w);
    	pphoj0->Fill(ptgam, footprint, w);
    
+    double phoScaleSF        = 1.0;
+    double phoScaleSF_Up     = 1.0;
+    double phoScaleSF_Down   = 1.0;
+    double phoSmearSF        = 1.0;
+    double phoSmearSF_Up     = 1.0;
+    double phoSmearSF_Down   = 1.0;
+   	if (iGam!=-1){ 
+        if (oName.Contains("Data")){
+            phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_correction", 
+                        tree->Photon_seedGain[iGam], 
+                        static_cast<Float_t>(tree->run), 
+                        tree->Photon_eta[iGam], 
+                        tree->Photon_r9[iGam],
+                        tree->Photon_pt[iGam]});
+        }
+        if (oName.Contains("MC")){
+            double phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_uncertainty",
+                        tree->Photon_seedGain[iGam], 
+                        static_cast<Float_t>(tree->run), 
+                        tree->Photon_eta[iGam], 
+                        tree->Photon_r9[iGam],
+                        tree->Photon_pt[iGam]});
+            phoScaleSF_Up     = (1+phoScaleSF);
+            phoScaleSF_Down   = (1-phoScaleSF);
+            double rho  = objS->loadedPhoSsRef->evaluate({"rho", 
+                        tree->Photon_eta[iGam], 
+                        tree->Photon_r9[iGam]});
+            double err_rho  = objS->loadedPhoSsRef->evaluate({"err_rho", 
+                        tree->Photon_eta[iGam], 
+                        tree->Photon_r9[iGam]});
+            phoSmearSF       = gRandom->Gaus(1., rho);
+            phoSmearSF_Up    = gRandom->Gaus(1., rho+err_rho);
+            phoSmearSF_Down  = gRandom->Gaus(1., rho-err_rho);
+        }
+        hPhoScaleSF        ->Fill(phoScaleSF     );
+        hPhoScaleSF_Up     ->Fill(phoScaleSF_Up  );
+        hPhoScaleSF_Down   ->Fill(phoScaleSF_Down);
+        hPhoSmearSF        ->Fill(phoSmearSF     );
+        hPhoSmearSF_Up     ->Fill(phoSmearSF_Up  );
+        hPhoSmearSF_Down   ->Fill(phoSmearSF_Down);
+        
+        tPhoScaleSF        ->Fill(tree->Photon_pt[iGam], phoScaleSF     );
+        //in eta bins
+        if(-1.5 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < -0.8) 
+            tPhoScaleSF_1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(-0.8 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < 0) 
+            tPhoScaleSF_2        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < 0.8) 
+            tPhoScaleSF_3        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(0.8 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < 1.5) 
+            tPhoScaleSF_4        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        //---
+        tPhoScaleSF_Up     ->Fill(tree->Photon_pt[iGam], phoScaleSF_Up  );
+        tPhoScaleSF_Down   ->Fill(tree->Photon_pt[iGam], phoScaleSF_Down);
+        tPhoSmearSF        ->Fill(tree->Photon_pt[iGam], phoSmearSF     );
+        tPhoSmearSF_Up     ->Fill(tree->Photon_pt[iGam], phoSmearSF_Up  );
+        tPhoSmearSF_Down   ->Fill(tree->Photon_pt[iGam], phoSmearSF_Down);
+    }
    	if (iGam!=-1 && tree->Photon_seedGain[iGam]==1) {
    	  h2phoj1->Fill(ptgam, footprint, w);
    	  pphoj1->Fill(ptgam, footprint, w);

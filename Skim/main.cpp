@@ -98,15 +98,17 @@ int main(int argc, char* argv[]){
     double totalTime = 0.0;
 	auto startClock = std::chrono::high_resolution_clock::now();
     bool passTrig = false;
-	for(Long64_t entry= startEntry; entry < endEntry; entry++){
-        //if(entry>100000) break;
-		if(endEntry > 100  && entry%(eventsPerJob/100) == 0){// print after every 1% of events
+	for(Long64_t i= startEntry; i < endEntry; i++){
+        //if(i>100000) break;
+		if(endEntry > 100  && i%(eventsPerJob/100) == 0){// print after every 1% of events
             totalTime+= std::chrono::duration<double>(std::chrono::high_resolution_clock::now()-startClock).count();
             int sec = (int)(totalTime)%60;
             int min = (int)(totalTime)/60;
-	        std::cout<<setw(10)<<100*entry/endEntry<<" %"<<setw(10)<<min<<"m "<<sec<<"s"<<std::endl;
+	        std::cout<<setw(10)<<100*i/endEntry<<" %"<<setw(10)<<min<<"m "<<sec<<"s"<<std::endl;
 			startClock = std::chrono::high_resolution_clock::now();
 		}
+        Long64_t entry = nanoT->loadEntry(i);
+        
 		hEvents_->Fill(0);
         //GamJet
         if(oName.Contains("2022") && oName.Contains("GamJet")){ 
@@ -316,7 +318,7 @@ int main(int argc, char* argv[]){
             nanoT->HLT_DiPFJetAve300_HFJEC ;
         }
 		if(passTrig){
-		    nanoT->GetEntry(entry);
+		    nanoT->fChain->GetTree()->GetEntry(entry);
             hEvents_->Fill(1);
 			newTree->Fill();
 		}

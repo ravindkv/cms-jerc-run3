@@ -44,7 +44,6 @@ def getData_GamJet():
     samps = {}
 
     #2022
-    samps['Data_2022A_GamJet_EGamma']       = '/EGamma/Run2022A-22Sep2023-v1/NANOAOD' 
     samps['Data_2022B_GamJet_EGamma']       = '/EGamma/Run2022B-22Sep2023-v2/NANOAOD' 
     samps['Data_2022C_GamJet_EGamma']       = '/EGamma/Run2022C-22Sep2023-v1/NANOAOD' 
     samps['Data_2022D_GamJet_EGamma']       = '/EGamma/Run2022D-22Sep2023-v1/NANOAOD'

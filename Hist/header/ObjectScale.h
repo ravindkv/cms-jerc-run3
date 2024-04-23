@@ -22,9 +22,13 @@ class ObjectScale{
             debug  = false;
             jetVetoKey      ="jetvetomap";
             jetVetoName     = "Winter22Run3_RunCD_V1";
-            jetL2L3JsonPath = "./jet_jerc.json";
             jetVetoJsonPath = "./jetvetomaps.json";
             jetL2L3Names    = {};
+            jetL2L3JsonPath = "./jet_jerc.json";
+            phoSsName       = "2022Re-recoE+PromptFG_ScaleJSON";
+            phoSsJsonPath   = "./photonSS.json";
+            eleSsName       = "2022Re-recoE+PromptFG_ScaleJSON";
+            eleSsJsonPath   = "./electronSS.json";
             lumiJsonPath    = "./Cert_Collisions2022_355100_362760_Golden.json";
             puTextPath      = "./pileup_ASCII_UL16-UL18.txt";
             minbXsec        = 69200;
@@ -67,6 +71,22 @@ class ObjectScale{
         void setJetL2L3JsonPath(TString oName);
         void loadJetL2L3Refs();
         vector<correction::Correction::Ref> loadedJetL2L3Refs;
+
+        // Photon Scale and Smearing (Ss)
+        string phoSsName;
+        string phoSsJsonPath;
+        void setPhoSsName(TString oName);
+        void setPhoSsJsonPath(TString oName);
+        void loadPhoSsRef();
+        correction::Correction::Ref loadedPhoSsRef;
+        
+        // Electron Scale and Smearing (Ss)
+        string eleSsName;
+        string eleSsJsonPath;
+        void setEleSsName(TString oName);
+        void setEleSsJsonPath(TString oName);
+        void loadEleSsRef();
+        correction::Correction::Ref loadedEleSsRef;
 
         // Lumi
         void PrintInfo(string info, bool printcout);

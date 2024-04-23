@@ -131,6 +131,77 @@ void ObjectScale::loadJetL2L3Refs(){
         std::abort();
     }
 } 
+//-------------------------------------
+// Photon Scale and Smearing 
+//-------------------------------------
+void ObjectScale::setPhoSsName(TString oName){
+    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+        phoSsName = "2022Re-recoBCD_ScaleJSON";
+    }
+    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+        phoSsName = "2022Re-recoE+PromptFG_ScaleJSON";
+    }
+     cout<<"+ setPhoSsName() = "<<phoSsName<<endl;
+} 
+   
+void ObjectScale::setPhoSsJsonPath(TString oName){
+    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+        phoSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoBCD/photonSS.json";
+    }
+    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+        phoSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoE+PromptFG/photonSS.json";
+    }
+     cout<<"+ setPhoSsJsonPath() = "<<phoSsJsonPath<<endl;
+} 
+
+void ObjectScale::loadPhoSsRef(){
+    cout<<"==> loadPhoSsRef()"<<endl;
+    auto ssJson      = correction::CorrectionSet::from_file(phoSsJsonPath);
+    try{
+        loadedPhoSsRef = ssJson->at(phoSsName);
+    }catch (const std::exception & e){
+        cout<<"\nEXCEPTION: ObjectScale::loadPhoSsRef()"<<endl;
+        cout<<"Check "<<phoSsJsonPath<<"or "<<phoSsName<<endl;
+        cout<<e.what()<<endl;
+        std::abort();
+    }
+} 
+
+//-------------------------------------
+// Electron Scale and Smearing 
+//-------------------------------------
+void ObjectScale::setEleSsName(TString oName){
+    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+        eleSsName = "2022Re-recoBCD_ScaleJSON";
+    }
+    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+        eleSsName = "2022Re-recoE+PromptFG_ScaleJSON";
+    }
+     cout<<"+ setEleSsName() = "<<eleSsName<<endl;
+} 
+   
+void ObjectScale::setEleSsJsonPath(TString oName){
+    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+        eleSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoBCD/electronSS.json";
+    }
+    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+        eleSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoE+PromptFG/electronSS.json";
+    }
+     cout<<"+ setEleSsJsonPath() = "<<eleSsJsonPath<<endl;
+} 
+
+void ObjectScale::loadEleSsRef(){
+    cout<<"==> loadEleSsRef()"<<endl;
+    auto ssJson      = correction::CorrectionSet::from_file(eleSsJsonPath);
+    try{
+        loadedEleSsRef = ssJson->at(eleSsName);
+    }catch (const std::exception & e){
+        cout<<"\nEXCEPTION: ObjectScale::loadEleSsRef()"<<endl;
+        cout<<"Check "<<eleSsJsonPath<<"or "<<eleSsName<<endl;
+        cout<<e.what()<<endl;
+        std::abort();
+    }
+} 
 
 void ObjectScale::PrintInfo(string info, bool printcout)
    {

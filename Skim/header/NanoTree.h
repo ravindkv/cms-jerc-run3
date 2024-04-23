@@ -1,5 +1,5 @@
-#ifndef SKIMTREE_H
-#define SKIMTREE_H
+#ifndef NANOTREE_H
+#define NANOTREE_H
 
 #include<iostream>
 #include <fstream>
@@ -9,6 +9,7 @@
 #include<TMath.h>
 #include <map>
 #include <nlohmann/json.hpp>
+#include <filesystem>
 
 #include<vector>
 
@@ -21,6 +22,8 @@ class NanoTree{
     ~NanoTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
+    Int_t           fCurrent; //!current Tree number in a TChain
+    virtual Long64_t loadEntry(Long64_t entry);
     
     UInt_t    run_;
     ULong64_t event_;

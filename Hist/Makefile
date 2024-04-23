@@ -4,7 +4,7 @@ ROOT_L=`root-config --libs`
 CORR_A=`correction config --cflags --ldflags --rpath`
 GCC=g++ -std=c++17
 
-SRCDIR   = src
+SRCDIR   = cpp
 OBJDIR   = obj
 SOURCES     := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS     := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)

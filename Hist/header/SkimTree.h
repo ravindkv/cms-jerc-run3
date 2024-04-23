@@ -20,6 +20,7 @@ class SkimTree{
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
     Int_t           fCurrent; //!current Tree number in a TChain
+    virtual Long64_t loadEntry(Long64_t entry);
 
     int             isMC;     // data=0, PythiaPtFlat=1, MadGraphHT=2
     bool            is16apv, is16fgh, is16;

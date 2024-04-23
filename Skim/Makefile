@@ -3,7 +3,7 @@ ROOT_L=`root-config --libs`
 ROOT_I=-I`root-config --incdir` -I./header
 GCC=g++ -std=c++17
 
-SRCDIR   = src
+SRCDIR   = cpp
 OBJDIR   = obj
 SOURCES     := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS     := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)

@@ -336,6 +336,7 @@ std::vector<std::string> SkimTree::splitString(const std::string& s, const std::
 }
 
 SkimTree::SkimTree(){
+    fCurrent  = -1;
 }
 
 SkimTree::~SkimTree(){
@@ -350,4 +351,16 @@ Long64_t SkimTree::GetEntries(){
 Int_t SkimTree::GetEntry(Long64_t entry){
     fChain->GetEntry(entry);
     return fChain->GetEntries();
+}
+Long64_t SkimTree::loadEntry(Long64_t entry)                                  
+{                                                                              
+// Set the environment to read one entry                                                  
+   if (!fChain) return -5;                                                     
+   Long64_t centry = fChain->LoadTree(entry);                                  
+   if (centry < 0) return centry;                                              
+   if (fChain->GetTreeNumber() != fCurrent) {                                  
+      fCurrent = fChain->GetTreeNumber();                                      
+   }                                                                           
+   //cout<<entry<<", "<<centry<<", "<<fCurrent<<endl;
+   return centry;                                                              
 }
