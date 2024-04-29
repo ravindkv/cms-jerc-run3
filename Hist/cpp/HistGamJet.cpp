@@ -447,18 +447,38 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
     TH1D *hPhoSmearSF_Up = new TH1D("hPhoSmearSF_Up", "hPhoSmearSF_Up", 100, 0.8, 1.2);
     TH1D *hPhoSmearSF_Down = new TH1D("hPhoSmearSF_Down", "hPhoSmearSF_Down", 100, 0.8, 1.2);
     //TProfile
-    TProfile *tPhoScaleSF = new TProfile("tPhoScaleSF", "tPhoScaleSF", 50, 0, 1000);
+    TProfile *tPhoScaleSF = new TProfile("tPhoScaleSF", "tPhoScaleSF", nx, vx);
     // in eta bins
-    TProfile *tPhoScaleSF_1 = new TProfile("tPhoScaleSF_1", "tPhoScaleSF_1", 50, 0, 1000);
-    TProfile *tPhoScaleSF_2 = new TProfile("tPhoScaleSF_2", "tPhoScaleSF_2", 50, 0, 1000);
-    TProfile *tPhoScaleSF_3 = new TProfile("tPhoScaleSF_3", "tPhoScaleSF_3", 50, 0, 1000);
-    TProfile *tPhoScaleSF_4 = new TProfile("tPhoScaleSF_4", "tPhoScaleSF_4", 50, 0, 1000);
+    // Gain = 1
+        TProfile *tPhoScaleSF_Gain1 = new TProfile("tPhoScaleSF_Gain1", "tPhoScaleSF_Gain1", nx, vx);
+        TProfile *tPhoScaleSF_etaBin1Gain1= new TProfile("tPhoScaleSF_etaBin1Gain1", "tPhoScaleSF_etaBin1Gain1", nx, vx);
+        TProfile *tPhoScaleSF_etaBin2Gain1= new TProfile("tPhoScaleSF_etaBin2Gain1", "tPhoScaleSF_etaBin2Gain1", nx, vx);
+        TProfile *tPhoScaleSF_etaBin3Gain1= new TProfile("tPhoScaleSF_etaBin3Gain1", "tPhoScaleSF_etaBin3Gain1", nx, vx);
+        TProfile *tPhoScaleSF_etaBin4Gain1= new TProfile("tPhoScaleSF_etaBin4Gain1", "tPhoScaleSF_etaBin4Gain1", nx, vx);
+        TProfile *tPhoScaleSF_etaBin5Gain1= new TProfile("tPhoScaleSF_etaBin5Gain1", "tPhoScaleSF_etaBin5Gain1", nx, vx);
+        TProfile *tPhoScaleSF_etaBin6Gain1= new TProfile("tPhoScaleSF_etaBin6Gain1", "tPhoScaleSF_etaBin6Gain1", nx, vx);
+    // Gain = 6
+        TProfile *tPhoScaleSF_Gain6 = new TProfile("tPhoScaleSF_Gain6", "tPhoScaleSF_Gain6", nx, vx);
+        TProfile *tPhoScaleSF_etaBin1Gain6= new TProfile("tPhoScaleSF_etaBin1Gain6", "tPhoScaleSF_etaBin1Gain6", nx, vx);
+        TProfile *tPhoScaleSF_etaBin2Gain6= new TProfile("tPhoScaleSF_etaBin2Gain6", "tPhoScaleSF_etaBin2Gain6", nx, vx);
+        TProfile *tPhoScaleSF_etaBin3Gain6= new TProfile("tPhoScaleSF_etaBin3Gain6", "tPhoScaleSF_etaBin3Gain6", nx, vx);
+        TProfile *tPhoScaleSF_etaBin4Gain6= new TProfile("tPhoScaleSF_etaBin4Gain6", "tPhoScaleSF_etaBin4Gain6", nx, vx);
+        TProfile *tPhoScaleSF_etaBin5Gain6= new TProfile("tPhoScaleSF_etaBin5Gain6", "tPhoScaleSF_etaBin5Gain6", nx, vx);
+        TProfile *tPhoScaleSF_etaBin6Gain6= new TProfile("tPhoScaleSF_etaBin6Gain6", "tPhoScaleSF_etaBin6Gain6", nx, vx);
+    // Gain = 12
+        TProfile *tPhoScaleSF_Gain12 = new TProfile("tPhoScaleSF_Gain12", "tPhoScaleSF_Gain12", nx, vx);
+        TProfile *tPhoScaleSF_etaBin1Gain12= new TProfile("tPhoScaleSF_etaBin1Gain12", "tPhoScaleSF_etaBin1Gain12", nx, vx);
+        TProfile *tPhoScaleSF_etaBin2Gain12= new TProfile("tPhoScaleSF_etaBin2Gain12", "tPhoScaleSF_etaBin2Gain12", nx, vx);
+        TProfile *tPhoScaleSF_etaBin3Gain12= new TProfile("tPhoScaleSF_etaBin3Gain12", "tPhoScaleSF_etaBin3Gain12", nx, vx);
+        TProfile *tPhoScaleSF_etaBin4Gain12= new TProfile("tPhoScaleSF_etaBin4Gain12", "tPhoScaleSF_etaBin4Gain12", nx, vx);
+        TProfile *tPhoScaleSF_etaBin5Gain12= new TProfile("tPhoScaleSF_etaBin5Gain12", "tPhoScaleSF_etaBin5Gain12", nx, vx);
+        TProfile *tPhoScaleSF_etaBin6Gain12= new TProfile("tPhoScaleSF_etaBin6Gain12", "tPhoScaleSF_etaBin6Gain12", nx, vx);
     //----
-    TProfile *tPhoScaleSF_Up = new TProfile("tPhoScaleSF_Up", "tPhoScaleSF_Up", 50, 0, 1000);
-    TProfile *tPhoScaleSF_Down = new TProfile("tPhoScaleSF_Down", "tPhoScaleSF_Down", 50, 0, 1000);
-    TProfile *tPhoSmearSF = new TProfile("tPhoSmearSF", "tPhoSmearSF", 50, 0, 1000);
-    TProfile *tPhoSmearSF_Up = new TProfile("tPhoSmearSF_Up", "tPhoSmearSF_Up", 50, 0, 1000);
-    TProfile *tPhoSmearSF_Down = new TProfile("tPhoSmearSF_Down", "tPhoSmearSF_Down", 50, 0, 1000);
+    TProfile *tPhoScaleSF_Up = new TProfile("tPhoScaleSF_Up", "tPhoScaleSF_Up", nx, vx);
+    TProfile *tPhoScaleSF_Down = new TProfile("tPhoScaleSF_Down", "tPhoScaleSF_Down", nx, vx);
+    TProfile *tPhoSmearSF = new TProfile("tPhoSmearSF", "tPhoSmearSF", nx, vx);
+    TProfile *tPhoSmearSF_Up = new TProfile("tPhoSmearSF_Up", "tPhoSmearSF_Up", nx, vx);
+    TProfile *tPhoSmearSF_Down = new TProfile("tPhoSmearSF_Down", "tPhoSmearSF_Down", nx, vx);
 
      // Plots for jet properties
      TH2D *h2gjet = new TH2D("h2gjet","",nx,vx,100,0.90,1.10);
@@ -1047,7 +1067,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
          
          // Leading tight photon(s)
          // R9>0.94 to avoid bias wrt R9Id90 triggers and from photon conversions
-        if (tree->Photon_pt[i]>15 && tree->Photon_cutBased[i]==3 && tree->Photon_hoe[i]<0.02148 && tree->Photon_r9[i]>0.94) {
+        if (tree->Photon_pt[i]>15 && tree->Photon_cutBased[i]==3 && tree->Photon_hoe[i]<0.02148 && tree->Photon_r9[i]>0.96) {
             ++nGam;
    	        if (iGam==-1) {
    	            iGam = i;
@@ -1940,15 +1960,53 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
         hPhoSmearSF_Down   ->Fill(phoSmearSF_Down);
         
         tPhoScaleSF        ->Fill(tree->Photon_pt[iGam], phoScaleSF     );
+        if(tree->Photon_seedGain[iGam]==1)
+            tPhoScaleSF_Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF     );
+        if(tree->Photon_seedGain[iGam]==6)
+            tPhoScaleSF_Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF     );
+        if(tree->Photon_seedGain[iGam]==12)
+            tPhoScaleSF_Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF     );
+             
         //in eta bins
-        if(-1.5 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < -0.8) 
-            tPhoScaleSF_1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
-        if(-0.8 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < 0) 
-            tPhoScaleSF_2        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
-        if(0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < 0.8) 
-            tPhoScaleSF_3        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
-        if(0.8 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] < 1.5) 
-            tPhoScaleSF_4        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        //Gain =1
+        if(tree->Photon_seedGain[iGam]==1 && -1.442 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.2) 
+            tPhoScaleSF_etaBin1Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==1 && -1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.0) 
+            tPhoScaleSF_etaBin2Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==1 && -1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 0.0) 
+            tPhoScaleSF_etaBin3Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==1 && 0.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.0) 
+            tPhoScaleSF_etaBin4Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==1 && 1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.2) 
+            tPhoScaleSF_etaBin5Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==1 && 1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.442) 
+            tPhoScaleSF_etaBin6Gain1        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        //Gain =6
+        if(tree->Photon_seedGain[iGam]==6 && -1.442 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.2) 
+            tPhoScaleSF_etaBin1Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==6 && -1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.0) 
+            tPhoScaleSF_etaBin2Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==6 && -1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 0.0) 
+            tPhoScaleSF_etaBin3Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==6 && 0.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.0) 
+            tPhoScaleSF_etaBin4Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==6 && 1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.2) 
+            tPhoScaleSF_etaBin5Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==6 && 1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.442) 
+            tPhoScaleSF_etaBin6Gain6        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        //Gain =12
+        if(tree->Photon_seedGain[iGam]==12 && -1.442 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.2) 
+            tPhoScaleSF_etaBin1Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==12 && -1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.0) 
+            tPhoScaleSF_etaBin2Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==12 && -1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 0.0) 
+            tPhoScaleSF_etaBin3Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==12 && 0.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.0) 
+            tPhoScaleSF_etaBin4Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==12 && 1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.2) 
+            tPhoScaleSF_etaBin5Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
+        if(tree->Photon_seedGain[iGam]==12 && 1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.442) 
+            tPhoScaleSF_etaBin6Gain12        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
         //---
         tPhoScaleSF_Up     ->Fill(tree->Photon_pt[iGam], phoScaleSF_Up  );
         tPhoScaleSF_Down   ->Fill(tree->Photon_pt[iGam], phoScaleSF_Down);
