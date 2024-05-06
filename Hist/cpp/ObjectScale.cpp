@@ -1,25 +1,12 @@
 #include"ObjectScale.h"
 #include<iostream>
    
-void ObjectScale::setIs22(bool value) {
-    is22 = value;
-}
-void ObjectScale::setIs23(bool value) {
-    is23 = value;
-}
-void ObjectScale::setIs24(bool value) {
-    is24 = value;
-}
-void ObjectScale::setIsData(bool value) {
-    isData = value;
-}
-
 //-------------------------------------
 // Jet Veto Maps
 //-------------------------------------
 void ObjectScale::setJetVetoKey(TString oName){
        if (isData){
-           if(oName.Contains("2022") || oName.Contains("2023")){
+           if(is22 || is23){
                jetVetoKey = "jetvetomap";
            }
        }
@@ -31,7 +18,7 @@ void ObjectScale::setJetVetoKey(TString oName){
    
 void ObjectScale::setJetVetoName(TString oName){
     if (isData){
-        if(oName.Contains("2022C") || oName.Contains("2022D")){
+        if(is22C || is22D){
             //jetVetoName = "Summer22_23Sep2023_RunCD_V1";
             //jetVetoName = "Summer22EE_23Sep2023_RunEFG_V1";
             jetVetoName = "Winter22Run3_RunCD_V1";
@@ -45,7 +32,7 @@ void ObjectScale::setJetVetoName(TString oName){
    
 void ObjectScale::setJetVetoJsonPath(TString oName){
     if (isData){
-        if(oName.Contains("2022") || oName.Contains("2022D")){
+        if(is22 || is22D){
             jetVetoJsonPath = "POG/JME/2022_Prompt/jetvetomaps.json.gz";
         }
     }
@@ -62,7 +49,7 @@ void ObjectScale::loadJetVetoRef(){
         loadedJetVetoRef = jvJson->at(jetVetoName);
     }catch (const std::exception & e){
         cout<<"\nEXCEPTION: ObjectScale::loadJetVetoRef()"<<endl;
-        cout<<"Check "<<jetVetoJsonPath<<"or "<<jetVetoName<<endl;
+        cout<<"Check "<<jetVetoJsonPath<<" or "<<jetVetoName<<endl;
         cout<<e.what()<<endl;
         std::abort();
     }
@@ -72,27 +59,23 @@ void ObjectScale::loadJetVetoRef(){
 //-------------------------------------
 void ObjectScale::setJetL2L3Names(TString oName){
      if (isData){
-       if(oName.Contains("2022A")){
+       if(is22C){
            jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
            jetL2L3Names.push_back("Summer22_22Sep2023_RunCD_V2_DATA_L2L3Residual_AK4PFPuppi");
        }
-       if(oName.Contains("2022C")){
+       if(is22D){
            jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
            jetL2L3Names.push_back("Summer22_22Sep2023_RunCD_V2_DATA_L2L3Residual_AK4PFPuppi");
        }
-       if(oName.Contains("2022D")){
-           jetL2L3Names.push_back("Summer22Run3_V1_MC_L2Relative_AK4PUPPI");
-           jetL2L3Names.push_back("Run22CD-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
-       }
-       if(oName.Contains("2022E")){
+       if(is22E){
            jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
            jetL2L3Names.push_back("Run22E-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
        }
-       if(oName.Contains("2022F")){
+       if(is22F){
            jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
            jetL2L3Names.push_back("Run22F-Prompt_DATA_L2L3Residual_AK4PFPuppi");
        }
-       if(oName.Contains("2022G")){
+       if(is22G){
            jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
            jetL2L3Names.push_back("Run22G-Prompt_DATA_L2L3Residual_AK4PFPuppi");
        }
@@ -107,7 +90,7 @@ void ObjectScale::setJetL2L3Names(TString oName){
    
 void ObjectScale::setJetL2L3JsonPath(TString oName){
     if (isData){
-        if(oName.Contains("2022") || oName.Contains("2022D")){
+        if(is22 || is22D){
             jetL2L3JsonPath = "POG/JME/2022_Summer22/jet_jerc.json.gz";
         }
     }
@@ -126,7 +109,7 @@ void ObjectScale::loadJetL2L3Refs(){
         }
     }catch (const std::exception & e){
         cout<<"\nEXCEPTION: ObjectScale::loadJetL2L3Refs"<<endl;
-        cout<<"Check "<<jetL2L3JsonPath<<"or jetL2L3Names"<<endl;
+        cout<<"Check "<<jetL2L3JsonPath<<" or jetL2L3Names"<<endl;
         cout<<e.what()<<endl;
         std::abort();
     }
@@ -135,20 +118,20 @@ void ObjectScale::loadJetL2L3Refs(){
 // Photon Scale and Smearing 
 //-------------------------------------
 void ObjectScale::setPhoSsName(TString oName){
-    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+    if(is22B || is22C || is22D){
         phoSsName = "2022Re-recoBCD_ScaleJSON";
     }
-    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+    if(is22E || is22F || is22G){
         phoSsName = "2022Re-recoE+PromptFG_ScaleJSON";
     }
      cout<<"+ setPhoSsName() = "<<phoSsName<<endl;
 } 
    
 void ObjectScale::setPhoSsJsonPath(TString oName){
-    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+    if(is22B || is22C || is22D){
         phoSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoBCD/photonSS.json";
     }
-    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+    if(is22E || is22F || is22G){
         phoSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoE+PromptFG/photonSS.json";
     }
      cout<<"+ setPhoSsJsonPath() = "<<phoSsJsonPath<<endl;
@@ -161,7 +144,7 @@ void ObjectScale::loadPhoSsRef(){
         loadedPhoSsRef = ssJson->at(phoSsName);
     }catch (const std::exception & e){
         cout<<"\nEXCEPTION: ObjectScale::loadPhoSsRef()"<<endl;
-        cout<<"Check "<<phoSsJsonPath<<"or "<<phoSsName<<endl;
+        cout<<"Check "<<phoSsJsonPath<<" or "<<phoSsName<<endl;
         cout<<e.what()<<endl;
         std::abort();
     }
@@ -171,20 +154,20 @@ void ObjectScale::loadPhoSsRef(){
 // Electron Scale and Smearing 
 //-------------------------------------
 void ObjectScale::setEleSsName(TString oName){
-    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+    if(is22B || is22C || is22D){
         eleSsName = "2022Re-recoBCD_ScaleJSON";
     }
-    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+    if(is22E || is22F || is22G){
         eleSsName = "2022Re-recoE+PromptFG_ScaleJSON";
     }
      cout<<"+ setEleSsName() = "<<eleSsName<<endl;
 } 
    
 void ObjectScale::setEleSsJsonPath(TString oName){
-    if(oName.Contains("2022B") || oName.Contains("2022C") || oName.Contains("2022D")){
+    if(is22B || is22C || is22D){
         eleSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoBCD/electronSS.json";
     }
-    if(oName.Contains("2022E") || oName.Contains("2022F") || oName.Contains("2022G")){
+    if(is22E || is22F || is22G){
         eleSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoE+PromptFG/electronSS.json";
     }
      cout<<"+ setEleSsJsonPath() = "<<eleSsJsonPath<<endl;
@@ -197,7 +180,7 @@ void ObjectScale::loadEleSsRef(){
         loadedEleSsRef = ssJson->at(eleSsName);
     }catch (const std::exception & e){
         cout<<"\nEXCEPTION: ObjectScale::loadEleSsRef()"<<endl;
-        cout<<"Check "<<eleSsJsonPath<<"or "<<eleSsName<<endl;
+        cout<<"Check "<<eleSsJsonPath<<" or "<<eleSsName<<endl;
         cout<<e.what()<<endl;
         std::abort();
     }
@@ -212,15 +195,9 @@ void ObjectScale::PrintInfo(string info, bool printcout)
 // Golden lumi Json 
 //-------------------------------------
 void ObjectScale::setLumiJsonPath(TString oName){
-    if (oName.Contains("2016"))
-      lumiJsonPath = "POG/files/Cert_271036-284044_13TeV_Legacy2016_Collisions16_JSON.txt";
-    if (oName.Contains("2017"))
-      lumiJsonPath = "POG/files/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt";
-    if (oName.Contains("2018"))
-      lumiJsonPath = "POG/files/Cert_314472-325175_13TeV_Legacy2018_Collisions18_JSON.txt";
-    if (oName.Contains("2022"))
+    if (is22)
       lumiJsonPath = "POG/files/Cert_Collisions2022_355100_362760_Golden.json";
-    if (oName.Contains("2023"))
+    if (is23)
       lumiJsonPath = "POG/files/Cert_Collisions2023_366442_370790_Golden.json";
     cout<<"+ setLumiJsonPath() = "<<lumiJsonPath<<endl;
 } 
@@ -279,7 +256,6 @@ void ObjectScale::loadLumiJson(){
 // Pileup Text 
 //-------------------------------------
 void ObjectScale::setPuTextPath(TString oName){
-    //if (oName.Contains("2016"))
     puTextPath = "POG/files/pileup_ASCII_UL16-UL18.txt";
     cout<<"+ setPuTextPath() = "<<puTextPath<<endl;
 } 
@@ -404,7 +380,6 @@ double ObjectScale::getTruePU(int run, int ls, double *rms = 0) {
 // Pileup Hist 
 //-------------------------------------
 void ObjectScale::setPuHistPath(TString oName){
-    //if (oName.Contains("2016"))
     puHistPath = "POG/files/pileup.root";
     cout<<"+ setPuHistPath() = "<<puHistPath<<endl;
 } 
@@ -416,7 +391,7 @@ void ObjectScale::setPuHistEras(TString oName){
     cout<<endl;
 } 
 void ObjectScale::setPuHistTrigs(TString oName){
-    if(oName.Contains("GamJet")){
+    if(isGamJet){
         puHistTrigs["2022"].push_back("HLT_Photon20_HoverELoose");
         puHistTrigs["2022"].push_back("HLT_Photon30_HoverELoose");
         //puHistTrigs["2022"].push_back("HLT_Photon30EB_TightID_TightIso");
@@ -428,7 +403,7 @@ void ObjectScale::setPuHistTrigs(TString oName){
         puHistTrigs["2022"].push_back("HLT_Photon200");
         //puHistTrigs["2023"] = puHistTrigs["2022"];
     }
-    if(oName.Contains("DiEleJet")){
+    if(isDiEleJet){
         puHistTrigs["2022"].push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
     }
     cout<<"+ setPuHistTrigs() = ";

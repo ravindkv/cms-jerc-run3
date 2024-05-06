@@ -4,21 +4,19 @@
 #include <set>
 #include<iostream>
 #include <fstream>
+#include <iomanip>
 
 #include "SkimTree.h"
 #include "correction.h"
+#include "GlobalFlag.h"
 
 #include "TH2D.h"
 #include "TRandom.h"
 #include "TCanvas.h"
 
-class ObjectScale{
+class ObjectScale: public GlobalFlag{
     public: 
-        ObjectScale(){
-            is22   = false;
-            is23   = false;
-            is24   = false;
-            isData = false;
+        ObjectScale(TString oName): GlobalFlag(oName){
             debug  = false;
             jetVetoKey      ="jetvetomap";
             jetVetoName     = "Winter22Run3_RunCD_V1";
@@ -44,15 +42,6 @@ class ObjectScale{
           lumiInfo(double lum_=0, double muavg_=0, double murms_=0)
             : lum(lum_), muavg(muavg_), murms(murms_) {};
         };
-        // Year, Data
-        bool is22;
-        bool is23;
-        bool is24;
-        bool isData;
-        void setIs22(bool value);
-        void setIs23(bool value);
-        void setIs24(bool value);
-        void setIsData(bool value);
         
         // Jet veto
         string jetVetoKey;

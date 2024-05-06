@@ -93,7 +93,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    		 2.650, 2.853, 2.964, 3.139, 3.489, 3.839, 5.191};
      const int ny = sizeof(vy)/sizeof(vy[0])-1;
    
-     string dir = (tree->isMC ? "MC" : "DATA");
+     string dir = (isMC ? "MC" : "DATA");
      
      vector<pair<double,double> > etas;
      etas.push_back(make_pair<double,double>(0,1.305));
@@ -114,9 +114,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      const int nht_gam = sizeof(vht_gam)/sizeof(vht_gam[0])-1;
      int nMG_gam(0);
      double wMG_gam(0);
-     isMG = false;
      if (isMG && !isQCD) {
-   
        hxsec = new TH1D("hxsec",";H_{T} (GeV);pb",nht_gam,vht_gam);
        hnevt = new TH1D("hnevt",";H_{T} (GeV);N_{evt}",nht_gam,vht_gam);
        hsumw = new TH1D("hsumw",";H_{T} (GeV);Sum(weights)",nht_gam,vht_gam);
@@ -179,8 +177,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      double vht_qcd3[] =
        {0, 40, 70, 100, 200, 400, 600, 800, 1000, 1200, 1500, 2000, 6800};
      const int nht_qcd3 = sizeof(vht_qcd3)/sizeof(vht_qcd3[0])-1;
-     const double *vht_qcd = (tree->isRun3 ? &vht_qcd3[0] : &vht_qcd2[0]);
-     const int nht_qcd = (tree->isRun3 ? nht_qcd3 : nht_qcd2);
+     const double *vht_qcd = (&vht_qcd3[0]);
+     const int nht_qcd = (nht_qcd3);
      int nMG_qcd(0);
      double wMG_qcd(0);
      if (isMG && isQCD) {
@@ -205,8 +203,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
           {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Summer22MG, local files
         int vnwgt3[nht_qcd3] =
           {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Summer22MG, local files
-        const int *vnevt = (tree->isRun3 ? &vnevt3[0] : &vnevt2[0]);
-        const int *vnwgt = (tree->isRun3 ? &vnwgt3[0] : &vnevt2[0]);
+        const int *vnevt = (&vnevt3[0]);
+        const int *vnwgt = (&vnwgt3[0]);
         for (int i = 0; i != nht_qcd; ++i) {
           hnevt->SetBinContent(i+1, vnevt[i]);
           hsumw->SetBinContent(i+1, vnwgt[i]);
@@ -227,7 +225,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	2.520e+07, 1.936e+06, 9.728e+04,
    	1.323e+04, //3.044e+04, //HT 60to800
    	3.027e+03, 8.883e+02, 3.834e+02, 1.253e+02, 2.629e+01};
-        const double *vxsec = (tree->isRun3 ? &vxsec3[0] : &vxsec2[0]);
+        const double *vxsec = (&vxsec3[0]);
         for (int i = 0; i != nht_qcd; ++i) {
           hxsec->SetBinContent(i+1, vxsec[i]);
         }
@@ -785,8 +783,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      // Match ordering to Lyon files (alpha->eta->data/MC) when creating
      // Although otherwise ordering is data/MC->eta->alpha
      // Add PS weight variations
-     unsigned int nps = (tree->isMC ? tree->nPSWeightMax+1 : 1);
-     //unsigned int nps = ((tree->isMC && !tree->isRun3) ? tree->nPSWeightMax+1 : 1);
+     unsigned int nps = (isMC ? tree->nPSWeightMax+1 : 1);
      map<int, map<int, map<int, BasicHistosGamJet*> > > mBasicHistosGamJet;
      for (unsigned int ialpha = 0; ialpha != alphas.size(); ++ialpha) {
        for (unsigned int ieta = 0; ieta != etas.size(); ++ieta) { 
@@ -883,7 +880,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
          cout<<Form("%s%1.4g",(i==1 ? "{" : ", "),hsumw->GetBinContent(i));
        }
        cout << "}; // " << dataset << endl << flush;
-     } // tree->isMC && nentries!=nMG
+     } // isMC && nentries!=nMG
      
      //int skip = 21700000; // 2018A first events without 110EB
      //int skip = 55342793; // 2018A first events with 92 photon
@@ -925,9 +922,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        Long64_t ientry = tree->loadEntry(jentry);
        if (ientry < 0) break; 
        tree->fChain->GetTree()->GetEntry(ientry);
-       if (!tree->isMC) { // Fast trigger filtering (useful for data)
-         if ((tree->isRun3 &&
-   	   !(tree->HLT_Photon200 ||
+   	   if (!(tree->HLT_Photon200 ||
    	     tree->HLT_Photon175 || 
    	     tree->HLT_Photon150 || 
    	     tree->HLT_Photon120 || 
@@ -945,66 +940,10 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	     tree->HLT_Photon75_R9Id90_HE10_IsoM ||
    	     tree->HLT_Photon50_R9Id90_HE10_IsoM ||
    	     tree->HLT_Photon30_HoverELoose ||
-   	     tree->HLT_Photon20_HoverELoose)) ||
-   	  (tree->is18 &&
-   	   !(tree->HLT_Photon200 ||
-   	     tree->HLT_Photon175 || 
-   	     tree->HLT_Photon150 || 
-   	     tree->HLT_Photon120 || 
-   	     tree->HLT_Photon90 || 
-   	     tree->HLT_Photon75 || 
-   	     tree->HLT_Photon50 || 
-   	     tree->HLT_Photon33 || 
-   	     tree->HLT_Photon20 ||
-   	     tree->HLT_Photon120EB_TightID_TightIso ||
-   	     tree->HLT_Photon110EB_TightID_TightIso ||
-   	     tree->HLT_Photon100EB_TightID_TightIso ||
-   	     tree->HLT_Photon90_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon75_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon50_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon30_HoverELoose ||
-   	     tree->HLT_Photon20_HoverELoose)) ||
-   	   (tree->is17 &&
-   	   !(tree->HLT_Photon200 ||
-   	     tree->HLT_Photon175 || 
-   	     tree->HLT_Photon150 || 
-   	     tree->HLT_Photon120 || 
-   	     tree->HLT_Photon90 || 
-   	     tree->HLT_Photon75 || 
-   	     tree->HLT_Photon50 || 
-   	     tree->HLT_Photon33 || 
-   	     tree->HLT_Photon165_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon120_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon90_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon75_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon50_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon60_HoverELoose ||
-   	     tree->HLT_Photon50_HoverELoose ||
-   	     tree->HLT_Photon40_HoverELoose ||
-   	     tree->HLT_Photon30_HoverELoose ||
-   	     tree->HLT_Photon20_HoverELoose)) ||
-   	  (tree->is16 &&
-   	   !(tree->HLT_Photon175 || 
-   	     tree->HLT_Photon120 || 
-   	     tree->HLT_Photon90 || 
-   	     tree->HLT_Photon75 || 
-   	     tree->HLT_Photon50 || 
-   	     tree->HLT_Photon36 || 
-   	     tree->HLT_Photon30 || 
-   	     tree->HLT_Photon22 || 
-   	     //tree->HLT_Photon165_HE10 ||
-   	     tree->HLT_Photon165_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon120_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon90_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon75_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon50_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon36_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon30_R9Id90_HE10_IsoM ||
-   	     tree->HLT_Photon22_R9Id90_HE10_IsoM))) {
-   	++_nbadevents_trigger;
-   	continue;
-         }
-       } // !tree->isMC
+   	     tree->HLT_Photon20_HoverELoose)){
+   	    ++_nbadevents_trigger;
+   	    continue;
+        }
    
        // if (Cut(ientry) < 0) continue;
    
@@ -1013,12 +952,11 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
          tree->fixedGridRhoFastjetAll = 34; // average conditions
        
        // Sanity check PS weights
-       if (!tree->isMC) { tree->nPSWeight = 0; }
-       //if (!tree->isMC || tree->is22 || tree->is23) { tree->nPSWeight = 0; }
+       if (!isMC) { tree->nPSWeight = 0; }
        assert(tree->nPSWeight<=tree->nPSWeightMax);
    
        // Does the run/LS pass the latest JSON selection?
-       if (!tree->isMC && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
+       if (!isMC && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
          //_badjson.insert(pair<int, int>(run, lbn));
          ++_nbadevents_json;
          continue;
@@ -1048,7 +986,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        phoj0.SetPtEtaPhiM(0,0,0,0);
    
        // Gen-photon
-       if (tree->isMC && tree->nGenIsolatedPhoton>0) {
+       if (isMC && tree->nGenIsolatedPhoton>0) {
          gengam.SetPtEtaPhiM(tree->GenIsolatedPhoton_pt[0],tree->GenIsolatedPhoton_eta[0],
    			  tree->GenIsolatedPhoton_phi[0],tree->GenIsolatedPhoton_mass[0]);
        }
@@ -1056,7 +994,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        // Select tight photons and photon matching gen photon
        for (int i = 0; i != tree->nPhoton; ++i) {
    
-         if (tree->isRun3) tree->Photon_mass[i] = 0;
+         tree->Photon_mass[i] = 0;
          gami.SetPtEtaPhiM(tree->Photon_pt[i],  tree->Photon_eta[i],
    			tree->Photon_phi[i], tree->Photon_mass[i]);
          
@@ -1078,20 +1016,10 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    
        // Correct photon for gain1 and MPF for "footprint" (photon vs PFgamma)
        rawgam = gam;
-       if (iGam!=-1 && tree->Photon_seedGain[iGam]==1 && !tree->isMC) {
+       if (iGam!=-1 && tree->Photon_seedGain[iGam]==1 && !isMC) {
          //gam *= 1./1.01;
          // minitools/drawGainVsPt.C (add R_6/12+R_1/6, take MPF+statTowardsDB)
-         if (!tree->isRun3) gam *= 1./1.011; // MPF=1.13+/-0.04%, DB=1.05+/-0.08%
-         if ( tree->isRun3) gam *= 1./1.017; // MPF=1.74+/-0.07%, DB=1.41+/-0.16%
-       }
-       if (iGam!=-1 && !tree->isRun3) {
-         // [0]+log(x)*([1]+log(x)*[2]) in range [15,1750] to MC pphoj0
-         //1  p0           4.57516e-02   3.91871e-04   1.09043e-07   4.17033e-05
-         //2  p1          -1.27462e-02   1.50968e-04   2.08432e-08   3.92715e-03
-         //3  p2           1.07760e-03   1.45293e-05   3.93020e-09   1.65460e-01
-         double x = max(60.,rawgam.Pt());
-         double f = 4.57516e-02 + log(x) * ( -1.27462e-02 + log(x) * 1.07760e-03);
-         rawgam *= (1+f);
+         gam *= 1./1.017; // MPF=1.74+/-0.07%, DB=1.41+/-0.16%
        }
       
        // Photon-jet: uncorrected jet minus (uncorr.) photon minus L1RC
@@ -1113,7 +1041,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	// 2022 data is missing proper Puppi photon protection for jets
    	// (but MET ok?)
    	//double r22 = max(0.15,min(1.0,(rawgam.Pt()-20.)/180.));
-   	//phoj -= (tree->is22v10 ? r22*rawgam : rawgam);
    	phoj -= rawgam; // NanoV12
          }
          else {
@@ -1134,12 +1061,12 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    
          // Calculate L1RC correction
          /*
-         double corrl1rc(1.); // tree->isRun3
+         double corrl1rc(1.); 
          phoj *= corrl1rc;
    
          // Calculate L1RC correction without "zero suppression"
          double refpt = 30; // phoj.Pt~0 leads to negative offset cutoff
-         double corrl1rc0(1.); // tree->isRun3
+         double corrl1rc0(1.); 
          double off0 = (corrl1rc0 - 1) * refpt; // corr*ptref = (ptref-off)
          phoj0off.SetPtEtaPhiM(off0,phoj0.Eta(),phoj0.Phi(),0.);
          phoj0 -= phoj0off;
@@ -1172,7 +1099,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    			 tree->Jet_mass[iFox]);
    	fox *= (1-tree->Jet_rawFactor[iFox]);
    	// Calculate L1RC correction
-   	double corrl1rc(1.); // tree->isRun3
+   	double corrl1rc(1.); // 
    	fox *= corrl1rc;
    	// NB2: should also remove UE clustered into fox. In Minsuk's plot
    	// QCD_CP5 has about 2.5 GeV/A of UE offset at FullSim level
@@ -1186,9 +1113,9 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        } // isQCD
      
        // Event weights (1 for MadGraph)
-       //bool tree->isMC = (run==1);
-       assert((tree->isMC && tree->run==1) || (!tree->isMC && tree->run!=1));
-       double w = (tree->isMC ? tree->genWeight : 1);
+       //bool isMC = (run==1);
+       assert((isMC && tree->run==1) || (!isMC && tree->run!=1));
+       double w = (isMC ? tree->genWeight : 1);
        if (isMG) {
          int iht = hxsec->FindBin(tree->LHE_HT);
          double xsec = hxsec->GetBinContent(iht);
@@ -1202,14 +1129,14 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        }
    
        //bool doPtHatFilter = true;
-       //if (doPtHatFilter && tree->isMC) {
+       //if (doPtHatFilter && isMC) {
        //if ( isMG && 2.*tree->Pileup_pthatmax>LHE_HT) continue;
        //if (!isMG && tree->Pileup_pthatmax>Generator_binvar) continue;
        //}
        
        // Pileup
        double TruePUrms(0);
-       if (!tree->isMC) tree->Pileup_nTrueInt = objS->getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
+       if (!isMC) tree->Pileup_nTrueInt = objS->getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
        double ptgam = gam.Pt();
    
        // Trigger selection. Take care to match pT bin edges
@@ -1218,53 +1145,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        // NB: Photon90 threshold could be 95, Photon175 coud be 185, if bins split?
        double pt = ptgam; // shorthand to make trigger selection more readable
        int itrg(0); // choose trigger for PU reweighing as side effect (hack...)
-       bool pass_trig = 
-         ((tree->is16 && 
-   	((tree->HLT_Photon175                  && pt>=230            && (itrg=175)) ||
-   	 //(tree->HLT_Photon165_HE10             && pt>=175 && pt<230) || // not in MC
-   	 (tree->HLT_Photon165_R9Id90_HE10_IsoM && pt>=175 && pt<230  && (itrg=165)) ||
-   	 (tree->HLT_Photon120_R9Id90_HE10_IsoM && pt>=130 && pt<175  && (itrg=120)) ||
-   	 (tree->HLT_Photon90_R9Id90_HE10_IsoM  && pt>=105 && pt<130  && (itrg=90)) ||
-   	 (tree->HLT_Photon75_R9Id90_HE10_IsoM  && pt>=85  && pt<105  && (itrg=75)) ||
-   	 (tree->HLT_Photon50_R9Id90_HE10_IsoM  && pt>=60  && pt<85   && (itrg=50)) ||
-   	 (tree->HLT_Photon36_R9Id90_HE10_IsoM  && pt>=40  && pt<60   && (itrg=36)) ||
-   	 (tree->HLT_Photon30_R9Id90_HE10_IsoM  && pt>=35  && pt<40   && (itrg=30)) ||
-   	 (tree->HLT_Photon22_R9Id90_HE10_IsoM  && pt>=20  && pt<35   && (itrg=22)) ||
-   	 (tree->isMC                           && pt>=40  && pt<60   && (itrg=36)) ||
-   	 (tree->isMC                           && pt>=35  && pt<40   && (itrg=30)) ||
-   	 (tree->isMC                           && pt>=20  && pt<35   && (itrg=22))
-   	 )) ||
-          (tree->is17 &&
-   	((tree->HLT_Photon200                  && pt>=230            && (itrg=200)) ||
-   	 (tree->HLT_Photon165_R9Id90_HE10_IsoM && pt>=175 && pt<230  && (itrg=165)) ||
-   	 (tree->HLT_Photon120_R9Id90_HE10_IsoM && pt>=130 && pt<175  && (itrg=120)) ||
-   	 (tree->HLT_Photon90_R9Id90_HE10_IsoM  && pt>=105 && pt<130  && (itrg=90)) ||
-   	 (tree->HLT_Photon75_R9Id90_HE10_IsoM  && pt>=85  && pt<105  && (itrg=75)) ||
-   	 (tree->HLT_Photon50_R9Id90_HE10_IsoM  && pt>=60  && pt<85   && (itrg=50)) ||
-   	 //(tree->HLT_Photon33                   && pt>=35  && pt<60 ) ||
-   	 (tree->HLT_Photon30_HoverELoose       && pt>=35  && pt<60   && (itrg=30)) ||
-   	 (tree->HLT_Photon20_HoverELoose       && pt>=20  && pt<35   && (itrg=20)) ||
-   	 //(tree->HLT_Photon20                     && pt>=20  && pt<60 )
-   	 (tree->isMC                           && pt>=35  && pt<60   && (itrg=30)) ||
-   	 (tree->isMC                           && pt>=20  && pt<35   && (itrg=20))
-   	 )) ||
-          (tree->is18 &&
-   	((tree->HLT_Photon200                    && pt>=230           && (itrg=200))||
-   	 (tree->HLT_Photon110EB_TightID_TightIso && pt>=130 && pt<230 && (itrg=110))||
-   	 (tree->HLT_Photon100EB_TightID_TightIso && pt>=105 && pt<130 && (itrg=100))||
-   	 (tree->HLT_Photon90_R9Id90_HE10_IsoM    && pt>=95  && pt<105 && (itrg=90)) ||
-   	 (tree->HLT_Photon75_R9Id90_HE10_IsoM    && pt>=85  && pt<95  && (itrg=75)) ||
-   	 (tree->HLT_Photon50_R9Id90_HE10_IsoM    && pt>=60  && pt<85  && (itrg=50)) ||
-   	 //(tree->HLT_Photon33                     && pt>=35  && pt<60 ) ||
-   	 (tree->HLT_Photon30_HoverELoose         && pt>=35  && pt<60  && (itrg=30)) ||
-   	 (tree->HLT_Photon20_HoverELoose         && pt>=20  && pt<35  && (itrg=20)) ||
-   	 //(tree->HLT_Photon20                   && pt>=20  && pt<35 )
-   	 (tree->isMC                           && pt>=35  && pt<60  && (itrg=30)) ||
-   	 (tree->isMC                           && pt>=20  && pt<35  && (itrg=20))
-   	 )) ||
-          // Push triggers to the limit for 22-23 (2022C bad 75,90)
-          (tree->isRun3 &&
-   	((tree->HLT_Photon200                 && pt>=230            && (itrg=200)) ||
+       bool pass_trig = ((tree->HLT_Photon200                 && pt>=230            && (itrg=200)) ||
    	 (tree->HLT_Photon110EB_TightID_TightIso && pt>=110&&pt<230 && (itrg=110)) ||
    	 (tree->HLT_Photon90_R9Id90_HE10_IsoM && pt>=90  && pt<110  && (itrg=90))  ||
    	 (tree->HLT_Photon75_R9Id90_HE10_IsoM && pt>=75  && pt<90   && (itrg=75))  ||
@@ -1273,79 +1154,20 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	 (tree->HLT_Photon30EB_TightID_TightIso  && pt>=30&&pt<50   && (itrg=30))  ||
    	 (tree->HLT_Photon20_HoverELoose      && pt>=20  && pt<30   && (itrg=20))
    	 //|| (true && (itrg=1))// trigger bypass for EGamma on photonTrigs.C
-   	 ))
-          );
+   	 );
      
        // Select trigger pT bins by hand for QCD. Error prone...
        if (isQCD && !pass_trig) {
-         pass_trig = 
-   	((tree->is16 && 
-   	  ((pt>=230            && (itrg=175)) ||
-   	   (pt>=175 && pt<230  && (itrg=165)) ||
-   	   (pt>=130 && pt<175  && (itrg=120)) ||
-   	   (pt>=105 && pt<130  && (itrg=90)) ||
-   	   (pt>=85  && pt<105  && (itrg=75)) ||
-   	   (pt>=60  && pt<85   && (itrg=50)) ||
-   	   (pt>=40  && pt<60   && (itrg=36)) ||
-   	   (pt>=35  && pt<40   && (itrg=30)) ||
-   	   (pt>=20  && pt<35   && (itrg=22))
-   	   )) ||
-   	 (tree->is17 &&
-   	  ((pt>=230            && (itrg=200)) ||
-   	   (pt>=175 && pt<230  && (itrg=165)) ||
-   	   (pt>=130 && pt<175  && (itrg=120)) ||
-   	   (pt>=105 && pt<130  && (itrg=90)) ||
-   	   (pt>=85  && pt<105  && (itrg=75)) ||
-   	   (pt>=60  && pt<85   && (itrg=50)) ||
-   	   (pt>=35  && pt<60   && (itrg=30)) ||
-   	   (pt>=20  && pt<35   && (itrg=20))
-   	   )) ||
-   	 (tree->is18 &&
-   	  ((pt>=230           && (itrg=200))||
-   	   (pt>=130 && pt<230 && (itrg=110))||
-   	   (pt>=105 && pt<130 && (itrg=100))||
-   	   (pt>=95  && pt<105 && (itrg=90)) ||
-   	   (pt>=85  && pt<95  && (itrg=75)) ||
-   	   (pt>=60  && pt<85  && (itrg=50)) ||
-   	   (pt>=35  && pt<60  && (itrg=30)) ||
-   	   (pt>=20  && pt<35  && (itrg=20))
-   	   )) ||
-   	 (tree->isRun3 &&
-   	  ((pt>=230            && (itrg=200)) ||
+         pass_trig = ((pt>=230            && (itrg=200)) ||
    	   (pt>=110&&pt<230 && (itrg=110)) ||
    	   (pt>=90  && pt<110  && (itrg=90))  ||
    	   (pt>=75  && pt<90   && (itrg=75))  ||
    	   (pt>=50  && pt<75   && (itrg=50))  ||
    	   (pt>=30&&pt<50   && (itrg=30))  ||
-   	   (pt>=20  && pt<30   && (itrg=20))
-   	   ))
-   	 );
+   	   (pt>=20  && pt<30   && (itrg=20)));
        } // isQCD
    
        assert(itrg>0 || !pass_trig);
-   
-       // Reweight MC pileup (except for 22-23)
-       if (tree->isMC && pass_trig && !tree->isRun3) {
-         TH1D *hm = objS->loadedPuHist[dataset][1]; assert(hm);
-         TH1D *hd = objS->loadedPuHist[sera][itrg];
-         if (!hd) cout << "Missing objS->loadedPuHist [sera="<<sera<<"][itrg="<<itrg<<"]"
-   		    << endl << flush;
-         assert(hd);
-         assert(hm->GetNbinsX()==hd->GetNbinsX());
-         int k = hm->FindBin(tree->Pileup_nTrueInt);
-         assert(hm->GetBinLowEdge(k)==hd->GetBinLowEdge(k));
-         double nm  = hm->GetBinContent(k);
-         assert(nm>0); // should never get here if hm made from fullMC
-         double nd  = hd->GetBinContent(k);
-         double wt = (nm>0 ? nd / nm : 0);
-         w *= wt;
-       }
-       // Normalize data luminosity (except for 22-23)
-       if (!tree->isMC && pass_trig && !tree->isRun3) {
-         double lumi = objS->loadedPuLumi[sera][itrg];
-         assert(lumi>0);
-         w *= 1./lumi;
-       }
    
        // Select leading jets. Just exclude photon, don't apply JetID yet
        Float_t         Jet_resFactor[tree->nJetMax]; // Custom addition
@@ -1421,7 +1243,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	
    	// Calculate L1RC correction
    	rawjet = (1-tree->Jet_rawFactor[i]) * jeti;
-   	double corrl1rc(1.); // tree->isRun3
+   	double corrl1rc(1.); // 
    	rcjet = corrl1rc * rawjet;
    	
    	// Corrected type-I chsMET calculation
@@ -1436,7 +1258,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        int iGenJet(-1), iGenJet2(-1);
        genjet.SetPtEtaPhiM(0,0,0,0);
        genjet2.SetPtEtaPhiM(0,0,0,0);
-       if (tree->isMC) {
+       if (isMC) {
          for (Int_t i = 0; i != tree->nGenJet; ++i) {
    	geni.SetPtEtaPhiM(tree->GenJet_pt[i],tree->GenJet_eta[i],tree->GenJet_phi[i],
    			  tree->GenJet_mass[i]);
@@ -1449,15 +1271,10 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	  genjet2 = geni;
    	}
          } // for i in tree->nGenJet
-       } // tree->isMC
+       } // isMC
    
        // Set MET vectors
-       if (tree->isRun3) {
-         rawmet.SetPtEtaPhiM(tree->RawPuppiMET_pt, 0, tree->RawPuppiMET_phi, 0);
-       }
-       else {
-         rawmet.SetPtEtaPhiM(tree->ChsMET_pt, 0, tree->ChsMET_phi, 0);
-       }
+       rawmet.SetPtEtaPhiM(tree->RawPuppiMET_pt, 0, tree->RawPuppiMET_phi, 0);
        if (isQCD && iFox!=-1) rawmet += fox - gam; // fox=rawjet-PU, gam=genjet
        else rawmet += rawgam - gam; // replace PF photon with Reco photon
        met1 = -jet -gam;
@@ -1518,32 +1335,14 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        // UL lists are separate, but all filter recommendations looked the same
        // Run3: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Run_3_recommendations
        bool pass_filt = 
-         (//(tree->isRun3 && tree->Flag_METFilters>0) ||
-          (tree->isRun3 &&
-   	tree->Flag_goodVertices &&
+   	(tree->Flag_goodVertices &&
    	tree->Flag_globalSuperTightHalo2016Filter &&
    	tree->Flag_EcalDeadCellTriggerPrimitiveFilter &&
    	tree->Flag_BadPFMuonFilter &&
    	tree->Flag_BadPFMuonDzFilter &&
    	tree->Flag_hfNoisyHitsFilter &&
    	tree->Flag_eeBadScFilter &&
-   	tree->Flag_ecalBadCalibFilter) ||
-          (!tree->isRun3 &&
-   	tree->Flag_goodVertices &&
-   	tree->Flag_globalSuperTightHalo2016Filter &&
-   	tree->Flag_HBHENoiseFilter &&
-   	tree->Flag_HBHENoiseIsoFilter &&
-   	tree->Flag_EcalDeadCellTriggerPrimitiveFilter &&
-   	tree->Flag_BadPFMuonFilter &&
-   	//tree->Flag_BadPFMuonDzFilter && // new in UL, but not in nAOD?
-   	//tree->Flag_BadChargedCandidateFilter && // not recommended
-   	//tree->Flag_globalTightHalo2016Filter && // obsolete?
-   	//tree->Flag_CSCTightHaloFilter // obsolete?
-   	(tree->is16 || tree->Flag_ecalBadCalibFilter) && //new in UL, not for UL16
-   	//(tree->isMC || tree->Flag_eeBadScFilter) // data only
-   	tree->Flag_eeBadScFilter // MC added 7 July 2021
-   	));
-       //) || tree->isRun3; // pass_filt
+   	tree->Flag_ecalBadCalibFilter);
        
        // Photon control plots
        h2ngam->Fill(ptgam, nGam, w);
@@ -1554,7 +1353,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        }
        if (ptgam>0 && fabs(gam.Eta()) < 1.3 && pass_filt) {
          hgam->Fill(ptgam, w);
-         if (tree->isMC) pfake->Fill(ptgam, iGam!=iGamGen ? 1 : 0, w);
+         if (isMC) pfake->Fill(ptgam, iGam!=iGamGen ? 1 : 0, w);
          if (isQCD) {
    	bool hasorig = (iGamOrig!=-1 && gam.DeltaR(gamorig)<0.2);
    	bool inwindow = (fabs(gamorig.Pt() / ptgam - 0.9) < 0.2); // [0.8,1.1]
@@ -1576,8 +1375,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
          }
    
          // Plots for photon trigger efficiencies
-         if (tree->isMC)  hgam0_mc->Fill(ptgam, w);
-         if (!tree->isMC) hgam0_data->Fill(ptgam, w);
+         if (isMC)  hgam0_mc->Fill(ptgam, w);
+         if (!isMC) hgam0_data->Fill(ptgam, w);
          
          hgam0 ->Fill(ptgam, w);
          // Backup high pT
@@ -1622,8 +1421,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    
          // Summary of combined trigger efficiencies
          if (ptgam>0 && fabs(gam.Eta())<1.3 && pass_trig && pass_filt) {
-   	if (tree->isMC)  hgamtrig_mc->Fill(ptgam, w);
-   	if (!tree->isMC) hgamtrig_data->Fill(ptgam, w);
+   	if (isMC)  hgamtrig_mc->Fill(ptgam, w);
+   	if (!isMC) hgamtrig_data->Fill(ptgam, w);
    	hgamtrig->Fill(ptgam, w); // 5 GeV bins to match hgam[trgX]
    	hgamtrg->Fill(ptgam, w); // wider binning to higher pT (=hgam)
          }
@@ -1656,7 +1455,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
              std::abort();
          }
        
-         bool pass_leak = (phoj.Pt()<0.06*ptgam);// || tree->isRun3);
+         bool pass_leak = (phoj.Pt()<0.06*ptgam);// 
          bool pass_basic = (pass_trig && pass_filt && pass_ngam && pass_njet &&
    			 pass_gameta && pass_dphi && pass_jetid && pass_veto &&
    			 pass_leak); // add pass_gameta v19 / 202111122 !
@@ -1768,7 +1567,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	if (pass_mpf && pass_bal) h2mpfc2->Fill(ptgam, mpf, w);
    	if (pass_basic_ext) {
    
-   	  if (pass_gen || !tree->isMC) {
+   	  if (pass_gen || !isMC) {
    	    h2rjet->Fill(ptgam, jet.Pt() / ptgam, w);
    	    prjet->Fill(ptgam, jet.Pt() / ptgam, w);
    	  }
@@ -1779,7 +1578,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	    prgen->Fill(genjet.Pt(), jet.Pt() / genjet.Pt(), w);
    	  }
    
-   	  int flv = (tree->isMC ? tree->GenJet_partonFlavour[iGenJet] : 99);
+   	  int flv = (isMC ? tree->GenJet_partonFlavour[iGenJet] : 99);
    	  mvar["counts"] = 1;
    	  mvar["mpfchs1"] = mpf;
    	  mvar["ptchs"] = bal;
@@ -1791,12 +1590,10 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	  mvar["gjet"] = (ptgam!=0 ? genjet.Pt() / ptgam : 0);
    	  mvar["rgen"] = (genjet.Pt()!=0 ? jet.Pt() / genjet.Pt() : 0);
    
-   	  if (tree->isRun3) { // temporary patch
-   	    tree->Jet_btagDeepB[iJet] = tree->Jet_btagDeepFlavB[iJet];
-   	    tree->Jet_btagDeepC[iJet] = 0.5*(tree->Jet_btagDeepFlavCvB[iJet] +
-   				       tree->Jet_btagDeepFlavCvL[iJet]);
-   	    tree->Jet_qgl[iJet] = tree->Jet_btagDeepFlavQG[iJet];
-   	  }
+   	  tree->Jet_btagDeepB[iJet] = tree->Jet_btagDeepFlavB[iJet];
+   	  tree->Jet_btagDeepC[iJet] = 0.5*(tree->Jet_btagDeepFlavCvB[iJet] +
+   	  		       tree->Jet_btagDeepFlavCvL[iJet]);
+   	  tree->Jet_qgl[iJet] = tree->Jet_btagDeepFlavQG[iJet];
    	  bool isb = (tree->Jet_btagDeepB[iJet] > bthr);
    	  bool isc = (tree->Jet_btagDeepC[iJet] > cthr && !isb);
    	  bool isq = (tree->Jet_qgl[iJet]>=0.5 && tree->Jet_qgl[iJet] && !isb && !isc);
@@ -1872,7 +1669,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
              */
    	}
    	if (pass_basic_ext && jet2.Pt()>0) {
-   	  if (iGenJet2!=-1 || !tree->isMC) {
+   	  if (iGenJet2!=-1 || !isMC) {
    	    h2rjet2->Fill(ptgam, jet2.Pt() / ptgam, w);
    	    prjet2->Fill(ptgam, jet2.Pt() / ptgam, w);
    	  }
@@ -1891,8 +1688,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	//     old bin trigger edges  (20,30,60,85,*95*,105,130,230)
    	double pt = ptgam;
    	double mu = tree->Pileup_nTrueInt;
-   	if (tree->isMC                             && pt>210)  hmusmc->Fill(mu, w);
-   	int nmax = (tree->isMC ? 1 : 100);
+   	if (isMC                             && pt>210)  hmusmc->Fill(mu, w);
+   	int nmax = (isMC ? 1 : 100);
    	for (int i=0; i!=nmax; ++i) {
    	  mu = gRandom->Gaus(tree->Pileup_nTrueInt,TruePUrms);
    	  double w1 = 0.01*w;
@@ -1925,7 +1722,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
     double phoSmearSF_Up     = 1.0;
     double phoSmearSF_Down   = 1.0;
    	if (iGam!=-1){ 
-        if (oName.Contains("Data")){
+        if (isData){
             phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_correction", 
                         tree->Photon_seedGain[iGam], 
                         static_cast<Float_t>(tree->run), 
@@ -1933,7 +1730,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
                         tree->Photon_r9[iGam],
                         tree->Photon_pt[iGam]});
         }
-        if (oName.Contains("MC")){
+        if (isMC){
             double phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_uncertainty",
                         tree->Photon_seedGain[iGam], 
                         static_cast<Float_t>(tree->run), 
@@ -2057,8 +1854,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	  pnef->Fill(ptgam, tree->Jet_neEmEF[iJet], w);
    	  pcef->Fill(ptgam, tree->Jet_chEmEF[iJet], w);
    	  pmuf->Fill(ptgam, tree->Jet_muEF[iJet], w);
-   	  //if (tree->isRun3) tree->Jet_chFPV0EF[iJet] = 0;
-   	  //ppuf->Fill(ptgam, tree->Jet_chFPV0EF[iJet], w);
    	  
    	  // 2D composition and response
    	  if (ptgam>230) {
@@ -2074,7 +1869,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	    //p2puf->Fill(eta, phi, tree->Jet_chFPV0EF[iJet], w);
    	  }
    
-   	  if (tree->isMC) {
+   	  if (isMC) {
    	    if (ptgam>=105 && ptgam<230)
    	      hmus->Fill(tree->Pileup_nTrueInt, w);
    	    h2mus->Fill(ptgam, tree->Pileup_nTrueInt, w);
@@ -2088,9 +1883,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	    } // for i in 100
    	  } // is MC
    	  //if (ptgam>=130 && ptgam<175) {
-   	  //if ((tree->is16 && ptgam>175) ||
-   	  //  (tree->is17 && ptgam>230) ||
-   	  //  (tree->is18 && ptgam>130)) {
    	  if (ptgam>230 && iGam!=-1) {
    	    pgainvsmu->Fill(tree->Pileup_nTrueInt, tree->Photon_seedGain[iGam], w);
    	    if (tree->Photon_eCorr) // safety for 2016
@@ -2276,7 +2068,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        	 << (100.*_nbadevents_veto/_nevents) << "%) \n";
    
      // Add extra plot for jet response vs photon pT
-     if (tree->isMC) {
+     if (isMC) {
        fout->cd("control");
        TH1D *hrgenvgen = prgen->ProjectionX("hrgenvgen");
        TH1D *hrgenvgam = prjet->ProjectionX("hrgenvgam");

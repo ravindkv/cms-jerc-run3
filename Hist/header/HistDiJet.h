@@ -25,6 +25,7 @@
 #include "EventPick.h"
 #include "ObjectPick.h"
 #include "ObjectScale.h"
+#include "GlobalFlag.h"
 
 #include "correction.h"
 struct BasicHistosDiJet {
@@ -86,7 +87,7 @@ public:
   TProfile2D *p2jsf;//, *p2jsftc, *p2jsfpf;
 };
 
-class HistDiJet {
+class HistDiJet: public GlobalFlag{
  public :
     HistDiJet();
     int Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fout);
@@ -106,8 +107,6 @@ class HistDiJet {
     // Error counters
     int cntErrDR = 0;
 	
-    bool            isQCD;
-    bool            isMG;
     string          dataset;
     string          version;
     string          _filename; // file name for debugging purposes

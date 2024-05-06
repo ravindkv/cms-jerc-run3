@@ -8,28 +8,23 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
 
+#include "GlobalFlag.h"
 #include<vector>
 
 using namespace std;
 const Int_t maxP = 600;
 
-class SkimTree{
+class SkimTree: public GlobalFlag{
  public:
-    SkimTree(); 
+    SkimTree(TString oName): GlobalFlag(oName){
+        fCurrent = -1;
+    }; 
     ~SkimTree();
     Long64_t GetEntries();
     Int_t GetEntry(Long64_t entry);
     Int_t           fCurrent; //!current Tree number in a TChain
     virtual Long64_t loadEntry(Long64_t entry);
 
-    int             isMC;     // data=0, PythiaPtFlat=1, MadGraphHT=2
-    bool            is16apv, is16fgh, is16;
-    bool            is17;
-    bool            is18;
-    bool            is22;
-    bool            is22v10;
-    bool            is23;
-    bool            isRun2, isRun3;
     // nCorrT1MetJet, nFatJet, nJet, nSoftActivityJet, nSubJet
     static const int nJetMax = 200;
     // nPhoton, nFsrPhoton, nGenIsolatedPhoton

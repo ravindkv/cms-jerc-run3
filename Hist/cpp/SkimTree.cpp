@@ -29,7 +29,7 @@ void SkimTree::loadInput(){
 void SkimTree::setInputJsonPath(string inDir){
     string year = "2022";
     TString oN = iName;
-    if(oN.Contains("2023")) year = "2023";
+    if(is23) year = "2023";
     string channel = splitString(loadedSampKey, "_").at(2);
     inputJsonPath = inDir+"/FilesSkim_"+year+"_"+channel+".json";
     cout<<"+ setInputJsonPath() = "<<inputJsonPath<<endl;
@@ -101,24 +101,15 @@ void SkimTree::loadTree(){
 	fChain->SetBranchAddress("luminosityBlock", &luminosityBlock);
 	fChain->SetBranchAddress("event", &event);
 
-	if(oN.Contains("2022")) is22 = true;
-	if(oN.Contains("2023")) is23 = true;
-	if(is22 || is23) isRun3 = true;
-	if(!oN.Contains("Data")) isMC = true;
-
     //--------------------------------------- 
     //Jet for all channels 
     //--------------------------------------- 
 	fChain->SetBranchAddress("nJet", &nJet);
 	fChain->SetBranchAddress("Jet_area", &Jet_area);
-	if (!(is22 || is23)) fChain->SetBranchAddress("Jet_btagDeepB", &Jet_btagDeepB);
-	if (!(is22 || is23)) fChain->SetBranchAddress("Jet_btagDeepC", &Jet_btagDeepC);
-	if (is22 || is23) {
-	  fChain->SetBranchAddress("Jet_btagDeepFlavB"   , &Jet_btagDeepFlavB);
-	  fChain->SetBranchAddress("Jet_btagDeepFlavCvB" , &Jet_btagDeepFlavCvB);
-	  fChain->SetBranchAddress("Jet_btagDeepFlavCvL" , &Jet_btagDeepFlavCvL);
-	  fChain->SetBranchAddress("Jet_btagDeepFlavQG"  , &Jet_btagDeepFlavQG);
-	}
+	fChain->SetBranchAddress("Jet_btagDeepFlavB"   , &Jet_btagDeepFlavB);
+	fChain->SetBranchAddress("Jet_btagDeepFlavCvB" , &Jet_btagDeepFlavCvB);
+	fChain->SetBranchAddress("Jet_btagDeepFlavCvL" , &Jet_btagDeepFlavCvL);
+	fChain->SetBranchAddress("Jet_btagDeepFlavQG"  , &Jet_btagDeepFlavQG);
 	fChain->SetBranchAddress("Jet_chEmEF"    , &Jet_chEmEF);
 	fChain->SetBranchAddress("Jet_chHEF"     , &Jet_chHEF);
 	fChain->SetBranchAddress("Jet_eta"       , &Jet_eta);
@@ -128,7 +119,6 @@ void SkimTree::loadTree(){
 	fChain->SetBranchAddress("Jet_neHEF"     , &Jet_neHEF);
 	fChain->SetBranchAddress("Jet_phi"       , &Jet_phi);
 	fChain->SetBranchAddress("Jet_pt"        , &Jet_pt);
-	if (!(is22 || is23)) fChain->SetBranchAddress("Jet_qgl", &Jet_qgl);
 	fChain->SetBranchAddress("Jet_rawFactor", &Jet_rawFactor);
 	fChain->SetBranchAddress("Jet_jetId", &Jet_jetId);
 	if (isMC)
@@ -137,7 +127,7 @@ void SkimTree::loadTree(){
     //--------------------------------------- 
     // Photon (for GamJet)
     //--------------------------------------- 
-	if(oN.Contains("GamJet")){
+	if(isGamJet){
 		fChain->SetBranchAddress("nPhoton", &nPhoton);
 		fChain->SetBranchAddress("Photon_eCorr", &Photon_eCorr);
 		fChain->SetBranchAddress("Photon_energyErr", &Photon_energyErr);
@@ -178,7 +168,7 @@ void SkimTree::loadTree(){
     //--------------------------------------- 
     // Electron (for DiEleJet)
     //--------------------------------------- 
-	if(oN.Contains("DiEleJet")){
+	if(isDiEleJet){
 		//status
 		fChain->SetBranchStatus("nElectron",1);
 		fChain->SetBranchStatus("Electron_*",1);
@@ -204,7 +194,7 @@ void SkimTree::loadTree(){
     //--------------------------------------- 
     // Muon (for DiMuJet)
     //--------------------------------------- 
-    if (oN.Contains("DiMuJet")){
+    if (isDiMuJet){
 		//status
 		fChain->SetBranchStatus("nMuon",1);
 		fChain->SetBranchStatus("Muon_*",1);
@@ -232,19 +222,9 @@ void SkimTree::loadTree(){
         fChain->SetBranchAddress("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", &HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8);
     }
 
-	if (isRun2) {
-	  fChain->SetBranchAddress("ChsMET_phi", &ChsMET_phi);
-	  fChain->SetBranchAddress("ChsMET_pt", &ChsMET_pt);
-	}
-	
-	if (isRun3) {
-	  fChain->SetBranchAddress("RawPuppiMET_phi", &RawPuppiMET_phi);
-	  fChain->SetBranchAddress("RawPuppiMET_pt", &RawPuppiMET_pt);
-	}
-	if (!isRun3)
-	  fChain->SetBranchAddress("fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll);
-	if (isRun3)
-	  fChain->SetBranchAddress("Rho_fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll);
+	fChain->SetBranchAddress("RawPuppiMET_phi", &RawPuppiMET_phi);
+	fChain->SetBranchAddress("RawPuppiMET_pt", &RawPuppiMET_pt);
+	fChain->SetBranchAddress("Rho_fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll);
 	fChain->SetBranchAddress("PV_npvs", &PV_npvs);
 	fChain->SetBranchAddress("PV_npvsGood", &PV_npvsGood);
 	
@@ -268,8 +248,8 @@ void SkimTree::loadTree(){
 	fChain->SetBranchAddress("Flag_muonBadTrackFilter", &Flag_muonBadTrackFilter);
 	fChain->SetBranchAddress("Flag_BadChargedCandidateFilter", &Flag_BadChargedCandidateFilter);
 	fChain->SetBranchAddress("Flag_BadPFMuonFilter", &Flag_BadPFMuonFilter);
-	if (isRun3) fChain->SetBranchAddress("Flag_BadPFMuonDzFilter", &Flag_BadPFMuonDzFilter);
-	if (isRun3) fChain->SetBranchAddress("Flag_hfNoisyHitsFilter", &Flag_hfNoisyHitsFilter);
+	fChain->SetBranchAddress("Flag_BadPFMuonDzFilter", &Flag_BadPFMuonDzFilter);
+	fChain->SetBranchAddress("Flag_hfNoisyHitsFilter", &Flag_hfNoisyHitsFilter);
 	fChain->SetBranchAddress("Flag_BadChargedCandidateSummer16Filter", &Flag_BadChargedCandidateSummer16Filter);
 	fChain->SetBranchAddress("Flag_BadPFMuonSummer16Filter", &Flag_BadPFMuonSummer16Filter);
 	fChain->SetBranchAddress("Flag_trkPOG_manystripclus53X", &Flag_trkPOG_manystripclus53X);
@@ -289,11 +269,8 @@ void SkimTree::loadTree(){
      fChain->SetBranchAddress("GenJet_phi", &GenJet_phi);
      fChain->SetBranchAddress("GenJet_pt", &GenJet_pt);
      fChain->SetBranchAddress("GenJet_partonFlavour", &GenJet_partonFlavour);
-
-     if (is22 || is23)
-       fChain->SetBranchAddress("LHE_HT", &LHE_HT);
-
-     if (!oN.Contains("QCD")) {
+     fChain->SetBranchAddress("LHE_HT", &LHE_HT);
+     if (!isQCD){
        fChain->SetBranchAddress("nGenIsolatedPhoton", &nGenIsolatedPhoton);
        fChain->SetBranchAddress("GenIsolatedPhoton_eta", &GenIsolatedPhoton_eta);
        fChain->SetBranchAddress("GenIsolatedPhoton_mass", &GenIsolatedPhoton_mass);
@@ -301,7 +278,6 @@ void SkimTree::loadTree(){
        fChain->SetBranchAddress("GenIsolatedPhoton_pt", &GenIsolatedPhoton_pt);
      } // isQCD
    } // isMC
-
 }
 
 std::vector<std::vector<std::string>> SkimTree::splitVector(const std::vector<std::string>& strings, int n) {
@@ -335,9 +311,9 @@ std::vector<std::string> SkimTree::splitString(const std::string& s, const std::
     return tokens;
 }
 
-SkimTree::SkimTree(){
-    fCurrent  = -1;
-}
+//SkimTree::SkimTree(oName){
+//    fCurrent  = -1;
+//}
 
 SkimTree::~SkimTree(){
     delete fChain;

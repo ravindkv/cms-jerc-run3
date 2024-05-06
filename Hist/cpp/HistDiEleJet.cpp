@@ -98,7 +98,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    		 2.650, 2.853, 2.964, 3.139, 3.489, 3.839, 5.191};
      const int ny = sizeof(vy)/sizeof(vy[0])-1;
    
-     string dir = (tree->isMC ? "MC" : "DATA");
+     string dir = (isMC ? "MC" : "DATA");
      
      vector<pair<double,double> > etas;
      etas.push_back(make_pair<double,double>(0,1.305));
@@ -183,8 +183,8 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
      double vht_qcd3[] =
        {0, 40, 70, 100, 200, 400, 600, 800, 1000, 1200, 1500, 2000, 6800};
      const int nht_qcd3 = sizeof(vht_qcd3)/sizeof(vht_qcd3[0])-1;
-     const double *vht_qcd = (tree->isRun3 ? &vht_qcd3[0] : &vht_qcd2[0]);
-     const int nht_qcd = (tree->isRun3 ? nht_qcd3 : nht_qcd2);
+     const double *vht_qcd =  &vht_qcd3[0]; 
+     const int nht_qcd =  nht_qcd3;
      int nMG_qcd(0);
      double wMG_qcd(0);
      if (isMG && isQCD) {
@@ -209,8 +209,8 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
           {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Summer22MG, local files
         int vnwgt3[nht_qcd3] =
           {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}; // Summer22MG, local files
-        const int *vnevt = (tree->isRun3 ? &vnevt3[0] : &vnevt2[0]);
-        const int *vnwgt = (tree->isRun3 ? &vnwgt3[0] : &vnevt2[0]);
+        const int *vnevt = (&vnevt3[0]);
+        const int *vnwgt = (&vnwgt3[0]);
         for (int i = 0; i != nht_qcd; ++i) {
           hnevt->SetBinContent(i+1, vnevt[i]);
           hsumw->SetBinContent(i+1, vnwgt[i]);
@@ -231,7 +231,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	2.520e+07, 1.936e+06, 9.728e+04,
    	1.323e+04, //3.044e+04, //HT 60to800
    	3.027e+03, 8.883e+02, 3.834e+02, 1.253e+02, 2.629e+01};
-        const double *vxsec = (tree->isRun3 ? &vxsec3[0] : &vxsec2[0]);
+        const double *vxsec = (&vxsec3[0]);
         for (int i = 0; i != nht_qcd; ++i) {
           hxsec->SetBinContent(i+1, vxsec[i]);
         }
@@ -708,8 +708,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
      // Match ordering to Lyon files (alpha->eta->data/MC) when creating
      // Although otherwise ordering is data/MC->eta->alpha
      // Add PS weight variations
-     unsigned int nps = (tree->isMC ? tree->nPSWeightMax+1 : 1);
-     //unsigned int nps = ((tree->isMC && !tree->isRun3) ? tree->nPSWeightMax+1 : 1);
+     unsigned int nps = (isMC ? tree->nPSWeightMax+1 : 1);
      map<int, map<int, map<int, BasicHistosDiEleJet*> > > mBasicHistosDiEleJet;
      for (unsigned int ialpha = 0; ialpha != alphas.size(); ++ialpha) {
        for (unsigned int ieta = 0; ieta != etas.size(); ++ieta) { 
@@ -806,7 +805,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
          cout<<Form("%s%1.4g",(i==1 ? "{" : ", "),hsumw->GetBinContent(i));
        }
        cout << "}; // " << dataset << endl << flush;
-     } // tree->isMC && nentries!=nMG
+     } // isMC && nentries!=nMG
      
      //int skip = 21700000; // 2018A first events without 110EB
      //int skip = 55342793; // 2018A first events with 92 DiEle
@@ -862,12 +861,12 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
          tree->fixedGridRhoFastjetAll = 34; // average conditions
        
        // Sanity check PS weights
-       if (!tree->isMC) { tree->nPSWeight = 0; }
-       //if (!tree->isMC || tree->is22 || tree->is23) { tree->nPSWeight = 0; }
+       if (!isMC) { tree->nPSWeight = 0; }
+       //if (!isMC || tree->is22 || tree->is23) { tree->nPSWeight = 0; }
        assert(tree->nPSWeight<=tree->nPSWeightMax);
    
        // Does the run/LS pass the latest JSON selection?
-       if (!tree->isMC && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
+       if (!isMC && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
          //_badjson.insert(pair<int, int>(run, lbn));
          ++_nbadevents_json;
          continue;
@@ -965,22 +964,11 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    
        // Correct DiEle for gain1 and MPF for "footprint" (DiEle vs PFZma)
        rawZ = Z;
-       if (iGam!=-1 && tree->Photon_seedGain[iGam]==1 && !tree->isMC) {
+       if (iGam!=-1 && tree->Photon_seedGain[iGam]==1 && !isMC) {
          //Z *= 1./1.01;
          // minitools/drawGainVsPt.C (add R_6/12+R_1/6, take MPF+statTowardsDB)
-         if (!tree->isRun3) Z *= 1./1.011; // MPF=1.13+/-0.04%, DB=1.05+/-0.08%
-         if ( tree->isRun3) Z *= 1./1.017; // MPF=1.74+/-0.07%, DB=1.41+/-0.16%
+         Z *= 1./1.017; // MPF=1.74+/-0.07%, DB=1.41+/-0.16%
        }
-       if (iGam!=-1 && !tree->isRun3) {
-         // [0]+log(x)*([1]+log(x)*[2]) in range [15,1750] to MC p_DiEle_j0
-         //1  p0           4.57516e-02   3.91871e-04   1.09043e-07   4.17033e-05
-         //2  p1          -1.27462e-02   1.50968e-04   2.08432e-08   3.92715e-03
-         //3  p2           1.07760e-03   1.45293e-05   3.93020e-09   1.65460e-01
-         double x = max(60.,rawZ.Pt());
-         double f = 4.57516e-02 + log(x) * ( -1.27462e-02 + log(x) * 1.07760e-03);
-         rawZ *= (1+f);
-       }
-      
        // Photon-jet: uncorrected jet minus (uncorr.) DiEle minus L1RC
        if (iGam!=-1 && tree->Photon_jetIdx[iGam]!=-1) {
          //assert(tree->Photon_jetIdx[iGam]>=-1);
@@ -1073,9 +1061,9 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        } // isQCD
      
        // Event weights (1 for MadGraph)
-       //bool tree->isMC = (run==1);
-       assert((tree->isMC && tree->run==1) || (!tree->isMC && tree->run!=1));
-       double w = (tree->isMC ? tree->genWeight : 1);
+       //bool isMC = (run==1);
+       assert((isMC && tree->run==1) || (!isMC && tree->run!=1));
+       double w = (isMC ? tree->genWeight : 1);
        if (isMG) {
          int iht = hxsec->FindBin(tree->LHE_HT);
          double xsec = hxsec->GetBinContent(iht);
@@ -1089,14 +1077,14 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        }
    
        //bool doPtHatFilter = true;
-       //if (doPtHatFilter && tree->isMC) {
+       //if (doPtHatFilter && isMC) {
        //if ( isMG && 2.*tree->Pileup_pthatmax>LHE_HT) continue;
        //if (!isMG && tree->Pileup_pthatmax>Generator_binvar) continue;
        //}
        
        // Pileup
        double TruePUrms(0);
-       if (!tree->isMC) tree->Pileup_nTrueInt = objS->getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
+       if (!isMC) tree->Pileup_nTrueInt = objS->getTruePU(tree->run,tree->luminosityBlock,&TruePUrms);
        double ptZ = Z.Pt();
    
        // Trigger selection. Take care to match pT bin edges
@@ -1111,38 +1099,6 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        // Select trigger pT bins by hand for QCD. Error prone...
        if (isQCD && !pass_trig) {
          pass_trig = 
-   	((tree->is16 && 
-   	  ((pt>=230            && (itrg=175)) ||
-   	   (pt>=175 && pt<230  && (itrg=165)) ||
-   	   (pt>=130 && pt<175  && (itrg=120)) ||
-   	   (pt>=105 && pt<130  && (itrg=90)) ||
-   	   (pt>=85  && pt<105  && (itrg=75)) ||
-   	   (pt>=60  && pt<85   && (itrg=50)) ||
-   	   (pt>=40  && pt<60   && (itrg=36)) ||
-   	   (pt>=35  && pt<40   && (itrg=30)) ||
-   	   (pt>=20  && pt<35   && (itrg=22))
-   	   )) ||
-   	 (tree->is17 &&
-   	  ((pt>=230            && (itrg=200)) ||
-   	   (pt>=175 && pt<230  && (itrg=165)) ||
-   	   (pt>=130 && pt<175  && (itrg=120)) ||
-   	   (pt>=105 && pt<130  && (itrg=90)) ||
-   	   (pt>=85  && pt<105  && (itrg=75)) ||
-   	   (pt>=60  && pt<85   && (itrg=50)) ||
-   	   (pt>=35  && pt<60   && (itrg=30)) ||
-   	   (pt>=20  && pt<35   && (itrg=20))
-   	   )) ||
-   	 (tree->is18 &&
-   	  ((pt>=230           && (itrg=200))||
-   	   (pt>=130 && pt<230 && (itrg=110))||
-   	   (pt>=105 && pt<130 && (itrg=100))||
-   	   (pt>=95  && pt<105 && (itrg=90)) ||
-   	   (pt>=85  && pt<95  && (itrg=75)) ||
-   	   (pt>=60  && pt<85  && (itrg=50)) ||
-   	   (pt>=35  && pt<60  && (itrg=30)) ||
-   	   (pt>=20  && pt<35  && (itrg=20))
-   	   )) ||
-   	 (tree->isRun3 &&
    	  ((pt>=230            && (itrg=200)) ||
    	   (pt>=110&&pt<230 && (itrg=110)) ||
    	   (pt>=90  && pt<110  && (itrg=90))  ||
@@ -1150,34 +1106,10 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	   (pt>=50  && pt<75   && (itrg=50))  ||
    	   (pt>=30&&pt<50   && (itrg=30))  ||
    	   (pt>=20  && pt<30   && (itrg=20))
-   	   ))
    	 );
        } // isQCD
    
        assert(itrg>0 || !pass_trig);
-   
-       // Reweight MC pileup (except for 22-23)
-       if (tree->isMC && pass_trig && !tree->isRun3) {
-         TH1D *hm = objS->loadedPuHist[dataset][1]; assert(hm);
-         TH1D *hd = objS->loadedPuHist[sera][itrg];
-         if (!hd) cout << "Missing objS->loadedPuHist[sera="<<sera<<"][itrg="<<itrg<<"]"
-   		    << endl << flush;
-         assert(hd);
-         assert(hm->GetNbinsX()==hd->GetNbinsX());
-         int k = hm->FindBin(tree->Pileup_nTrueInt);
-         assert(hm->GetBinLowEdge(k)==hd->GetBinLowEdge(k));
-         double nm  = hm->GetBinContent(k);
-         assert(nm>0); // should never get here if hm made from fullMC
-         double nd  = hd->GetBinContent(k);
-         double wt = (nm>0 ? nd / nm : 0);
-         w *= wt;
-       }
-       // Normalize data luminosity (except for 22-23)
-       if (!tree->isMC && pass_trig && !tree->isRun3) {
-         double lumi = objS->loadedPuLumi[sera][itrg];
-         assert(lumi>0);
-         w *= 1./lumi;
-       }
    
        // Select leading jets. Just exclude DiEle, don't apply JetID yet
        Float_t         Jet_resFactor[tree->nJetMax]; // Custom addition
@@ -1268,7 +1200,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        int iGenJet(-1), iGenJet2(-1);
        genjet.SetPtEtaPhiM(0,0,0,0);
        genjet2.SetPtEtaPhiM(0,0,0,0);
-       if (tree->isMC) {
+       if (isMC) {
          for (Int_t i = 0; i != tree->nGenJet; ++i) {
    	geni.SetPtEtaPhiM(tree->GenJet_pt[i],tree->GenJet_eta[i],tree->GenJet_phi[i],
    			  tree->GenJet_mass[i]);
@@ -1281,15 +1213,10 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	  genjet2 = geni;
    	}
          } // for i in tree->nGenJet
-       } // tree->isMC
+       } // isMC
    
        // Set MET vectors
-       if (tree->isRun3) {
-         rawmet.SetPtEtaPhiM(tree->RawPuppiMET_pt, 0, tree->RawPuppiMET_phi, 0);
-       }
-       else {
-         rawmet.SetPtEtaPhiM(tree->ChsMET_pt, 0, tree->ChsMET_phi, 0);
-       }
+       rawmet.SetPtEtaPhiM(tree->RawPuppiMET_pt, 0, tree->RawPuppiMET_phi, 0);
        if (isQCD && iFox!=-1) rawmet += fox - Z; // fox=rawjet-PU, Z=genjet
        else rawmet += rawZ - Z; // replace PF DiEle with Reco DiEle
        met1 = -jet -Z;
@@ -1350,32 +1277,14 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        // UL lists are separate, but all filter recommendations looked the same
        // Run3: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Run_3_recommendations
        bool pass_filt = 
-         (//(tree->isRun3 && tree->Flag_METFilters>0) ||
-          (tree->isRun3 &&
-   	tree->Flag_goodVertices &&
+   	(tree->Flag_goodVertices &&
    	tree->Flag_globalSuperTightHalo2016Filter &&
    	tree->Flag_EcalDeadCellTriggerPrimitiveFilter &&
    	tree->Flag_BadPFMuonFilter &&
    	tree->Flag_BadPFMuonDzFilter &&
    	tree->Flag_hfNoisyHitsFilter &&
    	tree->Flag_eeBadScFilter &&
-   	tree->Flag_ecalBadCalibFilter) ||
-          (!tree->isRun3 &&
-   	tree->Flag_goodVertices &&
-   	tree->Flag_globalSuperTightHalo2016Filter &&
-   	tree->Flag_HBHENoiseFilter &&
-   	tree->Flag_HBHENoiseIsoFilter &&
-   	tree->Flag_EcalDeadCellTriggerPrimitiveFilter &&
-   	tree->Flag_BadPFMuonFilter &&
-   	//tree->Flag_BadPFMuonDzFilter && // new in UL, but not in nAOD?
-   	//tree->Flag_BadChargedCandidateFilter && // not recommended
-   	//tree->Flag_globalTightHalo2016Filter && // obsolete?
-   	//tree->Flag_CSCTightHaloFilter // obsolete?
-   	(tree->is16 || tree->Flag_ecalBadCalibFilter) && //new in UL, not for UL16
-   	//(tree->isMC || tree->Flag_eeBadScFilter) // data only
-   	tree->Flag_eeBadScFilter // MC added 7 July 2021
-   	));
-       //) || tree->isRun3; // pass_filt
+   	tree->Flag_ecalBadCalibFilter);
        
        // Photon control plots
        h2nZ->Fill(ptZ, nGam, w);
@@ -1386,7 +1295,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        }
        if (ptZ>0 && fabs(Z.Eta()) < 1.3 && pass_filt) {
          hZ->Fill(ptZ, w);
-         if (tree->isMC) pfake->Fill(ptZ, iGam!=iGamGen ? 1 : 0, w);
+         if (isMC) pfake->Fill(ptZ, iGam!=iGamGen ? 1 : 0, w);
          if (isQCD) {
    	bool hasorig = (iGamOrig!=-1 && Z.DeltaR(Zorig)<0.2);
    	bool inwindow = (fabs(Zorig.Pt() / ptZ - 0.9) < 0.2); // [0.8,1.1]
@@ -1408,8 +1317,8 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
          }
    
          // Plots for DiEle trigger efficiencies
-         if (tree->isMC)  hZ0_mc->Fill(ptZ, w);
-         if (!tree->isMC) hZ0_data->Fill(ptZ, w);
+         if (isMC)  hZ0_mc->Fill(ptZ, w);
+         if (!isMC) hZ0_data->Fill(ptZ, w);
          
          hZ0 ->Fill(ptZ, w);
          // Backup high pT
@@ -1418,8 +1327,8 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    
          // Summary of combined trigger efficiencies
          if (ptZ>0 && fabs(Z.Eta())<1.3 && pass_trig && pass_filt) {
-   	if (tree->isMC)  hZtrig_mc->Fill(ptZ, w);
-   	if (!tree->isMC) hZtrig_data->Fill(ptZ, w);
+   	if (isMC)  hZtrig_mc->Fill(ptZ, w);
+   	if (!isMC) hZtrig_data->Fill(ptZ, w);
    	hZtrig->Fill(ptZ, w); // 5 GeV bins to match hZ[trgX]
    	hZtrg->Fill(ptZ, w); // wider binning to higher pT (=hZ)
          }
@@ -1563,7 +1472,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	if (pass_mpf && pass_bal) h2mpfc2->Fill(ptZ, mpf, w);
    	if (pass_basic_ext) {
    
-   	  if (pass_gen || !tree->isMC) {
+   	  if (pass_gen || !isMC) {
    	    h2rjet->Fill(ptZ, jet.Pt() / ptZ, w);
    	    prjet->Fill(ptZ, jet.Pt() / ptZ, w);
    	  }
@@ -1574,7 +1483,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	    prgen->Fill(genjet.Pt(), jet.Pt() / genjet.Pt(), w);
    	  }
    
-   	  int flv = (tree->isMC ? tree->GenJet_partonFlavour[iGenJet] : 99);
+   	  int flv = (isMC ? tree->GenJet_partonFlavour[iGenJet] : 99);
    	  mvar["counts"] = 1;
    	  mvar["mpfchs1"] = mpf;
    	  mvar["ptchs"] = bal;
@@ -1586,12 +1495,10 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	  mvar["gjet"] = (ptZ!=0 ? genjet.Pt() / ptZ : 0);
    	  mvar["rgen"] = (genjet.Pt()!=0 ? jet.Pt() / genjet.Pt() : 0);
    
-   	  if (tree->isRun3) { // temporary patch
-   	    tree->Jet_btagDeepB[iJet] = tree->Jet_btagDeepFlavB[iJet];
-   	    tree->Jet_btagDeepC[iJet] = 0.5*(tree->Jet_btagDeepFlavCvB[iJet] +
-   				       tree->Jet_btagDeepFlavCvL[iJet]);
-   	    tree->Jet_qgl[iJet] = tree->Jet_btagDeepFlavQG[iJet];
-   	  }
+   	  tree->Jet_btagDeepB[iJet] = tree->Jet_btagDeepFlavB[iJet];
+   	  tree->Jet_btagDeepC[iJet] = 0.5*(tree->Jet_btagDeepFlavCvB[iJet] +
+   	  		       tree->Jet_btagDeepFlavCvL[iJet]);
+   	  tree->Jet_qgl[iJet] = tree->Jet_btagDeepFlavQG[iJet];
    	  bool isb = (tree->Jet_btagDeepB[iJet] > bthr);
    	  bool isc = (tree->Jet_btagDeepC[iJet] > cthr && !isb);
    	  bool isq = (tree->Jet_qgl[iJet]>=0.5 && tree->Jet_qgl[iJet] && !isb && !isc);
@@ -1667,7 +1574,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
              */
    	}
    	if (pass_basic_ext && jet2.Pt()>0) {
-   	  if (iGenJet2!=-1 || !tree->isMC) {
+   	  if (iGenJet2!=-1 || !isMC) {
    	    h2rjet2->Fill(ptZ, jet2.Pt() / ptZ, w);
    	    prjet2->Fill(ptZ, jet2.Pt() / ptZ, w);
    	  }
@@ -1686,8 +1593,8 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	//     old bin trigger edges  (20,30,60,85,*95*,105,130,230)
    	double pt = ptZ;
    	double mu = tree->Pileup_nTrueInt;
-   	if (tree->isMC                             && pt>210)  hmusmc->Fill(mu, w);
-   	int nmax = (tree->isMC ? 1 : 100);
+   	if (isMC                             && pt>210)  hmusmc->Fill(mu, w);
+   	int nmax = (isMC ? 1 : 100);
    	for (int i=0; i!=nmax; ++i) {
    	  mu = gRandom->Gaus(tree->Pileup_nTrueInt,TruePUrms);
    	  double w1 = 0.01*w;
@@ -1749,7 +1656,6 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	  pnef->Fill(ptZ, tree->Jet_neEmEF[iJet], w);
    	  pcef->Fill(ptZ, tree->Jet_chEmEF[iJet], w);
    	  pmuf->Fill(ptZ, tree->Jet_muEF[iJet], w);
-   	  //if (tree->isRun3) tree->Jet_chFPV0EF[iJet] = 0;
    	  //ppuf->Fill(ptZ, tree->Jet_chFPV0EF[iJet], w);
    	  
    	  // 2D composition and response
@@ -1766,7 +1672,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	    //p2puf->Fill(eta, phi, tree->Jet_chFPV0EF[iJet], w);
    	  }
    
-   	  if (tree->isMC) {
+   	  if (isMC) {
    	    if (ptZ>=105 && ptZ<230)
    	      hmus->Fill(tree->Pileup_nTrueInt, w);
    	    h2mus->Fill(ptZ, tree->Pileup_nTrueInt, w);
@@ -1780,9 +1686,6 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
    	    } // for i in 100
    	  } // is MC
    	  //if (ptZ>=130 && ptZ<175) {
-   	  //if ((tree->is16 && ptZ>175) ||
-   	  //  (tree->is17 && ptZ>230) ||
-   	  //  (tree->is18 && ptZ>130)) {
    	  if (ptZ>230 && iGam!=-1) {
    	    pgainvsmu->Fill(tree->Pileup_nTrueInt, tree->Photon_seedGain[iGam], w);
    	    if (tree->Photon_eCorr) // safety for 2016
@@ -1968,7 +1871,7 @@ int HistDiEleJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *f
        	 << (100.*_nbadevents_veto/_nevents) << "%) \n";
    
      // Add extra plot for jet response vs DiEle pT
-     if (tree->isMC) {
+     if (isMC) {
        fout->cd("control");
        TH1D *hrgenvgen = prgen->ProjectionX("hrgenvgen");
        TH1D *hrgenvZ = prjet->ProjectionX("hrgenvZ");

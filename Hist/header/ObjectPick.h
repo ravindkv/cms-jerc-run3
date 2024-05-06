@@ -14,6 +14,7 @@
 #include<bitset>
 
 #include "correction.h"
+#include "GlobalFlag.h"
 typedef correction::Correction::Ref cRef; 
 #include <random>
 
@@ -41,9 +42,33 @@ static const double photonEA[7][3] = {{0.0360, 0.0597, 0.1210},
 									  {0.0254, 0.0184, 0.1457},
 									  {0.0217, 0.0284, 0.1719},
 									  {0.0167, 0.0591, 0.1998}};
-class ObjectPick{
+class ObjectPick: public GlobalFlag{
 public:
-	ObjectPick();
+	ObjectPick(TString oName): GlobalFlag(oName){
+    year = "2016";
+    printEvent = -1;
+
+    looseJetID = false;
+    systVariation == "nom"; 
+    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+    btag_cut = 0.8484;  
+    topTagWP = 0.74;
+
+    // whether to invert lepton requirements for 
+    QCDselect = false;
+
+    skipAK4AK8dr = false;
+
+    smearJetPt = true;
+    smearPho = true;
+    smearEle = true;
+    scaleEle = true;
+    scalePho = true;
+    isSignal = false;
+    isQCD = false;
+
+    }
+
 	~ObjectPick();
 	void process_objects(SkimTree* inp_tree);
 	std::vector<int> Muons;
@@ -88,7 +113,6 @@ public:
 	bool   looseJetID;
 	bool   QCDselect;
     bool isSignal;
-    bool isQCD;
     bool sampForTopPt;
     bool skipAK4AK8dr;
 

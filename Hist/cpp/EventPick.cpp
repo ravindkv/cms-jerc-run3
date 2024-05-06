@@ -3,26 +3,6 @@
 #include <iostream>
 #include <iomanip>
 
-EventPick::EventPick(std::string titleIn){
-    title = titleIn;
-    year = "2016";
-    printEvent = -1;
-
-    // Cut levels
-    MET_cut = 20.0;
-    Nlep_eq = 1;
-    Njet_ge = 3;
-    NBjet_ge = 1;
-    Nmu_eq = 1;
-    Nele_eq = 1;
-    Npho_eq = 1;
-    
-    NlooseMuVeto_le = 0;
-    NlooseEleVeto_le = 0;
-
-
-}
-
 EventPick::~EventPick(){
 }
 /*

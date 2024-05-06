@@ -3,6 +3,7 @@
 #include "HistDiEleJet.h"
 #include "SkimTree.h"
 #include "ObjectScale.h"
+#include "GlobalFlag.h"
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -47,37 +48,18 @@ int main(int argc, char* argv[]){
         }
     }
     cout<<"\n./makeHist -o " <<outName<<endl;
+    TString oName = outName;
 
     cout<<"\n--------------------------------------"<<endl;
-    cout<<" Set and load SkimTree.cpp"<<endl;
+    cout<<" Set GlobalFlag.cpp"<<endl;
     cout<<"--------------------------------------"<<endl;
-    SkimTree *skimT = new SkimTree();
-    skimT->setInput(outName);
-    skimT->loadInput();
-    cout<<endl;
-    skimT->setInputJsonPath("input/json/");
-    skimT->loadInputJson();
-    cout<<endl;
-    skimT->loadJobFileNames();
-    cout<<endl;
-    skimT->loadTree();
-    cout<<endl;
+    GlobalFlag *globF =  new GlobalFlag(oName);
+    globF->printFlag();
 
-    TString oName = outName;
-    string outDir = "output";
-    mkdir(outDir.c_str(), S_IRWXU);
-    cout << "new output file name: "<< outDir+"/"+oName << endl;
-    TFile *fout = new TFile(outDir+"/"+oName, "RECREATE");
-    
     cout<<"\n--------------------------------------"<<endl;
     cout<<" Set and load ObjectScale.cpp"<<endl;
     cout<<"--------------------------------------"<<endl;
-    ObjectScale *objS = new ObjectScale();
-    if(oName.Contains("2022")) objS->setIs22(true);
-    if(oName.Contains("2023")) objS->setIs23(true);
-    if(oName.Contains("2024")) objS->setIs24(true);
-    if(oName.Contains("Data")) objS->setIsData(true);
-
+    ObjectScale *objS = new ObjectScale(oName);
     //Jet veto 
     objS->setJetVetoKey(oName); 
     objS->setJetVetoName(oName); 
@@ -121,29 +103,49 @@ int main(int argc, char* argv[]){
     objS->loadPuHist(); 
 
     cout<<"\n--------------------------------------"<<endl;
+    cout<<" Set and load SkimTree.cpp"<<endl;
+    cout<<"--------------------------------------"<<endl;
+    SkimTree *skimT = new SkimTree(oName);
+    skimT->setInput(outName);
+    skimT->loadInput();
+    cout<<endl;
+    skimT->setInputJsonPath("input/json/");
+    skimT->loadInputJson();
+    cout<<endl;
+    skimT->loadJobFileNames();
+    cout<<endl;
+    skimT->loadTree();
+    cout<<endl;
+
+    string outDir = "output";
+    mkdir(outDir.c_str(), S_IRWXU);
+    cout << "new output file name: "<< outDir+"/"+oName << endl;
+    TFile *fout = new TFile(outDir+"/"+oName, "RECREATE");
+
+    cout<<"\n--------------------------------------"<<endl;
     cout<<" Loop over events and fill Histos"<<endl;
     cout<<"--------------------------------------"<<endl;
-    if(oName.Contains("GamJet")){
+    if(globF->isGamJet){
       cout<<"==> Running GamJet"<<endl;
-      HistGamJet *gamJet = new HistGamJet();
+      HistGamJet *gamJet = new HistGamJet(oName);
       gamJet->Run(oName, skimT, objS, fout);  
     }
 
-    if(oName.Contains("DiEleJet")){
+    if(globF->isDiEleJet){
       cout<<"==> Running DiEleJet"<<endl;
-      //HistDiEleJet *diEleJet = new HistDiEleJet();
+      //HistDiEleJet *diEleJet = new HistDiEleJet(oName);
       //diEleJet->Run(oName, skimT, objS, fout);  
     }
     
-    if(oName.Contains("DiMuJet")){
+    if(globF->isDiMuJet){
       cout<<"==> Running DiMuJet"<<endl;
-      //HistDiMuJet *diMuJet = new HistDiMuJet();
+      //HistDiMuJet *diMuJet = new HistDiMuJet(oName);
       //diMuJet->Run(oName, skimT, objS, fout);  
     }
 
-    if(oName.Contains("DiJet")){
+    if(globF->isDiJet){
       cout<<"==> Running DiJet"<<endl;
-      //HistDiJet *diJet = new HistDiJet();
+      //HistDiJet *diJet = new HistDiJet(oName);
       //diJet->Run(oName, skimT, objS, fout);  
     }
 

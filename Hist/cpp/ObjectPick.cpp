@@ -2,31 +2,6 @@
 
 TRandom* generator = new TRandom3(0);
 
-ObjectPick::ObjectPick(){
-    year = "2016";
-    printEvent = -1;
-
-    looseJetID = false;
-    systVariation == "nom"; 
-    //https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-    btag_cut = 0.8484;  
-    topTagWP = 0.74;
-
-    // whether to invert lepton requirements for 
-    QCDselect = false;
-
-    skipAK4AK8dr = false;
-
-    smearJetPt = true;
-    smearPho = true;
-    smearEle = true;
-    scaleEle = true;
-    scalePho = true;
-    isSignal = false;
-    isQCD = false;
-
-}
-
 void ObjectPick::init_JER(cRef jerRefSF, cRef jerRefSF8, cRef jerRefReso, cRef jerRefReso8){
     jerRefSF_   = jerRefSF;
     jerRefSF8_  = jerRefSF8;

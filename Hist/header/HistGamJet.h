@@ -25,6 +25,7 @@
 #include "EventPick.h"
 #include "ObjectPick.h"
 #include "ObjectScale.h"
+#include <GlobalFlag.h>
 
 #include "correction.h"
 struct BasicHistosGamJet {
@@ -86,9 +87,9 @@ public:
   TProfile2D *p2jsf;//, *p2jsftc, *p2jsfpf;
 };
 
-class HistGamJet {
+class HistGamJet: public GlobalFlag {
  public :
-    HistGamJet(){
+    HistGamJet(TString oName): GlobalFlag(oName){
         _gh_debug   = false;
         _gh_debug100 = false;
         doGamjet = true;
@@ -113,8 +114,6 @@ class HistGamJet {
 
     // Error counters
     int cntErrDR;
-    bool    isQCD;
-    bool    isMG;
     //string  dataset;
     string  version;
     string  _filename; // file name for debugging purposes
