@@ -43,7 +43,7 @@ class SkimTree: public GlobalFlag{
     static const int nTrigObjMax = 50;
     static const int nSVMax = 100;
 
-    static const int nPSWeightMax = 4;
+    static const int nPSWeightMax = 400;
 
 //  Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -119,6 +119,8 @@ class SkimTree: public GlobalFlag{
     Float_t         GenIsolatedPhoton_eta[nPhotonMax];
     Float_t         GenIsolatedPhoton_phi[nPhotonMax];
     Float_t         GenIsolatedPhoton_mass[nPhotonMax];
+    Int_t           GenIsolatedPhoton_pdgId[nPhotonMax];
+
     // Triggers from 2016
     Bool_t          HLT_Photon250_NoHE;
     Bool_t          HLT_Photon300_NoHE;
@@ -161,7 +163,7 @@ class SkimTree: public GlobalFlag{
     //--------------------------------------- 
     // Electron (for DiEleJet)
     //--------------------------------------- 
-    UInt_t          nEle_;
+    Int_t           nEle_;
     Float_t         elePhi_[100];
     Float_t         elePt_[100];
     Float_t         eleEta_[100];
@@ -171,7 +173,7 @@ class SkimTree: public GlobalFlag{
     Int_t           eleID_[100];
     Bool_t  HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ;
 
-    UInt_t  nGenDressedLepton;
+    Int_t  nGenDressedLepton;
     Float_t GenDressedLepton_pt[100];
     Float_t GenDressedLepton_phi[100];
     Float_t GenDressedLepton_mass[100];

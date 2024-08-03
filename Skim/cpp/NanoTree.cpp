@@ -29,6 +29,7 @@ void NanoTree::setInputJsonPath(string inDir){
     string year = "2022";
     TString oN = iName;
     if(oN.Contains("2023")) year = "2023";
+    if(oN.Contains("2024")) year = "2024";
     string channel = splitString(loadedSampKey, "_").at(2);
     inputJsonPath = inDir+"/FilesNano_"+year+"_"+channel+".json";
     cout<<"+ setInputJsonPath() = "<<inputJsonPath<<endl;

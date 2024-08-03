@@ -13,7 +13,7 @@
 using namespace std;
 
 int main(int argc, char* argv[]){
-    string fileDefault = "input/json/FilesSkim_2022_GamJet.json";//default file
+    string fileDefault = "input/json/FilesSkim_2024_DiEleJet.json";//default file
     ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -65,7 +65,6 @@ int main(int argc, char* argv[]){
     objS->setJetVetoName(oName); 
     objS->setJetVetoJsonPath(oName); 
     objS->loadJetVetoRef(); 
-    cout<<endl;
 
     //Jet L2L3 
     objS->setJetL2L3Names(oName); 
@@ -73,22 +72,26 @@ int main(int argc, char* argv[]){
     objS->loadJetL2L3Refs(); 
     cout<<endl;
 
-    //Photon SS 
-    objS->setPhoSsName(oName); 
-    objS->setPhoSsJsonPath(oName); 
-    objS->loadPhoSsRef(); 
-    cout<<endl;
-
-    //Electron SS 
-    objS->setEleSsName(oName); 
-    objS->setEleSsJsonPath(oName); 
-    objS->loadEleSsRef(); 
-    cout<<endl;
+    if(globF->isGamJet){
+        //Photon SS 
+        objS->setPhoSsName(oName); 
+        objS->setPhoSsJsonPath(oName); 
+        objS->loadPhoSsRef(); 
+        cout<<endl;
+        
+        //Electron SS 
+        objS->setEleSsName(oName); 
+        objS->setEleSsJsonPath(oName); 
+        objS->loadEleSsRef(); 
+        cout<<endl;
+    }
 
     //Lumi
-    objS->setLumiJsonPath(oName); 
-    objS->loadLumiJson(); 
-    cout<<endl;
+    if (globF->isData){
+        objS->setLumiJsonPath(oName); 
+        objS->loadLumiJson(); 
+        cout<<endl;
+    }
 
     //PU Text
     objS->setPuTextPath(oName); 
@@ -119,7 +122,6 @@ int main(int argc, char* argv[]){
 
     string outDir = "output";
     mkdir(outDir.c_str(), S_IRWXU);
-    cout << "new output file name: "<< outDir+"/"+oName << endl;
     TFile *fout = new TFile(outDir+"/"+oName, "RECREATE");
 
     cout<<"\n--------------------------------------"<<endl;
@@ -128,13 +130,13 @@ int main(int argc, char* argv[]){
     if(globF->isGamJet){
       cout<<"==> Running GamJet"<<endl;
       HistGamJet *gamJet = new HistGamJet(oName);
-      gamJet->Run(oName, skimT, objS, fout);  
+      gamJet->Run(oName,  skimT, objS, fout);  
     }
 
     if(globF->isDiEleJet){
       cout<<"==> Running DiEleJet"<<endl;
-      //HistDiEleJet *diEleJet = new HistDiEleJet(oName);
-      //diEleJet->Run(oName, skimT, objS, fout);  
+      HistDiEleJet *diEleJet = new HistDiEleJet(oName);
+      diEleJet->Run(skimT, objS, fout);  
     }
     
     if(globF->isDiMuJet){

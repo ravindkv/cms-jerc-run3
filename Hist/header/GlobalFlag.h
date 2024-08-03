@@ -10,6 +10,8 @@ class GlobalFlag{
         GlobalFlag(TString oName);
         ~GlobalFlag();
         
+        bool isDebug;
+
         //Year 
         bool is22;
         bool is23;
@@ -22,13 +24,19 @@ class GlobalFlag{
         bool is22E;
         bool is22F;
         bool is22G;
+        bool isPostEE;
         //Eras 2023
+        bool is23A;
         bool is23B;
         bool is23C;
+        bool is23Cv123;
+        bool is23Cv4;
         bool is23D;
         bool is23E;
         bool is23F;
         bool is23G;
+        bool is23Pre;
+        bool is23Post;
         //Eras 2024
         bool is24B;
         bool is24C;

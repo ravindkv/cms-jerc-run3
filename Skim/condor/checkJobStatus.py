@@ -4,7 +4,7 @@ import sys
 import json
 import itertools
 from ROOT import TFile
-from createJdlFiles import createJobs
+from createJobFiles import createJobs
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.getcwd().replace("condor",""))
 from Inputs import *

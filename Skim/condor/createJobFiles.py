@@ -8,6 +8,7 @@ from Inputs import *
 
 def createJobs(jsonFile, jdlFile, logDir="log"):
     os.system(f"mkdir -p tmpSub/{logDir}")
+    os.system("cp /tmp/%s tmpSub"%vomsProxy)
     common_command = \
     'Universe   = vanilla\n\
     should_transfer_files = YES\n\
@@ -16,7 +17,6 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     x509userproxy        = %s\n\
     +MaxRuntime = 60*60*24\n\
     max_retries = 2\n\
-    use_x509userproxy = true\n\
     Output = %s/log_$(cluster)_$(process).stdout\n\
     Log = %s/log_$(cluster)_$(process).log\n\
     Error  = %s/log_$(cluster)_$(process).stderr\n\n'%(vomsProxy, logDir, logDir, logDir)

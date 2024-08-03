@@ -27,6 +27,7 @@
 #include "ObjectScale.h"
 #include "GlobalFlag.h"
 #include "correction.h"
+
 struct BasicHistosDiEleJet {
   TH1D *hn;
   TH1D *hxsec;
@@ -43,85 +44,19 @@ struct BasicHistosDiEleJet {
   TProfile *pres;
 };
 
-class MoreHistosDiEleJet {
- public:
-  
-  TH1D *hpt13, *hpt13a, *hpt13j;
-  TProfile *pptg, *pptj;
-  TProfile *pres, *pjsf, *pm0, *pm2, *pmn, *pmu;
-
-  // Resolution
-  TProfile *pm0x, *pm2x;
-
-  // Extra FRS studies
-  TProfile *pmnu, *pmnx, *pmux, *pmnux;
-  
-  // Composition
-  TProfile *prho, *pchf, *pnef, *pnhf;
-
-  // Alternative pT bins
-  TProfile *presa, *pm0a, *pm2a, *pmna, *pmua;
-  TProfile *presj, *pm0j, *pm2j, *pmnj, *pmuj;
-};
-
-class MoreHistosDiEleJet2 {
-public:
-
-  // Basic information about the trigger
-  //string trg;
-  //int trgpt;
-  //double ptmin, ptmax, absetamin, absetamax;
-
-  TH2D *h2pteta;
-  TProfile2D *p2res, *p2m0, *p2m2, *p2mn, *p2mu;
-  TProfile2D *p2m0x, *p2m2x;
-
-  // Extra for FSR studies
-  TProfile2D *p2mnu, *p2mnx, *p2mux, *p2mnux;
-  //TH2D *h2ptetatc, *h2ptetapf;
-  //TProfile2D *p2restc, *p2m0tc, *p2m2tc, *p2mntc, *p2mutc; // pT,tag (central)
-  //TProfile2D *p2respf, *p2m0pf, *p2m2pf, *p2mnpf, *p2mupf; // pT,probe (forward)
-
-  // Smearing controls
-  TProfile2D *p2jsf;//, *p2jsftc, *p2jsfpf;
-};
-
 class HistDiEleJet: public GlobalFlag{
  public :
     HistDiEleJet(TString oName): GlobalFlag(oName){}
-    int Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fout);
+    int Run(SkimTree *tree, ObjectScale *objS, TFile *fout);
     ~HistDiEleJet();
 
  private :
-
-    EventPick* evtPick;   
+    EventPick* eventPick;
     ObjectPick* objectPick;   
     //ObjectScale* objectScale;
 	
-    bool _gh_debug = false;
-    bool _gh_debug100 = false;
-
-    bool doGamjet = true;
-    bool doGamjet2 = true;
     bool smearJets = false;
 
-    // Error counters
-    int cntErrDR = 0;
-    //string          dataset;
-    string          version;
-    string          _filename; // file name for debugging purposes
-    static const bool debugFiles = true;
-    bool debug = false;//true;
-    string systematicType;
-
-    int eventNum = -1;
-
-    bool isSystematicRun;
-
-    void InitVariables();
-    void FillEvent(std::string year);
-    void InitBranches();
-   // Code originally from jetphys/HistosFill.C
 };
 
 #endif

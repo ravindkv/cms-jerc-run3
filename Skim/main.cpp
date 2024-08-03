@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesNano_2022_GamJet.json";//default file
+    std::string fileDefault = "input/json/FilesNano_2024_DiMuJet.json";// for help ONLY
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{

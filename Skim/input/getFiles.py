@@ -36,12 +36,12 @@ def formatNum(num):
 
 if __name__=="__main__":
     allJobs = 0
-    toNano = {}
-    toSkim = {}
-    toJobs = {}
     if not os.path.exists("json"):
         os.makedirs("json")
     for year, ch in itertools.product(Years, Channels):
+        toNano = {}
+        toSkim = {}
+        toJobs = {}
         f1 = open(f"json/FilesNano_{year}_{ch}.json", "w")
         f2 = open(f"json/JobsSkim_{year}_{ch}.json", "w")
         f3 = open(f"json/FilesSkim_{year}_{ch}.json", "w")

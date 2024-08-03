@@ -2,44 +2,46 @@
 #include<iostream>
    
 //-------------------------------------
-// Jet Veto Maps
+// Jet Veto Maps: applied to bota data and MC
 //-------------------------------------
 void ObjectScale::setJetVetoKey(TString oName){
-       if (isData){
-           if(is22 || is23){
-               jetVetoKey = "jetvetomap";
-           }
-       }
-       else{
-           jetVetoKey = "jetvetomap";
-       }
-     cout<<"+ setJetVetoKey() = "<<jetVetoKey<<endl;
+     jetVetoKey = "jetvetomap";
+     cout<<setw(25)<<"setJetVetoKey() = "<<jetVetoKey<<endl;
 } 
    
 void ObjectScale::setJetVetoName(TString oName){
-    if (isData){
-        if(is22C || is22D){
-            //jetVetoName = "Summer22_23Sep2023_RunCD_V1";
-            //jetVetoName = "Summer22EE_23Sep2023_RunEFG_V1";
-            jetVetoName = "Winter22Run3_RunCD_V1";
-        }
-    }
-    else{
-        jetVetoName = "Winter22Run3_RunCD_V1";
-    }
-     cout<<"+ setJetVetoName() = "<<jetVetoName<<endl;
+     if(is22C || is22D){
+         jetVetoName = "Winter22Run3_RunCD_V1";
+     }
+     if(is22E){
+         jetVetoName = "Winter22Run3_RunE_V1";
+     }
+     if(is23A || is23B || is23C || is23Pre){
+         jetVetoName = "Summer23Prompt23_RunC_V1";
+     }
+     if(is23D || is23E || is23F || is23G || is23Post){
+         jetVetoName = "Summer23BPixPrompt23_RunD_V1";
+     }
+     if(is24){//FIXME
+         jetVetoName = "Summer23BPixPrompt23_RunD_V1";
+     }
+     cout<<setw(25)<<"setJetVetoName() = "<<jetVetoName<<endl;
 } 
    
 void ObjectScale::setJetVetoJsonPath(TString oName){
-    if (isData){
-        if(is22 || is22D){
-            jetVetoJsonPath = "POG/JME/2022_Prompt/jetvetomaps.json.gz";
-        }
-    }
-    else{
-        jetVetoJsonPath = "POG/JME/2022_Prompt/jetvetomaps.json.gz";
-    }
-     cout<<"+ setJetVetoJsonPath() = "<<jetVetoJsonPath<<endl;
+     if(is22 || is22D){
+         jetVetoJsonPath = "POG/JME/2022_Prompt/jetvetomaps.json.gz";
+     }
+     if(is23A || is23B || is23C || is23Pre){
+         jetVetoJsonPath = "POG/JME/2023_Summer23/jetvetomaps.json.gz";
+     }
+     if(is23D || is23E || is23F || is23G || is23Post){
+         jetVetoJsonPath = "POG/JME/2023_Summer23BPix/jetvetomaps.json.gz";
+     }
+     if(is24){//FIXME
+         jetVetoJsonPath = "POG/JME/2023_Summer23BPix/jetvetomaps.json.gz";
+     }
+     cout<<setw(25)<<"setJetVetoJsonPath() = "<<jetVetoJsonPath<<endl;
 } 
 
 void ObjectScale::loadJetVetoRef(){
@@ -58,46 +60,80 @@ void ObjectScale::loadJetVetoRef(){
 // Jet L2L3 corrections
 //-------------------------------------
 void ObjectScale::setJetL2L3Names(TString oName){
-     if (isData){
-       if(is22C){
-           jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
-           jetL2L3Names.push_back("Summer22_22Sep2023_RunCD_V2_DATA_L2L3Residual_AK4PFPuppi");
-       }
-       if(is22D){
-           jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
-           jetL2L3Names.push_back("Summer22_22Sep2023_RunCD_V2_DATA_L2L3Residual_AK4PFPuppi");
-       }
-       if(is22E){
-           jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
-           jetL2L3Names.push_back("Run22E-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
-       }
-       if(is22F){
-           jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
-           jetL2L3Names.push_back("Run22F-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-       }
-       if(is22G){
-           jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
-           jetL2L3Names.push_back("Run22G-Prompt_DATA_L2L3Residual_AK4PFPuppi");
-       }
-     }
-     else{
-       jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
-     }
-     cout<<"+ setJetL2L3Names() = ";
-     for(string jN: jetL2L3Names){ cout<<jN<<", ";}
-     cout<<endl;
-} 
-   
-void ObjectScale::setJetL2L3JsonPath(TString oName){
     if (isData){
-        if(is22 || is22D){
-            jetL2L3JsonPath = "POG/JME/2022_Summer22/jet_jerc.json.gz";
+        if(is22C){
+            jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer22_22Sep2023_RunCD_V2_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is22D){
+            jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer22_22Sep2023_RunCD_V2_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is22E){
+            jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
+            jetL2L3Names.push_back("Run22E-22Sep2023_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is22F){
+            jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
+            jetL2L3Names.push_back("Run22F-Prompt_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is22G){
+            jetL2L3Names.push_back("Summer22EEVetoRun3_V1_MC_L2Relative_AK4PUPPI");
+            jetL2L3Names.push_back("Run22G-Prompt_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is23A || is23B || is23Cv123){
+            jetL2L3Names.push_back("Summer23Prompt23_RunCv123_V1_DATA_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23Prompt23_RunCv123_V1_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is23Cv4){
+            jetL2L3Names.push_back("Summer23Prompt23_RunCv4_V1_DATA_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23Prompt23_RunCv4_V1_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is23D || is23E || is23F || is23G){
+            jetL2L3Names.push_back("Summer23BPixPrompt23_RunD_V1_DATA_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23BPixPrompt23_RunD_V1_DATA_L2L3Residual_AK4PFPuppi");
+        }
+        if(is24){//FIXME
+            jetL2L3Names.push_back("Summer23BPixPrompt23_RunD_V1_DATA_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23BPixPrompt23_RunD_V1_DATA_L2L3Residual_AK4PFPuppi");
         }
     }
     else{
+        if(is22){ 
+            jetL2L3Names.push_back("Summer22_22Sep2023_V2_MC_L2Relative_AK4PFPuppi");
+        }
+        if(is23Pre){ 
+            jetL2L3Names.push_back("Summer23Prompt23_V1_MC_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23Prompt23_V1_MC_L2L3Residual_AK4PFPuppi");
+        }
+        if(is23Post){ 
+            jetL2L3Names.push_back("Summer23BPixPrompt23_V1_MC_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23BPixPrompt23_V1_MC_L2L3Residual_AK4PFPuppi");
+        }
+        if(is24){//FIXME
+            jetL2L3Names.push_back("Summer23BPixPrompt23_V1_MC_L2Relative_AK4PFPuppi");
+            jetL2L3Names.push_back("Summer23BPixPrompt23_V1_MC_L2L3Residual_AK4PFPuppi");
+        }
+    }
+    cout<<setw(25)<<"setJetL2L3Names() = ";
+    for(string jN: jetL2L3Names){ cout<<jN<<", ";}
+    cout<<endl;
+} 
+   
+void ObjectScale::setJetL2L3JsonPath(TString oName){
+    if(is22 || is22D){
         jetL2L3JsonPath = "POG/JME/2022_Summer22/jet_jerc.json.gz";
     }
-     cout<<"+ setJetL2L3JsonPath() = "<<jetL2L3JsonPath<<endl;
+    if(is23A || is23B || is23C || is23Pre){
+        jetL2L3JsonPath = "POG/JME/2023_Summer23/jet_jerc.json.gz";
+    }
+    if(is23D || is23E || is23F || is23G || is23Post){
+        jetL2L3JsonPath = "POG/JME/2023_Summer23BPix/jet_jerc.json.gz";
+    }
+    if(is24){//FIXME
+        jetL2L3JsonPath = "POG/JME/2023_Summer23BPix/jet_jerc.json.gz";
+    }
+    cout<<setw(25)<<"setJetL2L3JsonPath() = "<<jetL2L3JsonPath<<endl;
 } 
    
 void ObjectScale::loadJetL2L3Refs(){
@@ -118,23 +154,25 @@ void ObjectScale::loadJetL2L3Refs(){
 // Photon Scale and Smearing 
 //-------------------------------------
 void ObjectScale::setPhoSsName(TString oName){
-    if(is22B || is22C || is22D){
-        phoSsName = "2022Re-recoBCD_ScaleJSON";
+    if(is22B || is22C || is22D || isMC){
+        //phoSsName = "2022Re-recoBCD_ScaleJSON";
+        phoSsName = "2022Re-recoBCD_SmearingJSON";
     }
-    if(is22E || is22F || is22G){
-        phoSsName = "2022Re-recoE+PromptFG_ScaleJSON";
+    if(is22E || is22F || is22G || (isMC && isPostEE)){
+        //phoSsName = "2022Re-recoE+PromptFG_ScaleJSON";
+        phoSsName = "2022Re-recoE+PromptFG_SmearingJSON";
     }
-     cout<<"+ setPhoSsName() = "<<phoSsName<<endl;
+     cout<<setw(25)<<"setPhoSsName() = "<<phoSsName<<endl;
 } 
    
 void ObjectScale::setPhoSsJsonPath(TString oName){
-    if(is22B || is22C || is22D){
+    if(is22B || is22C || is22D || isMC){
         phoSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoBCD/photonSS.json";
     }
-    if(is22E || is22F || is22G){
+    if(is22E || is22F || is22G || (isMC && isPostEE)){
         phoSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoE+PromptFG/photonSS.json";
     }
-     cout<<"+ setPhoSsJsonPath() = "<<phoSsJsonPath<<endl;
+     cout<<setw(25)<<"setPhoSsJsonPath() = "<<phoSsJsonPath<<endl;
 } 
 
 void ObjectScale::loadPhoSsRef(){
@@ -160,17 +198,17 @@ void ObjectScale::setEleSsName(TString oName){
     if(is22E || is22F || is22G){
         eleSsName = "2022Re-recoE+PromptFG_ScaleJSON";
     }
-     cout<<"+ setEleSsName() = "<<eleSsName<<endl;
+     cout<<setw(25)<<"setEleSsName() = "<<eleSsName<<endl;
 } 
    
 void ObjectScale::setEleSsJsonPath(TString oName){
-    if(is22B || is22C || is22D){
+    if(is22B || is22C || is22D || isMC){
         eleSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoBCD/electronSS.json";
     }
-    if(is22E || is22F || is22G){
+    if(is22E || is22F || is22G || (isMC && isPostEE)){
         eleSsJsonPath = "POG/EGM/S+SJSON/2022Re-recoE+PromptFG/electronSS.json";
     }
-     cout<<"+ setEleSsJsonPath() = "<<eleSsJsonPath<<endl;
+     cout<<setw(25)<<"setEleSsJsonPath() = "<<eleSsJsonPath<<endl;
 } 
 
 void ObjectScale::loadEleSsRef(){
@@ -199,69 +237,43 @@ void ObjectScale::setLumiJsonPath(TString oName){
       lumiJsonPath = "POG/files/Cert_Collisions2022_355100_362760_Golden.json";
     if (is23)
       lumiJsonPath = "POG/files/Cert_Collisions2023_366442_370790_Golden.json";
-    cout<<"+ setLumiJsonPath() = "<<lumiJsonPath<<endl;
+    if (is24)
+      lumiJsonPath = "POG/files/Cert_Collisions2024_378981_381594_Golden.json";
+    cout<<setw(25)<<"setLumiJsonPath() = "<<lumiJsonPath<<endl;
 } 
+
 void ObjectScale::loadLumiJson(){
     cout<<"==> loadLumiJson()"<<endl;
-    bool _gh_debug = false;
-    bool _gh_debug100 = false;
-    
-    PrintInfo(string("Processing LoadJSON() with ") + lumiJsonPath + " ...",true);
-    ifstream file(lumiJsonPath, ios::in);
-    //if (!file.is_open()) { assert(false); return false; }
-    if (!file.is_open()) { assert(false);}
-    char c;
-    string s, s2, s3;
-    char s1[256];
-    int rn(0), ls1(0), ls2(0), nrun(0), nls(0);
-    file.get(c);
-    //if (c!='{') return false;
-    while (file >> s and sscanf(s.c_str(),"\"%d\":",&rn)==1) {
-      if (_gh_debug) PrintInfo(Form("\"%d\": ",rn),true);
-    
-      while (file.get(c) and c==' ') {};
-      if (_gh_debug) { PrintInfo(Form("%c",c),true); assert(c=='['); }
-      ++nrun;
-    
-      bool endrun = false;
-      while (!endrun and file >> s >> s2 and (sscanf((s+s2).c_str(),"[%d,%d]%s",&ls1,&ls2,s1)==3 or (file >> s3 and sscanf((s+s2+s3).c_str(),"[%d,%d]%s",&ls1,&ls2,s1)==3))) {
-    
-        s2 = s1;
-        if (s2=="]") { file >> s3; s2 += s3; }
-    
-        if (_gh_debug) PrintInfo(Form("[%d,%d,'%s']",ls1,ls2,s1),true);
-    
-        for (int ls = ls1; ls != ls2+1; ++ls) {
-          loadedLumiJson[rn][ls] = 1;
-          ++nls;
+    std::ifstream file(lumiJsonPath);
+    file >> loadedLumiJson;
+}
+
+bool ObjectScale::checkGoodLumi(unsigned int &run, unsigned int &lumi){
+  try{
+    auto it = loadedLumiJson.find(std::to_string(run));
+    if (it != loadedLumiJson.end()) {
+      for (const auto& range : it.value()) {
+        if (lumi >= range[0] && lumi <= range[1]) {
+            return true;
         }
-    
-        endrun = (s2=="]," || s2=="]}");
-        if (_gh_debug and !endrun and s2!=",") { PrintInfo(string("s1: ")+s2,true); assert(s2==","); }
-      } // while ls
-      if (_gh_debug) PrintInfo("",true);
-    
-      if (s2=="]}") continue;
-      else if (_gh_debug and s2!="],") PrintInfo(string("s2: ")+s2,true); assert(s2=="],");
-    } // while run
-    if (s2!="]}") { PrintInfo(string("s3: ")+s2,true);}
-    //if (s2!="]}") { PrintInfo(string("s3: ")+s2,true); return false; }
-    
-    PrintInfo(string("Called LoadJSON() with ") + lumiJsonPath + ":",true);
-    PrintInfo(Form("Loaded %d good runs and %d good lumi sections",nrun,nls),true);
-} // loadLumiJson()
-   
+      }
+    }
+  } catch (const std::exception& e) {
+      cout<<e.what()<<" in the golden JSON"<<endl;
+  }
+  return false;
+}
 
 //-------------------------------------
 // Pileup Text 
 //-------------------------------------
 void ObjectScale::setPuTextPath(TString oName){
     puTextPath = "POG/files/pileup_ASCII_UL16-UL18.txt";
-    cout<<"+ setPuTextPath() = "<<puTextPath<<endl;
+    cout<<setw(25)<<"setPuTextPath() = "<<puTextPath<<endl;
 } 
 void ObjectScale::setPuMinbXsec(double xsec){
     minbXsec = xsec;
-    cout<<"+ setPuMinbXsec() = "<<minbXsec <<endl;
+    cout<<setw(25)<<"setPuMinbXsec() = "<<minbXsec <<endl;
 } 
 void ObjectScale::loadPuText(){
     cout<<"==> loadPuText()"<<endl;
@@ -381,12 +393,12 @@ double ObjectScale::getTruePU(int run, int ls, double *rms = 0) {
 //-------------------------------------
 void ObjectScale::setPuHistPath(TString oName){
     puHistPath = "POG/files/pileup.root";
-    cout<<"+ setPuHistPath() = "<<puHistPath<<endl;
+    cout<<setw(25)<<"setPuHistPath() = "<<puHistPath<<endl;
 } 
 void ObjectScale::setPuHistEras(TString oName){
     puHistEras.push_back("2022");
     puHistEras.push_back("2023");
-    cout<<"+ setPuHistEras() = ";
+    cout<<setw(25)<<"setPuHistEras() = ";
     for(auto era: puHistEras){ cout<<era<<", ";}
     cout<<endl;
 } 
@@ -406,7 +418,7 @@ void ObjectScale::setPuHistTrigs(TString oName){
     if(isDiEleJet){
         puHistTrigs["2022"].push_back("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ");
     }
-    cout<<"+ setPuHistTrigs() = ";
+    cout<<setw(25)<<"setPuHistTrigs() = ";
     for (const auto& pair : puHistTrigs) {
         std::cout <<pair.first<<endl;
         for(auto trig: pair.second){ cout<<trig<<", ";}
@@ -461,6 +473,14 @@ void ObjectScale::loadPuHist(){
      cout << endl << flush;
 } // LoadPU
    
+
+void ObjectScale::setThresh(TString oName){
+    double frac = 0.5;
+    if(is22 || is23 || is24){
+      bThresh = 0.4184;
+      cThresh = 0.137+frac*(0.66-0.137);
+    } 
+}
 
 void ObjectScale::applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar){
        /*

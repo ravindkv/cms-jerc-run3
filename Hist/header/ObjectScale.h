@@ -2,7 +2,7 @@
 #define OBJECTSCALE_H
         
 #include <set>
-#include<iostream>
+#include <iostream>
 #include <fstream>
 #include <iomanip>
 
@@ -13,6 +13,7 @@
 #include "TH2D.h"
 #include "TRandom.h"
 #include "TCanvas.h"
+#include <nlohmann/json.hpp>
 
 class ObjectScale: public GlobalFlag{
     public: 
@@ -33,6 +34,8 @@ class ObjectScale: public GlobalFlag{
             puHistPath      = "pileup.root";
             puHistEras      = {};
             puHistTrigs     = {};
+            bThresh         = 0.0;
+            cThresh         = 0.0;
         };
         ~ObjectScale();
         struct lumiInfo {
@@ -82,7 +85,8 @@ class ObjectScale: public GlobalFlag{
         string lumiJsonPath;
         void setLumiJsonPath(TString oName);
         void loadLumiJson();
-        std::map<int, std::map<int, int>> loadedLumiJson;
+        nlohmann::json loadedLumiJson;
+        bool checkGoodLumi(unsigned int &run, unsigned int &lumi);
 
         // Pileup Text
         string puTextPath;
@@ -103,6 +107,10 @@ class ObjectScale: public GlobalFlag{
         map<string, map<int, TH1D*> >  loadedPuHist;
         map<string, map<int, double> > loadedPuLumi;
     
+        double bThresh;
+        double cThresh;
+        void setThresh(TString oName);
+
         void applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar);
 
     private:

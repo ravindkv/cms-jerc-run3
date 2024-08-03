@@ -102,7 +102,7 @@ class HistGamJet: public GlobalFlag {
 
  private :
 
-    EventPick* evtPick;   
+    EventPick* eventPick;   
     ObjectPick* objectPick;   
     //ObjectScale* objectScale;
 	

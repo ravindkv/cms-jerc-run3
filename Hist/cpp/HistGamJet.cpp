@@ -10,64 +10,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      int _nbadevents_veto(0);
      
      bool isPrint = false;
-     string dataset = "2022C"; 
-     string& ds = dataset;
-     // Select appropriate L1RC for type-I MET L1L2L3-RC calculation
-     string sera("");
-     if (ds=="2016APVP8" || ds=="2016APVQCD") sera = "2016APV";
-     if (ds=="2016P8" || ds=="2016QCD") sera = "2016FGH";
-     if (ds=="2017P8" || ds=="2017QCD") sera = "2017";
-     if (ds=="2018P8" || ds=="2018QCD") sera = "2018";
-     if (ds=="2022P8" || ds=="2022QCD") sera = "2022";
-     if (ds=="2022EEP8" || ds=="2022EEQCD") sera = "2022EE";
-     if (ds=="2023P8" || ds=="2023QCD") sera = "2023";
-     //
-     if (ds=="2016B"||ds=="2016C"||ds=="2016D"||ds=="2016BCD"||
-         ds=="2016E"||ds=="2016F"||ds=="2016EF"||ds=="2016BCDEF") sera = "2016APV";
-     if (ds=="2016FG"||ds=="2016H"||ds=="2016FGH") sera = "2016FGH";
-     if (ds=="2017B"||ds=="2017C"||ds=="2017D"||ds=="2017E"||ds=="2017F"||
-         ds=="2017BCDEF") sera = "2017";
-     if (ds=="2018A"||ds=="2018A1"||ds=="2018A2"||ds=="2018B"||ds=="2018C"||
-         ds=="2018D"||ds=="2018D1"||ds=="2018D2"||ds=="2018D3"||ds=="2018D4")
-       sera = "2018";
-     //
-     if (ds=="2022P8" || ds=="2022QCD") sera = "2022";
-     if (ds=="2022EEP8" || ds=="2022EEQCD") sera = "2022EE";
-     if (ds=="2022C" || ds=="2022D") sera ="2022";
-     if (ds=="2022E" || ds=="2022F" || ds=="2022G") sera = "2022EE";
-     if (ds=="2023B" || ds=="2023Cv123" || ds=="2023Cv4" || ds=="2023D")
-       sera = "2023";
-     assert(sera!="");
-   
-     // Setup B and C tagging thresholds according to Z+jet settings (Sami)
-     double bthr(0.7527), cthr(0.3985), frac(0.5);
-     if (TString(ds.c_str()).Contains("2016")) {
-       //btagDeepB->set("2016",0.2217,0.6321,0.8953);
-       //btagDeepC->set("2016",-0.48,-0.1,-0.1+frac*(0.69+0.1));
-       //bthr = 0.8953; // tight
-       bthr = 0.6321; // medium
-       cthr = -0.1+frac*(0.69+0.1);
-     }
-     if (TString(ds.c_str()).Contains("2017")) {
-       //btagDeepB->set("2017",0.1522,0.4941,0.8001);
-       //btagDeepC->set("2017",0.05,0.15,0.15+frac*(0.8-0.15));
-       //bthr = 0.8001; // tight
-       bthr = 0.4941; // medium
-       cthr = 0.15+frac*(0.8-0.15);
-     }
-     if (TString(ds.c_str()).Contains("2018")) {
-       //btagDeepB->set("2018",0.1241,0.4184,0.7527);
-       //btagDeepC->set("2018",0.04,0.137,0.137+frac*(0.66-0.137));
-       //bthr = 0.7527; // tight
-       bthr = 0.4184; // medium
-       cthr = 0.137+frac*(0.66-0.137);
-     }
-     if (TString(ds.c_str()).Contains("22")  ||
-         TString(ds.c_str()).Contains("23")) {
-       // Copy of 2018
-       bthr = 0.4184;
-       cthr = 0.137+frac*(0.66-0.137);
-     }
    
      // Create histograms. Copy format from existing files from Lyon
      // Keep only histograms actually used by global fit (reprocess.C)
@@ -475,6 +417,31 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
     TProfile *tPhoScaleSF_Up = new TProfile("tPhoScaleSF_Up", "tPhoScaleSF_Up", nx, vx);
     TProfile *tPhoScaleSF_Down = new TProfile("tPhoScaleSF_Down", "tPhoScaleSF_Down", nx, vx);
     TProfile *tPhoSmearSF = new TProfile("tPhoSmearSF", "tPhoSmearSF", nx, vx);
+    // in eta bins
+    // Gain = 1
+        TProfile *tPhoSmearSF_Gain1 = new TProfile("tPhoSmearSF_Gain1", "tPhoSmearSF_Gain1", nx, vx);
+        TProfile *tPhoSmearSF_etaBin1Gain1= new TProfile("tPhoSmearSF_etaBin1Gain1", "tPhoSmearSF_etaBin1Gain1", nx, vx);
+        TProfile *tPhoSmearSF_etaBin2Gain1= new TProfile("tPhoSmearSF_etaBin2Gain1", "tPhoSmearSF_etaBin2Gain1", nx, vx);
+        TProfile *tPhoSmearSF_etaBin3Gain1= new TProfile("tPhoSmearSF_etaBin3Gain1", "tPhoSmearSF_etaBin3Gain1", nx, vx);
+        TProfile *tPhoSmearSF_etaBin4Gain1= new TProfile("tPhoSmearSF_etaBin4Gain1", "tPhoSmearSF_etaBin4Gain1", nx, vx);
+        TProfile *tPhoSmearSF_etaBin5Gain1= new TProfile("tPhoSmearSF_etaBin5Gain1", "tPhoSmearSF_etaBin5Gain1", nx, vx);
+        TProfile *tPhoSmearSF_etaBin6Gain1= new TProfile("tPhoSmearSF_etaBin6Gain1", "tPhoSmearSF_etaBin6Gain1", nx, vx);
+    // Gain = 6
+        TProfile *tPhoSmearSF_Gain6 = new TProfile("tPhoSmearSF_Gain6", "tPhoSmearSF_Gain6", nx, vx);
+        TProfile *tPhoSmearSF_etaBin1Gain6= new TProfile("tPhoSmearSF_etaBin1Gain6", "tPhoSmearSF_etaBin1Gain6", nx, vx);
+        TProfile *tPhoSmearSF_etaBin2Gain6= new TProfile("tPhoSmearSF_etaBin2Gain6", "tPhoSmearSF_etaBin2Gain6", nx, vx);
+        TProfile *tPhoSmearSF_etaBin3Gain6= new TProfile("tPhoSmearSF_etaBin3Gain6", "tPhoSmearSF_etaBin3Gain6", nx, vx);
+        TProfile *tPhoSmearSF_etaBin4Gain6= new TProfile("tPhoSmearSF_etaBin4Gain6", "tPhoSmearSF_etaBin4Gain6", nx, vx);
+        TProfile *tPhoSmearSF_etaBin5Gain6= new TProfile("tPhoSmearSF_etaBin5Gain6", "tPhoSmearSF_etaBin5Gain6", nx, vx);
+        TProfile *tPhoSmearSF_etaBin6Gain6= new TProfile("tPhoSmearSF_etaBin6Gain6", "tPhoSmearSF_etaBin6Gain6", nx, vx);
+    // Gain = 12
+        TProfile *tPhoSmearSF_Gain12 = new TProfile("tPhoSmearSF_Gain12", "tPhoSmearSF_Gain12", nx, vx);
+        TProfile *tPhoSmearSF_etaBin1Gain12= new TProfile("tPhoSmearSF_etaBin1Gain12", "tPhoSmearSF_etaBin1Gain12", nx, vx);
+        TProfile *tPhoSmearSF_etaBin2Gain12= new TProfile("tPhoSmearSF_etaBin2Gain12", "tPhoSmearSF_etaBin2Gain12", nx, vx);
+        TProfile *tPhoSmearSF_etaBin3Gain12= new TProfile("tPhoSmearSF_etaBin3Gain12", "tPhoSmearSF_etaBin3Gain12", nx, vx);
+        TProfile *tPhoSmearSF_etaBin4Gain12= new TProfile("tPhoSmearSF_etaBin4Gain12", "tPhoSmearSF_etaBin4Gain12", nx, vx);
+        TProfile *tPhoSmearSF_etaBin5Gain12= new TProfile("tPhoSmearSF_etaBin5Gain12", "tPhoSmearSF_etaBin5Gain12", nx, vx);
+        TProfile *tPhoSmearSF_etaBin6Gain12= new TProfile("tPhoSmearSF_etaBin6Gain12", "tPhoSmearSF_etaBin6Gain12", nx, vx);
     TProfile *tPhoSmearSF_Up = new TProfile("tPhoSmearSF_Up", "tPhoSmearSF_Up", nx, vx);
     TProfile *tPhoSmearSF_Down = new TProfile("tPhoSmearSF_Down", "tPhoSmearSF_Down", nx, vx);
 
@@ -851,7 +818,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
      
      //Long64_t nentries = tree->GetEntriesFast();
      Long64_t nentries = tree->GetEntries(); // Long startup time
-     cout << "\nStarting loop over " << dataset << " with "
+     cout << "\nStarting loop over " << oName << " with "
           << nentries << " entries" << endl;
    
      if (isMG && nentries!=nMG) {
@@ -873,13 +840,13 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        for (int i = 1; i != hnevt->GetNbinsX()+1; ++i) {
          cout<<Form("%s%d",(i==1 ? "{" : ", "),int(hnevt->GetBinContent(i)+0.5));
        }
-       cout << "}; // " << dataset << endl << flush;
+       cout << "}; // " << oName << endl << flush;
        //
        cout << Form("double vsumw[%d] = ",hsumw->GetNbinsX());
        for (int i = 1; i != hsumw->GetNbinsX()+1; ++i) {
          cout<<Form("%s%1.4g",(i==1 ? "{" : ", "),hsumw->GetBinContent(i));
        }
-       cout << "}; // " << dataset << endl << flush;
+       cout << "}; // " << oName << endl << flush;
      } // isMC && nentries!=nMG
      
      //int skip = 21700000; // 2018A first events without 110EB
@@ -918,7 +885,6 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        }
        if (jentry%10000==0) cout << "." << flush;
        ++nlap;
-   
        Long64_t ientry = tree->loadEntry(jentry);
        if (ientry < 0) break; 
        tree->fChain->GetTree()->GetEntry(ientry);
@@ -956,7 +922,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        assert(tree->nPSWeight<=tree->nPSWeightMax);
    
        // Does the run/LS pass the latest JSON selection?
-       if (!isMC && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
+       if (isData && objS->loadedLumiJson[tree->run][tree->luminosityBlock]==0) {
          //_badjson.insert(pair<int, int>(run, lbn));
          ++_nbadevents_json;
          continue;
@@ -1334,15 +1300,7 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
        // Event filters for 2016 and 2017+2018 data and MC
        // UL lists are separate, but all filter recommendations looked the same
        // Run3: https://twiki.cern.ch/twiki/bin/viewauth/CMS/MissingETOptionalFiltersRun2#Run_3_recommendations
-       bool pass_filt = 
-   	(tree->Flag_goodVertices &&
-   	tree->Flag_globalSuperTightHalo2016Filter &&
-   	tree->Flag_EcalDeadCellTriggerPrimitiveFilter &&
-   	tree->Flag_BadPFMuonFilter &&
-   	tree->Flag_BadPFMuonDzFilter &&
-   	tree->Flag_hfNoisyHitsFilter &&
-   	tree->Flag_eeBadScFilter &&
-   	tree->Flag_ecalBadCalibFilter);
+       bool pass_filt = eventPick->passFilter(tree); 
        
        // Photon control plots
        h2ngam->Fill(ptgam, nGam, w);
@@ -1594,8 +1552,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
    	  tree->Jet_btagDeepC[iJet] = 0.5*(tree->Jet_btagDeepFlavCvB[iJet] +
    	  		       tree->Jet_btagDeepFlavCvL[iJet]);
    	  tree->Jet_qgl[iJet] = tree->Jet_btagDeepFlavQG[iJet];
-   	  bool isb = (tree->Jet_btagDeepB[iJet] > bthr);
-   	  bool isc = (tree->Jet_btagDeepC[iJet] > cthr && !isb);
+   	  bool isb = (tree->Jet_btagDeepB[iJet] > objS->bThresh);
+   	  bool isc = (tree->Jet_btagDeepC[iJet] > objS->cThresh && !isb);
    	  bool isq = (tree->Jet_qgl[iJet]>=0.5 && tree->Jet_qgl[iJet] && !isb && !isc);
    	  bool isg = (tree->Jet_qgl[iJet]>=0 && tree->Jet_qgl[iJet]<0.5 && !isb && !isc);
    	  bool isn = (!isb && !isc && !isq && !isg);
@@ -1731,7 +1689,8 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
                         tree->Photon_pt[iGam]});
         }
         if (isMC){
-            double phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_uncertainty",
+            /*
+            phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_uncertainty",
                         tree->Photon_seedGain[iGam], 
                         static_cast<Float_t>(tree->run), 
                         tree->Photon_eta[iGam], 
@@ -1739,15 +1698,18 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
                         tree->Photon_pt[iGam]});
             phoScaleSF_Up     = (1+phoScaleSF);
             phoScaleSF_Down   = (1-phoScaleSF);
+            */
             double rho  = objS->loadedPhoSsRef->evaluate({"rho", 
                         tree->Photon_eta[iGam], 
                         tree->Photon_r9[iGam]});
+            /*
             double err_rho  = objS->loadedPhoSsRef->evaluate({"err_rho", 
                         tree->Photon_eta[iGam], 
                         tree->Photon_r9[iGam]});
+            */
             phoSmearSF       = gRandom->Gaus(1., rho);
-            phoSmearSF_Up    = gRandom->Gaus(1., rho+err_rho);
-            phoSmearSF_Down  = gRandom->Gaus(1., rho-err_rho);
+            //phoSmearSF_Up    = gRandom->Gaus(1., rho+err_rho);
+            //phoSmearSF_Down  = gRandom->Gaus(1., rho-err_rho);
         }
         hPhoScaleSF        ->Fill(phoScaleSF     );
         hPhoScaleSF_Up     ->Fill(phoScaleSF_Up  );
@@ -1810,6 +1772,53 @@ int HistGamJet::Run(TString oName, SkimTree *tree, ObjectScale *objS, TFile *fou
         tPhoSmearSF        ->Fill(tree->Photon_pt[iGam], phoSmearSF     );
         tPhoSmearSF_Up     ->Fill(tree->Photon_pt[iGam], phoSmearSF_Up  );
         tPhoSmearSF_Down   ->Fill(tree->Photon_pt[iGam], phoSmearSF_Down);
+        if(tree->Photon_seedGain[iGam]==1)
+            tPhoSmearSF_Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF     );
+        if(tree->Photon_seedGain[iGam]==6)
+            tPhoSmearSF_Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF     );
+        if(tree->Photon_seedGain[iGam]==12)
+            tPhoSmearSF_Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF     );
+        //in eta bins
+        //Gain =1
+        if(tree->Photon_seedGain[iGam]==1 && -1.442 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.2) 
+            tPhoSmearSF_etaBin1Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==1 && -1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.0) 
+            tPhoSmearSF_etaBin2Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==1 && -1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 0.0) 
+            tPhoSmearSF_etaBin3Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==1 && 0.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.0) 
+            tPhoSmearSF_etaBin4Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==1 && 1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.2) 
+            tPhoSmearSF_etaBin5Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==1 && 1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.442) 
+            tPhoSmearSF_etaBin6Gain1        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        //Gain =6
+        if(tree->Photon_seedGain[iGam]==6 && -1.442 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.2) 
+            tPhoSmearSF_etaBin1Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==6 && -1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.0) 
+            tPhoSmearSF_etaBin2Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==6 && -1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 0.0) 
+            tPhoSmearSF_etaBin3Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==6 && 0.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.0) 
+            tPhoSmearSF_etaBin4Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==6 && 1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.2) 
+            tPhoSmearSF_etaBin5Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==6 && 1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.442) 
+            tPhoSmearSF_etaBin6Gain6        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        //Gain =12
+        if(tree->Photon_seedGain[iGam]==12 && -1.442 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.2) 
+            tPhoSmearSF_etaBin1Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==12 && -1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= -1.0) 
+            tPhoSmearSF_etaBin2Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==12 && -1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 0.0) 
+            tPhoSmearSF_etaBin3Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==12 && 0.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.0) 
+            tPhoSmearSF_etaBin4Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==12 && 1.0 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.2) 
+            tPhoSmearSF_etaBin5Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        if(tree->Photon_seedGain[iGam]==12 && 1.2 < tree->Photon_eta[iGam] && tree->Photon_eta[iGam] <= 1.442) 
+            tPhoSmearSF_etaBin6Gain12        ->Fill(tree->Photon_pt[iGam], phoSmearSF);
+        //---
     }
    	if (iGam!=-1 && tree->Photon_seedGain[iGam]==1) {
    	  h2phoj1->Fill(ptgam, footprint, w);

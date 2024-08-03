@@ -1,6 +1,8 @@
 #include "GlobalFlag.h"
 
 GlobalFlag::GlobalFlag(TString oName){
+    isDebug = false;
+
     //Years
     is22 = false;
     is23 = false;
@@ -13,13 +15,18 @@ GlobalFlag::GlobalFlag(TString oName){
     is22E = false;
     is22F = false;
     is22G = false;
+    isPostEE = false;
     //Eras 2023
     is23B = false;
     is23C = false;
+    is23Cv123 = false;
+    is23Cv4   = false;
     is23D = false;
     is23E = false;
     is23F = false;
     is23G = false;
+    is23Pre  = false;
+    is23Post = false;
     //Eras 2024
     is24B = false;
     is24C = false;
@@ -52,13 +59,18 @@ GlobalFlag::GlobalFlag(TString oName){
     if (oName.Contains("2022E")) is22E = true;
     if (oName.Contains("2022F")) is22F = true;
     if (oName.Contains("2022G")) is22G = true;
+    if (oName.Contains("PostEE")) isPostEE = true;
 
     if (oName.Contains("2023B")) is23B = true;
     if (oName.Contains("2023C")) is23C = true;
+    if (oName.Contains("2023Cv1") || oName.Contains("2023Cv2") || oName.Contains("2023Cv3")) is23Cv123 = true;
+    if (oName.Contains("2023Cv4")) is23Cv4 = true;
     if (oName.Contains("2023D")) is23D = true;
     if (oName.Contains("2023E")) is23E = true;
     if (oName.Contains("2023F")) is23F = true;
     if (oName.Contains("2023G")) is23G = true;
+    if (oName.Contains("2023Pre"))  is23Pre  = true;
+    if (oName.Contains("2023Post")) is23Post = true;
 
     if (oName.Contains("2024B")) is24B = true;
     if (oName.Contains("2024C")) is24C = true;
@@ -80,6 +92,7 @@ GlobalFlag::GlobalFlag(TString oName){
 }
 
 void GlobalFlag::printFlag(){
+    if(isDebug   )std::cout<<"isDebug   = true"<<std::endl;
     if(is22      )std::cout<<"is22      = true"<<std::endl;
     if(is23      )std::cout<<"is23      = true"<<std::endl;
     if(is24      )std::cout<<"is24      = true"<<std::endl;
@@ -91,10 +104,14 @@ void GlobalFlag::printFlag(){
     if(is22G     )std::cout<<"is22G     = true"<<std::endl;
     if(is23B     )std::cout<<"is23B     = true"<<std::endl;
     if(is23C     )std::cout<<"is23C     = true"<<std::endl;
+    if(is23Cv123 )std::cout<<"is23Cv123 = true"<<std::endl;
+    if(is23Cv4   )std::cout<<"is23Cv4   = true"<<std::endl;
     if(is23D     )std::cout<<"is23D     = true"<<std::endl;
     if(is23E     )std::cout<<"is23E     = true"<<std::endl;
     if(is23F     )std::cout<<"is23F     = true"<<std::endl;
     if(is23G     )std::cout<<"is23G     = true"<<std::endl;
+    if(is23Pre   )std::cout<<"is23Pre   = true"<<std::endl;
+    if(is23Post  )std::cout<<"is23Post  = true"<<std::endl;
     if(is24B     )std::cout<<"is24B     = true"<<std::endl;
     if(is24C     )std::cout<<"is24C     = true"<<std::endl;
     if(is24D     )std::cout<<"is24D     = true"<<std::endl;
