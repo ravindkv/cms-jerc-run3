@@ -123,6 +123,34 @@ void SkimTree::loadTree(){
 	fChain->SetBranchAddress("Jet_rawFactor", &Jet_rawFactor);
 	fChain->SetBranchAddress("Jet_jetId", &Jet_jetId);
 
+  if(isVetoMap || isDiJet || isIncJet || isMultiJet || isWqq){
+      fChain->SetBranchAddress("HLT_PFJet40"            , & HLT_PFJet40            );
+      fChain->SetBranchAddress("HLT_PFJet60"            , & HLT_PFJet60            );
+      fChain->SetBranchAddress("HLT_PFJet80"            , & HLT_PFJet80            );
+      fChain->SetBranchAddress("HLT_PFJet140"           , & HLT_PFJet140           );
+      fChain->SetBranchAddress("HLT_PFJet200"           , & HLT_PFJet200           );
+      fChain->SetBranchAddress("HLT_PFJet260"           , & HLT_PFJet260           );
+      fChain->SetBranchAddress("HLT_PFJet320"           , & HLT_PFJet320           );
+      fChain->SetBranchAddress("HLT_PFJet400"           , & HLT_PFJet400           );
+      fChain->SetBranchAddress("HLT_PFJet450"           , & HLT_PFJet450           );
+      fChain->SetBranchAddress("HLT_PFJet500"           , & HLT_PFJet500           );
+      fChain->SetBranchAddress("HLT_DiPFJetAve40"       , & HLT_DiPFJetAve40       );
+      fChain->SetBranchAddress("HLT_DiPFJetAve60"       , & HLT_DiPFJetAve60       );
+      fChain->SetBranchAddress("HLT_DiPFJetAve80"       , & HLT_DiPFJetAve80       );
+      fChain->SetBranchAddress("HLT_DiPFJetAve140"      , & HLT_DiPFJetAve140      );
+      fChain->SetBranchAddress("HLT_DiPFJetAve200"      , & HLT_DiPFJetAve200      );
+      fChain->SetBranchAddress("HLT_DiPFJetAve260"      , & HLT_DiPFJetAve260      );
+      fChain->SetBranchAddress("HLT_DiPFJetAve320"      , & HLT_DiPFJetAve320      );
+      fChain->SetBranchAddress("HLT_DiPFJetAve400"      , & HLT_DiPFJetAve400      );
+      fChain->SetBranchAddress("HLT_DiPFJetAve500"      , & HLT_DiPFJetAve500      );
+      fChain->SetBranchAddress("HLT_DiPFJetAve60_HFJEC" , & HLT_DiPFJetAve60_HFJEC );
+      fChain->SetBranchAddress("HLT_DiPFJetAve80_HFJEC" , & HLT_DiPFJetAve80_HFJEC );
+      fChain->SetBranchAddress("HLT_DiPFJetAve100_HFJEC", & HLT_DiPFJetAve100_HFJEC);
+      fChain->SetBranchAddress("HLT_DiPFJetAve160_HFJEC", & HLT_DiPFJetAve160_HFJEC);
+      fChain->SetBranchAddress("HLT_DiPFJetAve220_HFJEC", & HLT_DiPFJetAve220_HFJEC);
+      fChain->SetBranchAddress("HLT_DiPFJetAve300_HFJEC", & HLT_DiPFJetAve300_HFJEC);
+  }
+
   //--------------------------------------- 
   // Photon (for GamJet)
   //--------------------------------------- 
@@ -167,7 +195,7 @@ void SkimTree::loadTree(){
   //--------------------------------------- 
   // Electron (for DiEleJet)
   //--------------------------------------- 
-	if(isDiEleJet){
+	if(isZeeJet){
 		//status
 		fChain->SetBranchStatus("nElectron",1);
 		fChain->SetBranchStatus("Electron_*",1);
@@ -187,7 +215,7 @@ void SkimTree::loadTree(){
   //--------------------------------------- 
   // Muon (for DiMuJet)
   //--------------------------------------- 
-  if (isDiMuJet){
+  if (isZmmJet){
 		//status
 		fChain->SetBranchStatus("nMuon",1);
 		fChain->SetBranchStatus("Muon_*",1);
@@ -211,7 +239,9 @@ void SkimTree::loadTree(){
 
 	fChain->SetBranchAddress("RawPuppiMET_phi", &RawPuppiMET_phi);
 	fChain->SetBranchAddress("RawPuppiMET_pt", &RawPuppiMET_pt);
-	fChain->SetBranchAddress("Rho_fixedGridRhoFastjetAll", &fixedGridRhoFastjetAll);
+	fChain->SetBranchAddress("Rho_fixedGridRhoFastjetAll", &Rho);
+	fChain->SetBranchAddress("PV_z", &PV_z);
+	fChain->SetBranchAddress("GenVtx_z", &GenVtx_z);
 	fChain->SetBranchAddress("PV_npvs", &PV_npvs);
 	fChain->SetBranchAddress("PV_npvsGood", &PV_npvsGood);
 	
@@ -266,7 +296,7 @@ void SkimTree::loadTree(){
       fChain->SetBranchAddress("GenIsolatedPhoton_pt", &GenIsolatedPhoton_pt);
       fChain->SetBranchAddress("GenIsolatedPhoton_pdgId", &GenIsolatedPhoton_pdgId);
     }
-    if (isDiEleJet || isDiMuJet){
+    if (isZeeJet || isZmmJet){
       fChain->SetBranchAddress("nGenDressedLepton", &nGenDressedLepton);
       fChain->SetBranchAddress("GenDressedLepton_eta", &GenDressedLepton_eta);
       fChain->SetBranchAddress("GenDressedLepton_mass", &GenDressedLepton_mass);

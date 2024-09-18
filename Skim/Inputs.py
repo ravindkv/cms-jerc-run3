@@ -7,10 +7,10 @@ Years = []
 Years.append('2024')
 
 Channels = []
-#Channels.append("GamJet")
+Channels.append("GamJet")
 Channels.append("DiEleJet")
 Channels.append("DiMuJet")
-#Channels.append("DiJet")
+Channels.append("DiJet")
 
 #vomsProxy = "/afs/cern.ch/user/r/rverma/x509up_u93032"
 vomsProxy = "x509up_u93032"

@@ -7,7 +7,7 @@ SRCDIR   = cpp
 OBJDIR   = obj
 SOURCES     := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS     := $(SOURCES:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
-BINS        := makeSkim
+BINS        := runMain
 
 $(BINS): $(OBJECTS) main.cpp
 	@echo "--> Creating executables $@"

@@ -20,7 +20,7 @@ void NanoTree::loadInput(){
     }catch(const std::exception &e){
         cout<<"\nEXCEPTION: Check the iName_: "<<iName<<endl;
         cout<<"iName format should be: DataOrMC_Year_Channel_Sample_Skim_nofN.rooot"<<endl;
-        cout<<"Run ./runMakeHist -h for more details"<<endl;
+        cout<<"Run ./runMain -h for more details"<<endl;
         cout<<e.what()<<endl;
         std::abort();
     }
@@ -141,24 +141,27 @@ void NanoTree::loadTree(){
     fChain->SetBranchStatus("nJet",1);
 
     //common branches
+	  fChain->SetBranchStatus("PV_z");
+	  fChain->SetBranchStatus("GenVtx_z");
     fChain->SetBranchStatus("PV_npvs",1);
     fChain->SetBranchStatus("PV_npvsGood",1);
-
-    fChain->SetBranchStatus("MET_pt",1);
-    fChain->SetBranchStatus("MET_phi",1);
-    fChain->SetBranchStatus("ChsMET_pt",1);
-    fChain->SetBranchStatus("ChsMET_phi",1);
-    fChain->SetBranchStatus("RawPuppiMET_pt",1);
-    fChain->SetBranchStatus("RawPuppiMET_phi",1);
+    if(oN.Contains("Data_2024")){
+      fChain->SetBranchStatus("PFMET_pt",1);
+      fChain->SetBranchStatus("PFMET_phi",1);
+      fChain->SetBranchStatus("PuppiMET_pt",1);
+      fChain->SetBranchStatus("PuppiMET_phi",1);
+    }
+    else{
+      fChain->SetBranchStatus("MET_pt",1);
+      fChain->SetBranchStatus("MET_phi",1);
+      fChain->SetBranchStatus("ChsMET_pt",1);
+      fChain->SetBranchStatus("ChsMET_phi",1);
+      fChain->SetBranchStatus("RawPuppiMET_pt",1);
+      fChain->SetBranchStatus("RawPuppiMET_phi",1);
+    }
 
     fChain->SetBranchStatus("Flag_*",1);
 	fChain->SetBranchStatus("Rho_fixedGridRhoFastjetAll");
-	/*
-    fChain->SetBranchStatus("TrigObj_*",1);
-    fChain->SetBranchStatus("nTrigObj",1);
-    fChain->SetBranchStatus("FatJet_*",1);
-    fChain->SetBranchStatus("nFatJet",1);
-	*/
  
     if (oN.Contains("MC")){
         fChain->SetBranchStatus("Jet_genJetIdx",1);
@@ -250,7 +253,7 @@ void NanoTree::loadTree(){
             fChain->SetBranchAddress("HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3"            , & HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3               , & b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3);
         }
         //2023
-        if(oN.Contains("2023")){ 
+        if(oN.Contains("2023") || oN.Contains("2024")){ 
             fChain->SetBranchAddress("HLT_Photon300_NoHE"                                    , & HLT_Photon300_NoHE                                    , & b_HLT_Photon300_NoHE                                    );
             fChain->SetBranchAddress("HLT_Photon33"                                          , & HLT_Photon33                                          , & b_HLT_Photon33                                          );
             fChain->SetBranchAddress("HLT_Photon50"                                          , & HLT_Photon50                                          , & b_HLT_Photon50                                          );

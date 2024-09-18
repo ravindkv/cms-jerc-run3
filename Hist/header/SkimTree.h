@@ -59,6 +59,9 @@ class SkimTree: public GlobalFlag{
     Float_t         RawPuppiMET_pt;  // Run3
 
 
+    //--------------------------------------- 
+    // Photon (for Jets )
+    //--------------------------------------- 
     //UInt_t          nJet; // NanoV11,10
     Int_t           nJet; // NanoV12
     Float_t         Jet_pt[nJetMax];
@@ -93,6 +96,49 @@ class SkimTree: public GlobalFlag{
 
     //Int_t           Jet_genJetIdx[nJetMax]; // NanoV11,10
     Short_t           Jet_genJetIdx[nJetMax]; // NanoV12
+
+    Bool_t HLT_MC;
+    Bool_t HLT_ZeroBias;
+    Bool_t HLT_DiPFJetAve40;
+    Bool_t HLT_DiPFJetAve60;
+    Bool_t HLT_DiPFJetAve80;
+    Bool_t HLT_DiPFJetAve140;
+    Bool_t HLT_DiPFJetAve200;
+    Bool_t HLT_DiPFJetAve260;
+    Bool_t HLT_DiPFJetAve320;
+    Bool_t HLT_DiPFJetAve400;
+    Bool_t HLT_DiPFJetAve500;
+    
+    Bool_t HLT_PFJet40;
+    Bool_t HLT_PFJet60;
+    Bool_t HLT_PFJet80;
+    Bool_t HLT_PFJet140;
+    Bool_t HLT_PFJet200;
+    Bool_t HLT_PFJet260;
+    Bool_t HLT_PFJet320;
+    Bool_t HLT_PFJet400; // v14
+    Bool_t HLT_PFJet450;
+    Bool_t HLT_PFJet500;
+    Bool_t HLT_PFJet550;
+    
+    Bool_t HLT_DiPFJetAve60_HFJEC;
+    Bool_t HLT_DiPFJetAve80_HFJEC;
+    Bool_t HLT_DiPFJetAve100_HFJEC;
+    Bool_t HLT_DiPFJetAve160_HFJEC;
+    Bool_t HLT_DiPFJetAve220_HFJEC;
+    Bool_t HLT_DiPFJetAve300_HFJEC;
+
+    Bool_t HLT_PFJetFwd40;
+    Bool_t HLT_PFJetFwd60;
+    Bool_t HLT_PFJetFwd80;
+    Bool_t HLT_PFJetFwd140;
+    Bool_t HLT_PFJetFwd200;
+    Bool_t HLT_PFJetFwd260;
+    Bool_t HLT_PFJetFwd320;
+    Bool_t HLT_PFJetFwd400;
+    Bool_t HLT_PFJetFwd450;
+    Bool_t HLT_PFJetFwd500;
+
    
     //--------------------------------------- 
     // Photon (for GamJet)
@@ -180,11 +226,10 @@ class SkimTree: public GlobalFlag{
     Float_t GenDressedLepton_eta[100];
     Int_t   GenDressedLepton_pdgId[100];
 
-    
     //--------------------------------------- 
     // Muon (for DiMuJet)
     //--------------------------------------- 
-    UInt_t          nMuon_;
+    Int_t          nMuon_;
     Float_t         muPhi_[100];
     Float_t         muPt_[100];
     Float_t         muEta_[100];
@@ -199,7 +244,7 @@ class SkimTree: public GlobalFlag{
     Float_t         muDz_[100];
     Bool_t  HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8;
 
-    Float_t         fixedGridRhoFastjetAll; // Run2,Run3
+    Float_t         Rho; // Run2,Run3
     //UInt_t          nTrigObj; // NanoV11,10
     //Int_t          nTrigObj; // NanoV12
     //Float_t         TrigObj_pt[nTrigObjMax];   //[nTrigObj]
@@ -221,10 +266,10 @@ class SkimTree: public GlobalFlag{
     //Float_t         PV_chi2;
     //Float_t         PV_score;
 
-    //Int_t           PV_npvs; // NanoV11,10
     UChar_t           PV_npvs; // NanoV12
-    //Int_t           PV_npvsGood; // NanoV11,10
     UChar_t           PV_npvsGood; // NanoV12
+    Float_t           PV_z;
+    Float_t           GenVtx_z;
  
     Bool_t          Flag_HBHENoiseFilter;
     Bool_t          Flag_HBHENoiseIsoFilter;

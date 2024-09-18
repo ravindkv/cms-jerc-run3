@@ -13,19 +13,22 @@
 
 void printInfo(TObject *obj) {
     if (TTree *tree = dynamic_cast<TTree*>(obj)) {
-        std::cout<< setw(15) << "TTree: " << setw(35)<< tree->GetName() << setw(10) << tree->GetEntries() << std::endl;
+        std::cout<< setw(15) << "TTree: " << setw(35)<< tree->GetName() << setw(15) << tree->GetEntries() << std::endl;
     }
     else if (TH1F *h1f = dynamic_cast<TH1F*>(obj)) {
-        std::cout<< setw(15) << "TH1F: " << setw(35)<< h1f->GetName() << setw(10) << h1f->GetEntries() << setw(10) << h1f->GetMean() << setw(10) << h1f->GetRMS() << std::endl;
+        std::cout<< setw(15) << "TH1F: " << setw(35)<< h1f->GetName() << setw(15) << h1f->GetEntries() << setw(15) << h1f->GetMean() << setw(15) << h1f->GetRMS() << std::endl;
+    }
+    else if (TH1D *h1f = dynamic_cast<TH1D*>(obj)) {
+        std::cout<< setw(15) << "TH1D: " << setw(35)<< h1f->GetName() << setw(15) << h1f->GetEntries() << setw(15) << h1f->GetMean() << setw(15) << h1f->GetRMS() << std::endl;
     }
     else if (TH2D *h2d = dynamic_cast<TH2D*>(obj)) {
-        std::cout<< setw(15) << "TH2D: " << setw(35)<< h2d->GetName() << setw(10) << h2d->GetEntries() << setw(10) << h2d->GetMean() << setw(10) << h2d->GetRMS() << std::endl;
+        std::cout<< setw(15) << "TH2D: " << setw(35)<< h2d->GetName() << setw(15) << h2d->GetEntries() << setw(15) << h2d->GetMean() << setw(15) << h2d->GetRMS() << std::endl;
     }
     else if (TProfile *prof = dynamic_cast<TProfile*>(obj)) {
-        std::cout<< setw(15) << "TProfile: " << setw(35)<< prof->GetName() << setw(10) << prof->GetEntries() << setw(10) << prof->GetMean() << setw(10) << prof->GetRMS() << std::endl;
+        std::cout<< setw(15) << "TProfile: " << setw(35)<< prof->GetName() << setw(15) << prof->GetEntries() << setw(15) << prof->GetMean() << setw(15) << prof->GetRMS() << std::endl;
     }
     else if (TProfile2D *prof2d = dynamic_cast<TProfile2D*>(obj)) {
-        std::cout<< setw(15) << "TProfile2D: " << setw(35)<< prof2d->GetName() << setw(10) << prof2d->GetEntries() << setw(10) << prof2d->GetMean() << setw(10) << prof2d->GetRMS() << std::endl;
+        std::cout<< setw(15) << "TProfile2D: " << setw(35)<< prof2d->GetName() << setw(15) << prof2d->GetEntries() << setw(15) << prof2d->GetMean() << setw(15) << prof2d->GetRMS() << std::endl;
     }
 }
 

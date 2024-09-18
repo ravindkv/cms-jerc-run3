@@ -26,12 +26,20 @@ if __name__=="__main__":
     skimDir = "../../Skim/input/json/"
     os.system("mkdir -p json")
     allJobs = 0
-    for year, ch in itertools.product(Years, Channels):
-        skimFile = f"FilesSkim_{year}_{ch}.json"
-        os.system(f"cp  {skimDir}/{skimFile} json/")
-        
-        fSkim = open(f"json/{skimFile}", "r")
+    for year, ch in itertools.product(Years, Channels.keys()):
+        multiJet = ["DiJet", "TriJet", "AllJet"]
+        chSkim = Channels[ch]
+        fSkim = open(f"{skimDir}/FilesSkim_{year}_{chSkim}.json", "r")
         jSkim = json.load(fSkim)
+        #Replace the keys (DiJet, IncJet, etc use same Skims)
+        keyMap = {}
+        for oldSkimKey in jSkim.keys():
+            newSkimKey = oldSkimKey.replace(f"_{chSkim}_", f"_{ch}_")
+            keyMap[oldSkimKey] = newSkimKey
+        for oldSkimKey, newSkimKey in keyMap.items():
+            if oldSkimKey in jSkim:
+                jSkim[newSkimKey] = jSkim.pop(oldSkimKey)
+
         fHist = open(f"json/FilesHist_{year}_{ch}.json", "w")
         dHist = {}
         os.system(f"mkdir -p {eosHistDir}/{year}/{ch}")
@@ -50,6 +58,8 @@ if __name__=="__main__":
             print(f"{year}: {ch}: {sKey}: nJob = {nJob}")
         print(f"\n{year} : {ch}: nJobs  = {yJobs}\n")
         allJobs = allJobs + yJobs
+        fSkimNew = open(f"json/FilesSkim_{year}_{ch}.json", "w")
+        json.dump(jSkim, fSkimNew, indent=4) 
+        json.dump(dHist, fHist, indent=4) 
     print(f"All jobs =  {allJobs}")
-    json.dump(dHist, fHist, indent=4) 
     

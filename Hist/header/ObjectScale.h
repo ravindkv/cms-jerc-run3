@@ -11,7 +11,8 @@
 #include "GlobalFlag.h"
 
 #include "TH2D.h"
-#include "TRandom.h"
+#include "TMath.h"
+#include "TRandom3.h"
 #include "TCanvas.h"
 #include <nlohmann/json.hpp>
 
@@ -29,23 +30,11 @@ class ObjectScale: public GlobalFlag{
             eleSsName       = "2022Re-recoE+PromptFG_ScaleJSON";
             eleSsJsonPath   = "./electronSS.json";
             lumiJsonPath    = "./Cert_Collisions2022_355100_362760_Golden.json";
-            puTextPath      = "./pileup_ASCII_UL16-UL18.txt";
             minbXsec        = 69200;
-            puHistPath      = "pileup.root";
-            puHistEras      = {};
-            puHistTrigs     = {};
             bThresh         = 0.0;
             cThresh         = 0.0;
         };
         ~ObjectScale();
-        struct lumiInfo {
-          double lum;
-          double muavg;
-          double murms;
-          lumiInfo(double lum_=0, double muavg_=0, double murms_=0)
-            : lum(lum_), muavg(muavg_), murms(murms_) {};
-        };
-        
         // Jet veto
         string jetVetoKey;
         string jetVetoName;
@@ -55,6 +44,34 @@ class ObjectScale: public GlobalFlag{
         void setJetVetoJsonPath(TString oName);
         void loadJetVetoRef();
         correction::Correction::Ref loadedJetVetoRef;
+        bool checkJetVetoMap(SkimTree *tree);
+
+        // L1 Offset (aka PU or L1RC) correction
+        string jetL1FastJetName;
+        string jetL1FastJetJsonPath;
+        void setJetL1FastJetName(TString oName);
+        void setJetL1FastJetJsonPath(TString oName);
+        void loadJetL1FastJetRef();
+        correction::Correction::Ref loadedJetL1FastJetRef;
+        double getL1FastJetCorrection(double jetArea, double jetEta, double jetPt, double rho);
+
+        // L2Relative (aka MCTruth or L2Relative) correction
+        string jetL2RelativeName;
+        string jetL2RelativeJsonPath;
+        void setJetL2RelativeName(TString oName);
+        void setJetL2RelativeJsonPath(TString oName);
+        void loadJetL2RelativeRef();
+        correction::Correction::Ref loadedJetL2RelativeRef;
+        double getL2RelativeCorrection(double jetEta, double jetPhi, double jetPt);
+
+        // L2L3Residual (aka L2Residual + L3Residual) correction
+        string jetL2L3ResidualName;
+        string jetL2L3ResidualJsonPath;
+        void setJetL2L3ResidualName(TString oName);
+        void setJetL2L3ResidualJsonPath(TString oName);
+        void loadJetL2L3ResidualRef();
+        correction::Correction::Ref loadedJetL2L3ResidualRef;
+        double getL2L3ResidualCorrection(double jetEta, double jetPt);
 
         // Jet L2L3
         vector<string> jetL2L3Names;
@@ -63,6 +80,29 @@ class ObjectScale: public GlobalFlag{
         void setJetL2L3JsonPath(TString oName);
         void loadJetL2L3Refs();
         vector<correction::Correction::Ref> loadedJetL2L3Refs;
+
+        // resoJER 
+        string JERResoName;
+        string JERResoJsonPath;
+        void setJERResoName(TString oName);
+        void setJERResoJsonPath(TString oName);
+        void loadJERResoRef();
+        correction::Correction::Ref loadedJERResoRef;
+        double getJERResolution(SkimTree *tree, int index);
+
+        // sfJER 
+        string JERSFName;
+        string JERSFJsonPath;
+        void setJERSFName(TString oName);
+        void setJERSFJsonPath(TString oName);
+        void loadJERSFRef();
+        correction::Correction::Ref loadedJERSFRef;
+        double getJERScaleFactor(SkimTree *tree, int index, string syst);
+
+        // now corrJER using resoJER and sfJER
+        TRandom* generator = new TRandom3(0);
+        double getJERCorrection(SkimTree *tree, int index, string syst);
+
 
         // Photon Scale and Smearing (Ss)
         string phoSsName;
@@ -88,34 +128,15 @@ class ObjectScale: public GlobalFlag{
         nlohmann::json loadedLumiJson;
         bool checkGoodLumi(unsigned int &run, unsigned int &lumi);
 
-        // Pileup Text
-        string puTextPath;
-        void setPuTextPath(TString oName);
-        void setPuMinbXsec(double xsec);
-        void loadPuText();
-        map<int, map<int, lumiInfo> > loadedPuText;
-        double getTruePU(int run, int ls, double *rms);
-
-        // Pileup Hist
-        string puHistPath;
-        std::vector<std::string> puHistEras;
-        map<string, vector<string> > puHistTrigs;
-        void setPuHistPath(TString oName);
-        void setPuHistEras(TString oName);
-        void setPuHistTrigs(TString oName);
-        void loadPuHist();
-        map<string, map<int, TH1D*> >  loadedPuHist;
-        map<string, map<int, double> > loadedPuLumi;
-    
         double bThresh;
         double cThresh;
         void setThresh(TString oName);
 
-        void applyJEC(SkimTree* tree, correction::CompoundCorrection::Ref jesRefSF, correction::Correction::Ref jesRefUnc, string systVar);
-
     private:
         bool debug;
         double minbXsec;
+				double DELTAPHI(double phi1, double phi2);
+				double DELTAR(double phi1, double phi2, double eta1, double eta2);
 };
 
 

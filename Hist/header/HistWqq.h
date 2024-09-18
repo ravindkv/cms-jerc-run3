@@ -1,5 +1,5 @@
-#ifndef HistDiEleJet_h
-#define HistDiEleJet_h
+#ifndef HistWqq_h
+#define HistWqq_h
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -28,33 +28,14 @@
 #include "GlobalFlag.h"
 #include "correction.h"
 
-struct BasicHistosDiEleJet {
-  TH1D *hn;
-  TH1D *hxsec;
-  TProfile *prpt;
-  TProfile *prbal;
-  TProfile *prdb;
-  TProfile *prmpf;
-  TProfile *prmpf1;
-  TProfile *prmpfn;
-  TProfile *prmpfu;
-  TProfile *prho;
-  TProfile *pdjes;
-  TProfile *pjes;
-  TProfile *pres;
-};
-
-class HistDiEleJet: public GlobalFlag{
+class HistWqq: public GlobalFlag{
  public :
-    HistDiEleJet(TString oName): GlobalFlag(oName){}
-    int Run(SkimTree *tree, ObjectScale *objS, TFile *fout);
-    ~HistDiEleJet();
+    HistWqq(TString oName): GlobalFlag(oName){}
+    int Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectScale *objS, TFile *fout);
+    ~HistWqq();
 
  private :
-    EventPick* eventPick;
     ObjectPick* objectPick;   
-    //ObjectScale* objectScale;
-	
     bool smearJets = false;
 
 };

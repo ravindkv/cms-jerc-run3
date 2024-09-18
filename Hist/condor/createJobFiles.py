@@ -11,7 +11,7 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     'Universe   = vanilla\n\
     should_transfer_files = YES\n\
     when_to_transfer_output = ON_EXIT\n\
-    Transfer_Input_Files = Hist.tar.gz, runMakeHist.sh\n\
+    Transfer_Input_Files = Hist.tar.gz, runMain.sh\n\
     x509userproxy        = %s\n\
     +MaxRuntime = 60*60*24\n\
     use_x509userproxy = true\n\
@@ -23,7 +23,7 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     #Create jdl (job discription language) files
     #---------------------------------------------
     data = json.load(jsonFile)
-    jdlFile.write('Executable =  runMakeHist.sh \n')
+    jdlFile.write('Executable =  runMain.sh \n')
     jdlFile.write(common_command)
     for sKey, hists in data.items():
         jdlFile.write("\n")
@@ -45,7 +45,7 @@ if __name__=="__main__":
     os.system("tar --exclude condor --exclude mikko -zcvf %s ../../Hist"%tarFile)
     #os.system("tar --exclude condor --exclude mikko --exclude *.root -zcvf %s ../../Hist"%tarFile)
     #os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Hist"%tarFile)
-    os.system("cp runMakeHist.sh tmpSub/")
+    os.system("cp runMain.sh tmpSub/")
     print("Created dir: tmpSub")
     jsonFile = open("../sample/FilesHist_cff.json", "r")
     jdlFile  = open('tmpSub/submitJobs_cff.jdl','w')

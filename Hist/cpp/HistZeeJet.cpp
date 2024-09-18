@@ -1,6 +1,6 @@
-#include "HistGamJet.h"
+#include "HistZeeJet.h"
    
-int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectScale *objS, TFile *fout){
+int HistZeeJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectScale *objS, TFile *fout){
    
   TDirectory *curdir = gDirectory;
   assert(fout && !fout->IsZombie());
@@ -62,37 +62,6 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
   TH1D *hGenRefPt = new TH1D("hGenRefPt","",nPt,binsPt);
   TProfile *pRefPtOgenRefPtInGenRefPt = new TProfile("pRefPtOgenRefPtInGenRefPt","",nPt,binsPt);// O = Over
   TProfile *pGenRefPtORefPtInRefPt  = new TProfile("pGenRefPtORefPtInRefPt","",nPt,binsPt);
-	//--------------------------
-  // Photon scale and smearing
-  //--------------------------
-  fout->mkdir("passAtleast1Ref/ScaleAndSmear");
-  fout->cd("passAtleast1Ref/ScaleAndSmear");
-  //TProfile
-  TProfile *pPhoScaleSF 			= new TProfile("pPhoScaleSF", "pPhoScaleSF", nPt, binsPt);
-  TProfile *pPhoScaleSF_Up 		= new TProfile("pPhoScaleSF_Up", "pPhoScaleSF_Up", nPt, binsPt);
-  TProfile *pPhoScaleSF_Down 	= new TProfile("pPhoScaleSF_Down", "pPhoScaleSF_Down", nPt, binsPt);
-  TProfile *pPhoSmearSF 			= new TProfile("pPhoSmearSF", "pPhoSmearSF", nPt, binsPt);
-  TProfile *pPhoSmearSF_Up 		= new TProfile("pPhoSmearSF_Up", "pPhoSmearSF_Up", nPt, binsPt);
-  TProfile *pPhoSmearSF_Down 	= new TProfile("pPhoSmearSF_Down", "pPhoSmearSF_Down", nPt, binsPt);
-  
-  // In different eta and seedGain bins 
-  std::vector<std::pair<float, float>> eta_bins;
-  eta_bins = {{-1.442, -1.2}, {-1.2, -1.0}, 
-             {-1.0, 0.0}, {0.0, 1.0}, {1.0, 1.2}, {1.2, 1.44}};
-  std::vector<int> gain_bins = {1, 6, 12};
-  //scale SF
-  std::vector<std::vector<TProfile*>> pPhoScaleSFs;
-  std::vector<std::vector<TProfile*>> pPhoSmearSFs;
-  for (size_t i = 0; i < eta_bins.size(); ++i) {
-  	pPhoScaleSFs.push_back(std::vector<TProfile*>());
-  	pPhoSmearSFs.push_back(std::vector<TProfile*>());
-  	for (size_t j = 0; j < gain_bins.size(); ++j) {
-  		std::string hist_name = "pPhoScaleSF_etaBin"+std::to_string(i) +"Gain"+ std::to_string(j);
-  		pPhoScaleSFs[i].push_back(new TProfile(hist_name.c_str(), hist_name.c_str(), nPt, binsPt));
-  		hist_name = "pPhoSmearSF_etaBin"+std::to_string(i) +"Gain"+ std::to_string(j);
-  		pPhoSmearSFs[i].push_back(new TProfile(hist_name.c_str(), hist_name.c_str(), nPt, binsPt));
-  	}
-  }
    
   //------------------------------------
   // Variables after leading Ref in barrel (eta < 1.33) 
@@ -275,13 +244,15 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
     Long64_t ientry = tree->loadEntry(jentry);
     if (ientry < 0) break; 
     tree->fChain->GetTree()->GetEntry(ientry);
+    if(isDebug) cout<<"Loaded jentry = "<<jentry<<endl;
 
     // Weight
     double weight = (isMC ? tree->genWeight : 1);
     //------------------------------------
     // trigger and golden lumi, MET filter selection 
     //------------------------------------
-    if(!eventP->passHLT(tree)) continue; //passHLT
+    if(!eventP->passHLT(tree)) continue; 
+    if(isDebug) cout<<"passHLT"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
@@ -290,12 +261,14 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
     if(isData){
       passGoodLumi = objS->checkGoodLumi(tree->run, tree->luminosityBlock);
     }
-    if(!passGoodLumi) continue; // passGoodLumi
+    if(!passGoodLumi) continue; 
+    if(isDebug) cout<<"passLumi"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
 
-    if(!eventP->passFilter(tree)) continue; // passMetFilter
+    if(!eventP->passFilter(tree)) continue; 
+    if(isDebug) cout<<"passMetFilter"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
@@ -305,13 +278,14 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
     //------------------------------------------
     // Reco objects
     objP->clearObjects();
-    if(isGamJet)   objP->pickPhotons();
+    if(isZeeJet) objP->pickElectrons();
     objP->pickRefs();
     vector<TLorentzVector> p4Refs = objP->pickedRefs;
 
     int nRef(0);
     nRef = p4Refs.size();
-    if(nRef<1) continue; // passAtleast1Ref
+    if(nRef<1) continue; 
+    if(isDebug) cout<<"passAtleast1Ref"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
@@ -333,7 +307,7 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
     // Gen objects
     p4GenRef.SetPtEtaPhiM(0,0,0,0);
     if(isMC){
-      if(isGamJet)   objP->pickGenPhotons();
+      if(isZeeJet) objP->pickGenElectrons();
       objP->pickGenRefs();
       vector<TLorentzVector> p4GenRefs = objP->pickedGenRefs;
       if(p4GenRefs.size()<1) continue;
@@ -350,65 +324,6 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
       }
     }//isMC
 
-    //------------------------------------------------
-    //Photon scale and smearing
-    //------------------------------------------------
-    if(isGamJet){
-			double phoScaleSF        = 1.0;
-			double phoScaleSF_Up     = 1.0;
-			double phoScaleSF_Down   = 1.0;
-			double phoSmearSF        = 1.0;
-			double phoSmearSF_Up     = 1.0;
-			double phoSmearSF_Down   = 1.0;
-			int iGam = objP->pickedPhotons.at(0);
-			if (isData){
-				phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_correction", 
-				            tree->Photon_seedGain[iGam], 
-				            static_cast<Float_t>(tree->run), 
-				            tree->Photon_eta[iGam], 
-				            tree->Photon_r9[iGam],
-				            tree->Photon_pt[iGam]});
-			}
-			if (isMC){
-				phoScaleSF  = objS->loadedPhoSsRef->evaluate({"total_uncertainty",
-				            tree->Photon_seedGain[iGam], 
-				            static_cast<Float_t>(tree->run), 
-				            tree->Photon_eta[iGam], 
-				            tree->Photon_r9[iGam],
-				            tree->Photon_pt[iGam]});
-				phoScaleSF_Up     = (1+phoScaleSF);
-				phoScaleSF_Down   = (1-phoScaleSF);
-				double rho  = objS->loadedPhoSsRef->evaluate({"rho", 
-				            tree->Photon_eta[iGam], 
-				            tree->Photon_r9[iGam]});
-				double err_rho  = objS->loadedPhoSsRef->evaluate({"err_rho", 
-				            tree->Photon_eta[iGam], 
-				            tree->Photon_r9[iGam]});
-				phoSmearSF       = gRandom->Gaus(1., rho);
-				phoSmearSF_Up    = gRandom->Gaus(1., rho+err_rho);
-				phoSmearSF_Down  = gRandom->Gaus(1., rho-err_rho);
-			}
-			pPhoScaleSF        ->Fill(tree->Photon_pt[iGam], phoScaleSF);
-			pPhoScaleSF_Up     ->Fill(tree->Photon_pt[iGam], phoScaleSF_Up  );
-      pPhoScaleSF_Down   ->Fill(tree->Photon_pt[iGam], phoScaleSF_Down);
-      pPhoSmearSF        ->Fill(tree->Photon_pt[iGam], phoSmearSF     );
-      pPhoSmearSF_Up     ->Fill(tree->Photon_pt[iGam], phoSmearSF_Up  );
-      pPhoSmearSF_Down   ->Fill(tree->Photon_pt[iGam], phoSmearSF_Down);
-			//fill these in different bins of eta and Gains
-			for (size_t i = 0; i < eta_bins.size(); ++i) {
-      	if (tree->Photon_eta[iGam] >= eta_bins[i].first && tree->Photon_eta[iGam] < eta_bins[i].second) {
-      		for (size_t j = 0; j < gain_bins.size(); ++j) {
-      			if (tree->Photon_seedGain[iGam] == gain_bins.at(j)) {
-      				pPhoScaleSFs[i][j]->Fill(tree->Photon_pt[iGam], phoScaleSF);
-      				pPhoSmearSFs[i][j]->Fill(tree->Photon_pt[iGam], phoSmearSF);
-      				break;
-      			}
-      		}//gain bins
-      		break;
-      	}
-    	}//eta bins
-    }//isGamJet
-      
     //------------------------------------------------
     // Jet loop: Apply JEC
     //------------------------------------------------
@@ -493,7 +408,8 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
       } // non-Ref jet
     } // for i in nJet
     
-    if(nJets < 1) continue; // passAtleast1Jet
+    if(nJets < 1) continue; 
+    if(isDebug) cout<<"passAtleast1Jet"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
@@ -595,12 +511,14 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
     }
    
     bool pass_dPhiProbJet1 = (fabs(p4Ref.DeltaPhi(p4Jet1)) > 2.7); // pi-0.44 as in KIT Ref+j
-    if(!pass_dPhiProbJet1) continue; // passDPhiRefJet1
+    if(!pass_dPhiProbJet1) continue; 
+    if(isDebug) cout<<"passDPhiRefJet1"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
 
-    if(fabs(p4Ref.Eta()) > 1.3) continue; // passRefBarrel
+    if(fabs(p4Ref.Eta()) > 1.3) continue; 
+    if(isDebug) cout<<"passRefBarrel"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
@@ -679,7 +597,8 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
 
     bool pass_Jet1Eta = (abseta < 1.3);
     bool pass_Jet2Pt = (ptJet2 < ptRef || ptJet2 < ptJet2Min);    
-    if(!(pass_Jet1Eta &&  pass_Jet2Pt)) continue; // passJet1EtaJet2Pt
+    if(!(pass_Jet1Eta &&  pass_Jet2Pt)) continue; 
+    if(isDebug) cout<<"passJet1EtaJet2Pt"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);
@@ -734,7 +653,8 @@ int HistGamJet::Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectS
     if (pass_MpfResp && pass_DbResp) h2RefPtDbRespPassBoth->Fill(ptRef, bal, weight);
     if (pass_MpfResp && pass_DbResp) h2RefPtMpfRespPassBoth->Fill(ptRef, mpf, weight);
 
-    if(!(pass_DbResp && pass_MpfResp)) continue; // passResponse
+    if(!(pass_DbResp && pass_MpfResp)) continue; 
+    if(isDebug) cout<<"passResponse"<<endl;
     count_passedCut++;
     hCutflow->Fill(count_passedCut);
     hCutflowWeight->Fill(count_passedCut, weight);

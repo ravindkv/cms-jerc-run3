@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesNano_2024_DiMuJet.json";// for help ONLY
+    std::string fileDefault = "input/json/FilesNano_2024_GamJet.json";// for help ONLY
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
                 break;
             case 'h':
                 cout<<"Default input json: "<<fileDefault<<endl;
-                std::cout << "Usage: ./makeSkim -o sKey_Skim_1of100.root\n" << std::endl;
+                std::cout << "Usage: ./runMain -o sKey_Skim_1of100.root\n" << std::endl;
                 cout<<"Choose sKey from the following:"<<endl;
                 for (auto& element : js.items()) {
                     std::cout << element.key() << std::endl;
@@ -58,7 +58,7 @@ int main(int argc, char* argv[]){
                 return 1;
         }
     }
-    cout<<"\n./makeSkim -o " <<outName<<endl;
+    cout<<"\n./runMain -o " <<outName<<endl;
 
     cout<<"\n--------------------------------------"<<endl;
     cout<<" Set and load NanoTree"<<endl;
@@ -181,7 +181,7 @@ int main(int argc, char* argv[]){
             nanoT->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3            ||
             nanoT->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ600DEta3           ;
         }
-        if(oName.Contains("2023") && oName.Contains("GamJet")){ 
+        if((oName.Contains("2023")) && oName.Contains("GamJet")){ 
             nanoT->b_HLT_Photon300_NoHE                                     ->GetEntry(entry);
             nanoT->b_HLT_Photon33                                           ->GetEntry(entry);
             nanoT->b_HLT_Photon50                                           ->GetEntry(entry);
@@ -200,6 +200,74 @@ int main(int argc, char* argv[]){
             nanoT->b_HLT_Photon150EB_TightID_TightIso                       ->GetEntry(entry);
             nanoT->b_HLT_Photon175EB_TightID_TightIso                       ->GetEntry(entry);
             nanoT->b_HLT_Photon200EB_TightID_TightIso                       ->GetEntry(entry);
+            nanoT->b_HLT_Photon100EBHE10                                    ->GetEntry(entry);
+            nanoT->b_HLT_Photon50_R9Id90_HE10_IsoM                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon75_R9Id90_HE10_IsoM                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon90_R9Id90_HE10_IsoM                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon120_R9Id90_HE10_IsoM                         ->GetEntry(entry);
+            nanoT->b_HLT_Photon165_R9Id90_HE10_IsoM                         ->GetEntry(entry);
+            nanoT->b_HLT_Photon35_TwoProngs35                               ->GetEntry(entry);
+            nanoT->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350  ->GetEntry(entry);
+            nanoT->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT380  ->GetEntry(entry);
+            nanoT->b_HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT400  ->GetEntry(entry);
+            nanoT->b_HLT_Photon20_HoverELoose                               ->GetEntry(entry);
+            nanoT->b_HLT_Photon30_HoverELoose                               ->GetEntry(entry);
+            nanoT->b_HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ->GetEntry(entry);
+            nanoT->b_HLT_Photon32_OneProng32_M50To105                       ->GetEntry(entry);
+
+		    passTrig =
+            nanoT->HLT_Photon300_NoHE                                     ||
+            nanoT->HLT_Photon33                                           ||
+            nanoT->HLT_Photon50                                           ||
+            nanoT->HLT_Photon75                                           ||
+            nanoT->HLT_Photon90                                           ||
+            nanoT->HLT_Photon120                                          ||
+            nanoT->HLT_Photon150                                          ||
+            nanoT->HLT_Photon175                                          ||
+            nanoT->HLT_Photon200                                          ||
+            nanoT->HLT_Photon30EB_TightID_TightIso                        ||
+            nanoT->HLT_Photon50EB_TightID_TightIso                        ||
+            nanoT->HLT_Photon75EB_TightID_TightIso                        ||
+            nanoT->HLT_Photon90EB_TightID_TightIso                        ||
+            nanoT->HLT_Photon110EB_TightID_TightIso                       ||
+            nanoT->HLT_Photon130EB_TightID_TightIso                       ||
+            nanoT->HLT_Photon150EB_TightID_TightIso                       ||
+            nanoT->HLT_Photon175EB_TightID_TightIso                       ||
+            nanoT->HLT_Photon200EB_TightID_TightIso                       ||
+            nanoT->HLT_Photon100EBHE10                                    ||
+            nanoT->HLT_Photon50_R9Id90_HE10_IsoM                          ||
+            nanoT->HLT_Photon75_R9Id90_HE10_IsoM                          ||
+            nanoT->HLT_Photon90_R9Id90_HE10_IsoM                          ||
+            nanoT->HLT_Photon120_R9Id90_HE10_IsoM                         ||
+            nanoT->HLT_Photon165_R9Id90_HE10_IsoM                         ||
+            nanoT->HLT_Photon35_TwoProngs35                               ||
+            nanoT->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT350  ||
+            nanoT->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT380  ||
+            nanoT->HLT_Photon60_R9Id90_CaloIdL_IsoL_DisplacedIdL_PFHT400  ||
+            nanoT->HLT_Photon20_HoverELoose                               ||
+            nanoT->HLT_Photon30_HoverELoose                               ||
+            nanoT->HLT_Photon75_R9Id90_HE10_IsoM_EBOnly_PFJetsMJJ300DEta3 ||
+            nanoT->HLT_Photon32_OneProng32_M50To105                       ;
+        }
+        if(oName.Contains("2024") && oName.Contains("GamJet")){ 
+            nanoT->b_HLT_Photon300_NoHE                                     ->GetEntry(entry);
+            nanoT->b_HLT_Photon33                                           ->GetEntry(entry);
+            nanoT->b_HLT_Photon50                                           ->GetEntry(entry);
+            nanoT->b_HLT_Photon75                                           ->GetEntry(entry);
+            nanoT->b_HLT_Photon90                                           ->GetEntry(entry);
+            nanoT->b_HLT_Photon120                                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon150                                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon175                                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon200                                          ->GetEntry(entry);
+            nanoT->b_HLT_Photon30EB_TightID_TightIso                        ->GetEntry(entry);
+            nanoT->b_HLT_Photon50EB_TightID_TightIso                        ->GetEntry(entry);
+            nanoT->b_HLT_Photon75EB_TightID_TightIso                        ->GetEntry(entry);
+            nanoT->b_HLT_Photon90EB_TightID_TightIso                        ->GetEntry(entry);
+            nanoT->b_HLT_Photon110EB_TightID_TightIso                       ->GetEntry(entry);
+            //nanoT->b_HLT_Photon130EB_TightID_TightIso                       ->GetEntry(entry);
+            //nanoT->b_HLT_Photon150EB_TightID_TightIso                       ->GetEntry(entry);
+            //nanoT->b_HLT_Photon175EB_TightID_TightIso                       ->GetEntry(entry);
+            //nanoT->b_HLT_Photon200EB_TightID_TightIso                       ->GetEntry(entry);
             nanoT->b_HLT_Photon100EBHE10                                    ->GetEntry(entry);
             nanoT->b_HLT_Photon50_R9Id90_HE10_IsoM                          ->GetEntry(entry);
             nanoT->b_HLT_Photon75_R9Id90_HE10_IsoM                          ->GetEntry(entry);

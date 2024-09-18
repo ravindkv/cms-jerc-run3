@@ -41,9 +41,15 @@ GlobalFlag::GlobalFlag(TString oName){
     
     //Channels
     isGamJet    = false;
-    isDiEleJet  = false;
-    isDiMuJet   = false;
+    isZeeJet  = false;
+    isZmmJet   = false;
+    isMCTruth   = false;
+    isFlavour= false;
+    isVetoMap   = false;
     isDiJet     = false;
+    isIncJet    = false;
+    isMultiJet  = false;
+    isWqq       = false;
     
     //Sample (e.g. QCD)
     isQCD = false;
@@ -83,9 +89,15 @@ GlobalFlag::GlobalFlag(TString oName){
     if (oName.Contains("MC"))   isMC = true;
 
     if(oName.Contains("GamJet"))    isGamJet    = true;
-    if(oName.Contains("DiEleJet"))  isDiEleJet  = true;
-    if(oName.Contains("DiMuJet"))   isDiMuJet   = true;
+    if(oName.Contains("ZeeJet"))  isZeeJet  = true;
+    if(oName.Contains("ZmmJet"))   isZmmJet   = true;
+    if(oName.Contains("MCTruth"))   isMCTruth   = true;
+    if(oName.Contains("Flavour"))   isFlavour   = true;
+    if(oName.Contains("VetoMap"))   isVetoMap   = true;
     if(oName.Contains("DiJet"))     isDiJet     = true;
+    if(oName.Contains("IncJet"))    isIncJet    = true;
+    if(oName.Contains("MultiJet"))  isMultiJet  = true;
+    if(oName.Contains("Wqq"))       isWqq       = true;
 
     if(oName.Contains("QCD"))    isQCD    = true;
     if(oName.Contains("MC"))     isMG     = true;
@@ -121,9 +133,14 @@ void GlobalFlag::printFlag(){
     if(isData    )std::cout<<"isData    = true"<<std::endl;
     if(isMC      )std::cout<<"isMC      = true"<<std::endl;
     if(isGamJet  )std::cout<<"isGamJet  = true"<<std::endl;
-    if(isDiEleJet)std::cout<<"isDiEleJet= true"<<std::endl;
-    if(isDiMuJet )std::cout<<"isDiMuJet = true"<<std::endl;
-    if(isDiJet   )std::cout<<"isDiJet   = true"<<std::endl;
+    if(isZeeJet  )std::cout<<"isZeeJet  = true"<<std::endl;
+    if(isZmmJet  )std::cout<<"isZmmJet  = true"<<std::endl;
+    if(isMCTruth )std::cout<<"isMCTruth = true"<<std::endl;
+    if(isFlavour)std::cout<<"isFlavour= true"<<std::endl;
+    if(isIncJet  )std::cout<<"isIncJet  = true"<<std::endl;
+    if(isMultiJet)std::cout<<"isMultiJet= true"<<std::endl;
+    if(isWqq     )std::cout<<"isWqq     = true"<<std::endl;
+
     if(isQCD     )std::cout<<"isQCD     = true"<<std::endl;
     if(isMG      )std::cout<<"isMG      = true"<<std::endl;
 }

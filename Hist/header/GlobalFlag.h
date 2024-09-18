@@ -1,7 +1,7 @@
 #ifndef GlobalFlag_H
 #define GlobalFlag_H
         
-#include<iostream>
+#include <iostream>
 #include <fstream>
 #include <TString.h>
 
@@ -51,9 +51,15 @@ class GlobalFlag{
         
         //Channels
         bool isGamJet;
-        bool isDiEleJet;
-        bool isDiMuJet;
+        bool isZeeJet;
+        bool isZmmJet;
+        bool isMCTruth;
+        bool isFlavour;
+        bool isVetoMap;
         bool isDiJet;
+        bool isIncJet;
+        bool isMultiJet;
+        bool isWqq;
 
         //Sample (e.g. QCD)
         bool isQCD;

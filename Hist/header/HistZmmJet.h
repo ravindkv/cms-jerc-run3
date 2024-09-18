@@ -1,5 +1,5 @@
-#ifndef HistGamJet_h
-#define HistGamJet_h
+#ifndef HistZmmJet_h
+#define HistZmmJet_h
 #include <TH2.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -28,14 +28,13 @@
 #include "GlobalFlag.h"
 #include "correction.h"
 
-class HistGamJet: public GlobalFlag{
+class HistZmmJet: public GlobalFlag{
  public :
-    HistGamJet(TString oName): GlobalFlag(oName){}
+    HistZmmJet(TString oName): GlobalFlag(oName){}
     int Run(SkimTree *tree, EventPick *eventP, ObjectPick *objP, ObjectScale *objS, TFile *fout);
-    ~HistGamJet();
+    ~HistZmmJet();
 
  private :
-    ObjectPick* objectPick;   
     bool smearJets = false;
 
 };

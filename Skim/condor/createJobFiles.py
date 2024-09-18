@@ -13,7 +13,7 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     'Universe   = vanilla\n\
     should_transfer_files = YES\n\
     when_to_transfer_output = ON_EXIT\n\
-    Transfer_Input_Files = Skim.tar.gz, runMakeSkim.sh\n\
+    Transfer_Input_Files = Skim.tar.gz, runMain.sh\n\
     x509userproxy        = %s\n\
     +MaxRuntime = 60*60*24\n\
     max_retries = 2\n\
@@ -25,7 +25,7 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     #Create jdl (job discription language) files
     #---------------------------------------------
     data = json.load(jsonFile)
-    jdlFile.write('Executable =  runMakeSkim.sh \n')
+    jdlFile.write('Executable =  runMain.sh \n')
     jdlFile.write(common_command)
     for sKey, skims in data.items():
         jdlFile.write("\n")
@@ -45,7 +45,7 @@ if __name__=="__main__":
     os.system("mkdir -p tmpSub")
     tarFile = "tmpSub/Skim.tar.gz"
     os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Skim"%tarFile)
-    os.system("cp runMakeSkim.sh tmpSub/")
+    os.system("cp runMain.sh tmpSub/")
     print("Created dir: tmpSub")
     submitAll = open("tmpSub/submitAll.sh", "w") 
     for year, ch in itertools.product(Years, Channels):

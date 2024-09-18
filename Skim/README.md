@@ -9,10 +9,10 @@ Have a look at the files produced from the above command
 ### Step-2: produce ONE skim file from nanofiles 
 * cd ..
 * make
-* ./makeSkim -h
+* ./runMain -h
 
 or 
-* ./makeSkim
+* ./runMain
 
 ### Step-3: submit condor jobs to produce MANY skims 
 
