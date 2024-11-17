@@ -17,35 +17,34 @@ def checkJobs(jsonFile):
     nEvents = 0
     print("Checking corrupted files ...") 
     for sKey, skims in jsonFile.items():
-        print(sKey)
         corruptedList = []
         nEvents = 0
-        for skim in skims :
-            try:
-                f = TFile.Open(skim, "READ")
-            except Exception:
-                corruptedList.append(skim)
-                #print("Unable to open: %s"%skim)
-                continue
-            if not f:
-                print("Null pointer: %s"%skim)
-                corruptedList.append(skim)
-                continue
-            if f.IsZombie():
-                print("Zombie: %s"%skim)
-                corruptedList.append(skim)
-                continue
-            if f.GetSize() < 3000:
-                print("Empty file: %s"%skim)
-                corruptedList.append(skim)
-                continue
-            h = f.Get("hEvents")
-            if not h:
-                print("hEvents does not exist: %s"%skim)
-                corruptedList.append(skim)
-                continue
-            nEvents = nEvents + h.GetBinContent(2)
-            f.Close()
+        skim = skims[-1]
+        try:
+            f = TFile.Open(skim, "READ")
+        except Exception:
+            corruptedList.append(skim)
+            #print("Unable to open: %s"%skim)
+            continue
+        if not f:
+            print("Null pointer: %s"%skim)
+            corruptedList.append(skim)
+            continue
+        if f.IsZombie():
+            print("Zombie: %s"%skim)
+            corruptedList.append(skim)
+            continue
+        if f.GetSize() < 3000:
+            print("Empty file: %s"%skim)
+            corruptedList.append(skim)
+            continue
+        h = f.Get("hEvents")
+        if not h:
+            print("hEvents does not exist: %s"%skim)
+            corruptedList.append(skim)
+            continue
+        nEvents = nEvents + h.GetBinContent(2)
+        f.Close()
         if len(corruptedList)>0:
             print("\n------ %s jobs to be resubmitted for %s ------\n"%(len(corruptedList),  sKey))
             unfinished[sKey] = corruptedList
@@ -57,7 +56,7 @@ def checkJobs(jsonFile):
 #-------------------------------------------------
 logDir = "resubLog"
 dResubs = {}
-fResub  = "tmpSub/resubFilesSkim.json"
+fResub  = "tmpSub/resubFilesFib.json"
 jdlFile_ = open('tmpSub/resubJobs.jdl', 'w')
 if os.path.exists(fResub):
     fResub_  = open(fResub, "r")
@@ -73,8 +72,8 @@ if os.path.exists(fResub):
 else:
     for year, ch in itertools.product(Years, Channels):
         print(f"=======> {year}: {ch}")
-        fSkim = open(f"../input/json/FilesSkim_{year}_{ch}.json", "r")
-        jsonFile = json.load(fSkim)
+        fFib = open(f"../input/json/FilesFib_{year}_{ch}.json", "r")
+        jsonFile = json.load(fFib)
         dResub = checkJobs(jsonFile)
         dResubs.update(dResub)
     fResub_  = open(fResub, "w")

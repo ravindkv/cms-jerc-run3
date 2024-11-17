@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesNano_2024_GamJet.json";// for help ONLY
+    std::string fileDefault = "input/json/FilesNano_2024_DiJet.json";// for help ONLY
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -332,6 +332,7 @@ int main(int argc, char* argv[]){
 
         //DiJet
         if(oName.Contains("DiJet")){
+            nanoT->b_HLT_ZeroBias            ->GetEntry(entry);
             nanoT->b_HLT_PFJet40             ->GetEntry(entry);
             nanoT->b_HLT_PFJet60             ->GetEntry(entry);
             nanoT->b_HLT_PFJet80             ->GetEntry(entry);
@@ -359,6 +360,7 @@ int main(int argc, char* argv[]){
             nanoT->b_HLT_DiPFJetAve300_HFJEC ->GetEntry(entry);
 
 		    passTrig =
+            nanoT->HLT_ZeroBias            ||
             nanoT->HLT_PFJet40             ||
             nanoT->HLT_PFJet60             ||
             nanoT->HLT_PFJet80             ||

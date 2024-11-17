@@ -81,6 +81,10 @@ void NanoTree::loadJobFileNames(){
     }
     std::vector<std::vector<std::string>> smallVectors = splitVector(loadedAllFileNames, loadedTotJob);
     loadedJobFileNames = smallVectors[loadedNthJob-1];
+    //loadedJobFileNames = {"/store/data/Run2024H/EGamma0/NANOAOD/PromptReco-v1/000/385/836/00000/ff057d36-5d80-40e5-a785-c4a729416c76.root"};
+    //loadedJobFileNames = {"/store/data/Run2024I/ZeroBias/NANOAOD/PromptReco-v2/000/386/034dbe81-5740-4de8-a57f-766537a8aaed.root"};
+    //loadedJobFileNames = {"/store/data/Run2024I/JetMET0/NANOAOD/PromptReco-v1/000/386/604/00000/e48a0a0c-d9bf-414d-8d77-ce05f83466ee.root"};
+    //loadedJobFileNames = {"/store/mc/Run3Winter24NanoAOD/GJ-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8/NANOAODSIM/JMENanoV14_133X_mcRun3_2024_realistic_v10-v1/2520000/9f11bda3-0a00-419e-826a-abcc4cc65235.root"};
 }
 
 void NanoTree::loadTree(){
@@ -123,12 +127,16 @@ void NanoTree::loadTree(){
     //Jet for all channels 
     //--------------------------------------- 
     fChain->SetBranchStatus("Jet_btagDeep*",1);
+    fChain->SetBranchStatus("Jet_btagPNetQvG",1);
+    fChain->SetBranchStatus("Jet_btagUParTAK4QvG",1);
     fChain->SetBranchStatus("Jet_chEmEF",1);
     fChain->SetBranchStatus("Jet_chHEF" ,1);
     fChain->SetBranchStatus("Jet_eta"   ,1);
     fChain->SetBranchStatus("Jet_mass"  ,1);
     fChain->SetBranchStatus("Jet_muEF"  ,1);
     fChain->SetBranchStatus("Jet_neEmEF",1);
+    fChain->SetBranchStatus("Jet_hfEmEF",1);
+    fChain->SetBranchStatus("Jet_hfHEF",1);
     fChain->SetBranchStatus("Jet_neHEF" ,1);
     fChain->SetBranchStatus("Jet_phi"   ,1);
     fChain->SetBranchStatus("Jet_pt"    ,1);
@@ -150,18 +158,22 @@ void NanoTree::loadTree(){
       fChain->SetBranchStatus("PFMET_phi",1);
       fChain->SetBranchStatus("PuppiMET_pt",1);
       fChain->SetBranchStatus("PuppiMET_phi",1);
+      fChain->SetBranchStatus("RawPuppiMET_phi",1);
+      fChain->SetBranchStatus("RawPuppiMET_pt",1);
+      fChain->SetBranchStatus("RawPuppiMET_sumEt",1);
     }
     else{
       fChain->SetBranchStatus("MET_pt",1);
       fChain->SetBranchStatus("MET_phi",1);
       fChain->SetBranchStatus("ChsMET_pt",1);
       fChain->SetBranchStatus("ChsMET_phi",1);
-      fChain->SetBranchStatus("RawPuppiMET_pt",1);
       fChain->SetBranchStatus("RawPuppiMET_phi",1);
+      fChain->SetBranchStatus("RawPuppiMET_pt",1);
+      fChain->SetBranchStatus("RawPuppiMET_sumEt",1);
     }
 
     fChain->SetBranchStatus("Flag_*",1);
-	fChain->SetBranchStatus("Rho_fixedGridRhoFastjetAll");
+	fChain->SetBranchStatus("Rho_fixed*");
  
     if (oN.Contains("MC")){
         fChain->SetBranchStatus("Jet_genJetIdx",1);
@@ -330,7 +342,9 @@ void NanoTree::loadTree(){
     }
     if(oN.Contains("DiJet")){
         fChain->SetBranchStatus("HLT_PFJet*", 1);
+        fChain->SetBranchStatus("HLT_ZeroBias*", 1);
         fChain->SetBranchStatus("HLT_DiPFJetAve*", 1);
+        fChain->SetBranchAddress("HLT_ZeroBias"            , & HLT_ZeroBias            , & b_HLT_ZeroBias            );
         fChain->SetBranchAddress("HLT_PFJet40"            , & HLT_PFJet40            , & b_HLT_PFJet40            );
         fChain->SetBranchAddress("HLT_PFJet60"            , & HLT_PFJet60            , & b_HLT_PFJet60            );
         fChain->SetBranchAddress("HLT_PFJet80"            , & HLT_PFJet80            , & b_HLT_PFJet80            );
