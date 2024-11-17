@@ -7,9 +7,14 @@
 #include <TProfile.h>
 #include <TProfile2D.h>
 #include <iostream>
+#include <iomanip>
+#include <string>
 
+using namespace std;
 
-//root -b -q -l "scanTFile.C(\"TFile.root\")";
+//$ g++ -o scanTFile scanTFile.C `root-config --cflags --glibs`
+
+//$ ./scanTFile file.root
 
 void printInfo(TObject *obj) {
     if (TTree *tree = dynamic_cast<TTree*>(obj)) {
@@ -50,16 +55,21 @@ void scanDirectory(TDirectory *dir, const std::string &path = "") {
     }
 }
 
-void scanTFile(const char *fileName) {
-    TFile *file = TFile::Open(fileName);
-    if (!file || file->IsZombie()) {
-        std::cerr << "Failed to open file: " << fileName << std::endl;
-        return;
+int main(int argc, char** argv) {
+    if (argc != 2) {
+        std::cout << "Usage: scanTFile file.root" << std::endl;
+        return 1;
     }
-		cout<<"\n-----------: Scan all directories and print Entries, Mean, RMS :------------\n"<<endl;
+    
+    TFile *file = TFile::Open(argv[1]);
+    if (!file || file->IsZombie()) {
+        std::cerr << "Failed to open file: " << argv[1] << std::endl;
+        return 1;
+    }
+    cout<<"\n-----------: Scan all directories and print Entries, Mean, RMS :------------\n"<<endl;
     scanDirectory(file);
 
     file->Close();
     delete file;
+    return 0;
 }
-

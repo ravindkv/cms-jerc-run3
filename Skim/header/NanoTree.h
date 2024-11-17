@@ -126,6 +126,7 @@ class NanoTree{
     TBranch *b_HLT_Photon32_OneProng32_M50To105;
 
     //2022+23, DiJet
+	Bool_t HLT_ZeroBias = false;
 	Bool_t HLT_PFJet40 = false;
     Bool_t HLT_PFJet60 = false;
     Bool_t HLT_PFJet80 = false;
@@ -152,6 +153,7 @@ class NanoTree{
     Bool_t HLT_DiPFJetAve220_HFJEC = false;
     Bool_t HLT_DiPFJetAve300_HFJEC = false;
 
+	TBranch *b_HLT_ZeroBias;
 	TBranch *b_HLT_PFJet40;
     TBranch *b_HLT_PFJet60;
     TBranch *b_HLT_PFJet80;
