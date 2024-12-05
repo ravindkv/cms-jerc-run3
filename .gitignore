@@ -6,13 +6,21 @@ Skim/condor/tmpSub
 Skim/input/__pycache__
 Skim/condor/__pycache__
 
+Fib/runMain
+Fib/obj
+Fib/output
+Fib/input/json
+Fib/condor/tmpSub
+Fib/input/__pycache__
+Fib/condor/__pycache__
+
 Hist/runMain
 Hist/obj
 Hist/output
 Hist/input/json
 Hist/condor/tmpSub
 Hist/input/__pycache__
-Skim/condor/__pycache__
+Hist/condor/__pycache__
 
 Hist/files
 Hist/POG

@@ -27,6 +27,7 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
     data = json.load(jsonFile)
     jdlFile.write('Executable =  runMain.sh \n')
     jdlFile.write(common_command)
+    localRun = open("tmpSub/runLocal.sh", "w")
     for sKey, skims in data.items():
         jdlFile.write("\n")
         skim = skims[-1]
@@ -36,7 +37,9 @@ def createJobs(jsonFile, jdlFile, logDir="log"):
         args =  'Arguments  = %s %s\n' %(oName, outDir)
         args += "Queue 1\n"
         jdlFile.write(args)
+        localRun.write(f"./runMain -o {oName} && xrdcp -f output/{oName} {outDir}\n\n")
     jdlFile.close() 
+    localRun.close()
 
 if __name__=="__main__":
     if os.path.exists("tmpSub"):
@@ -44,7 +47,7 @@ if __name__=="__main__":
         print("Deleted dir: tmpSub")
     os.system("mkdir -p tmpSub")
     tarFile = "tmpSub/Fib.tar.gz"
-    os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Fib"%tarFile)
+    os.system("tar --exclude condor --exclude *.root --exclude output -zcvf %s ../../Fib"%tarFile)
     os.system("cp runMain.sh tmpSub/")
     print("Created dir: tmpSub")
     submitAll = open("tmpSub/submitAll.sh", "w") 

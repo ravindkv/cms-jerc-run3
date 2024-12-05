@@ -87,41 +87,116 @@ void NanoTree::loadJobFileNames(){
     //loadedJobFileNames = {"/store/mc/Run3Winter24NanoAOD/GJ-4Jets_HT-100to200_TuneCP5_13p6TeV_madgraphMLM-pythia8/NANOAODSIM/JMENanoV14_133X_mcRun3_2024_realistic_v10-v1/2520000/9f11bda3-0a00-419e-826a-abcc4cc65235.root"};
 }
 
-void NanoTree::loadTree(){
-    cout<<"==> loadTree()"<<endl;
-    TString oN = iName;
-    std::cout << "Start NanoTree" << std::endl;
-    fChain->SetCacheSize(100*1024*1024);
-    bool isCopy = false;
-    int nFiles = loadedJobFileNames.size();
-    string dir = "root://cms-xrd-global.cern.ch/";
-    //string dir = "root://cmsxrootd.fnal.gov/";
-    //string dir = "./"; 
-    for(int fileI=0; fileI<nFiles; fileI++){
-        string fName = loadedJobFileNames[fileI];
-        if(isCopy){
-            string singleFile = fName.substr(fName.find_last_of("/")+1,fName.size());
-            string xrdcp_command = "xrdcp " + dir + fName + " " + singleFile ;
-            cout << xrdcp_command.c_str() << endl;
-            system(xrdcp_command.c_str());
-            fChain->Add( singleFile.c_str());
-            cout << singleFile << "  " << fChain->GetEntries() << endl;
-        }
-        else{
-            std::filesystem::path filePath = "/eos/cms/" + fName;
+
+void NanoTree::loadTree() {
+    std::cout << "==> loadTree()" << '\n';
+	TString oN = iName;
+    fChain->SetCacheSize(50*1024*1024);
+    bool isCopy = false;  // Set to true if you want to copy files locally
+    std::string dir = "root://cms-xrd-global.cern.ch/";  // Default remote directory
+    // std::string dir = "./";  // Uncomment if using local directory
+
+    int totalFiles = 0;
+    int addedFiles = 0;
+    int failedFiles = 0;
+    for (const auto& fileName : loadedJobFileNames) {
+        totalFiles++;
+        std::string fullPath;
+
+        if (isCopy) {
+            // Extract the local file name from the remote path
+            std::string localFile = fileName.substr(fileName.find_last_of('/') + 1);
+            std::string cmd = "xrdcp ";
+            cmd.append(dir).append(fileName).append(" ").append(localFile);
+            std::cout << "Executing command: " << cmd << '\n';
+            int ret = system(cmd.c_str());
+
+            if (ret != 0) {
+                std::cerr << "Error: Failed to copy " << fileName << " to local file " << localFile << '\n';
+                failedFiles++;
+                continue;  // Skip adding this file
+            }
+
+            // Check if the file was successfully copied
+            if (!std::filesystem::exists(localFile)) {
+                std::cerr << "Error: Local file " << localFile << " does not exist after copying.\n";
+                failedFiles++;
+                continue;  // Skip adding this file
+            }
+
+            fullPath = localFile;  // Use the local file path
+        } else {
+            // Remote file handling
+            std::filesystem::path filePath = "/eos/cms/" + fileName;
             if (std::filesystem::exists(filePath)) {
-    			dir = "/eos/cms/"; 
-			}
-            fChain->Add( (dir + fName).c_str());
-            cout << dir+fName << "  " << fChain->GetEntries() << endl;
+                dir = "/eos/cms/";  // Use local EOS path
+                fullPath = dir + fileName;
+            } else {
+                dir = "root://cms-xrd-global.cern.ch/";  // Fallback to remote xrootd path
+                fullPath = dir + fileName;
+            }
         }
+
+        // Attempt to open the file to verify its validity
+        TFile* f = TFile::Open(fullPath.c_str(), "READ");
+        if (!f || f->IsZombie()) {
+            std::cerr << "Error: Failed to open or corrupted file " << fullPath << '\n';
+            if (f) f->Close();
+            failedFiles++;
+            continue;  // Skip adding this file
+        }
+
+        // Optionally, check for the presence of essential branches or histograms
+        // For example, check if "Events" exists
+        if (!f->GetListOfKeys()->Contains("Events")) {
+            std::cerr << "Error: 'Events' not found in " << fullPath << '\n';
+            f->Close();
+            failedFiles++;
+            continue;  // Skip adding this file
+        }
+
+        // Check the entries in the newly added TTree
+        Long64_t fileEntries = f->Get<TTree>("Events")->GetEntries();
+        if (fileEntries == 0) {
+            std::cerr << "\nWarning: 'Events' TTree in file " << fullPath << " has 0 entries. Skipping file.\n\n";
+            f->Close();
+            failedFiles++;
+            continue;  // Skip adding this file to the final count
+        }
+
+        // File is valid, add it to the TChain
+        int added = fChain->Add(fullPath.c_str());
+        if (added == 0) {
+            std::cerr << "Warning: TChain::Add failed for " << fullPath << '\n';
+            f->Close();
+            failedFiles++;
+            continue;  // Skip adding this file
+        }
+
+        std::cout << fullPath << "  Entries: " << fChain->GetEntries() << '\n';
+        addedFiles++;
+        f->Close();
     }
+
+    // Final summary
+    std::cout << "==> Finished loading files.\n";
+    std::cout << "Total files processed: " << totalFiles << '\n';
+    std::cout << "Successfully added files: " << addedFiles << '\n';
+    std::cout << "Failed to add files: " << failedFiles << '\n';
+
+    // Check if the chain has any trees
+    if (fChain->GetNtrees() == 0) {
+        std::cerr << "Error: No valid ROOT files were added to the TChain. Exiting.\n";
+        return;
+    }
+
     std::cout << "Begin" << std::endl;
     fChain->SetBranchStatus("*",0);
     // event
     fChain->SetBranchStatus("run",1);
     fChain->SetBranchStatus("event",1);
     fChain->SetBranchStatus("luminosityBlock",1);
+    fChain->SetBranchStatus("bunchCrossing",1);
     
     //--------------------------------------- 
     //Jet for all channels 
@@ -341,38 +416,41 @@ void NanoTree::loadTree(){
         fChain->SetBranchAddress("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8", & HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8, &b_HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ_Mass8);
     }
     if(oN.Contains("DiJet")){
-        fChain->SetBranchStatus("HLT_PFJet*", 1);
-        fChain->SetBranchStatus("HLT_ZeroBias*", 1);
-        fChain->SetBranchStatus("HLT_DiPFJetAve*", 1);
-        fChain->SetBranchAddress("HLT_ZeroBias"            , & HLT_ZeroBias            , & b_HLT_ZeroBias            );
-        fChain->SetBranchAddress("HLT_PFJet40"            , & HLT_PFJet40            , & b_HLT_PFJet40            );
-        fChain->SetBranchAddress("HLT_PFJet60"            , & HLT_PFJet60            , & b_HLT_PFJet60            );
-        fChain->SetBranchAddress("HLT_PFJet80"            , & HLT_PFJet80            , & b_HLT_PFJet80            );
-        fChain->SetBranchAddress("HLT_PFJet140"           , & HLT_PFJet140           , & b_HLT_PFJet140           );
-        fChain->SetBranchAddress("HLT_PFJet200"           , & HLT_PFJet200           , & b_HLT_PFJet200           );
-        fChain->SetBranchAddress("HLT_PFJet260"           , & HLT_PFJet260           , & b_HLT_PFJet260           );
-        fChain->SetBranchAddress("HLT_PFJet320"           , & HLT_PFJet320           , & b_HLT_PFJet320           );
-        fChain->SetBranchAddress("HLT_PFJet400"           , & HLT_PFJet400           , & b_HLT_PFJet400           );
-        fChain->SetBranchAddress("HLT_PFJet450"           , & HLT_PFJet450           , & b_HLT_PFJet450           );
-        fChain->SetBranchAddress("HLT_PFJet500"           , & HLT_PFJet500           , & b_HLT_PFJet500           );
-        fChain->SetBranchAddress("HLT_DiPFJetAve40"       , & HLT_DiPFJetAve40       , & b_HLT_DiPFJetAve40       );
-        fChain->SetBranchAddress("HLT_DiPFJetAve60"       , & HLT_DiPFJetAve60       , & b_HLT_DiPFJetAve60       );
-        fChain->SetBranchAddress("HLT_DiPFJetAve80"       , & HLT_DiPFJetAve80       , & b_HLT_DiPFJetAve80       );
-        fChain->SetBranchAddress("HLT_DiPFJetAve140"      , & HLT_DiPFJetAve140      , & b_HLT_DiPFJetAve140      );
-        fChain->SetBranchAddress("HLT_DiPFJetAve200"      , & HLT_DiPFJetAve200      , & b_HLT_DiPFJetAve200      );
-        fChain->SetBranchAddress("HLT_DiPFJetAve260"      , & HLT_DiPFJetAve260      , & b_HLT_DiPFJetAve260      );
-        fChain->SetBranchAddress("HLT_DiPFJetAve320"      , & HLT_DiPFJetAve320      , & b_HLT_DiPFJetAve320      );
-        fChain->SetBranchAddress("HLT_DiPFJetAve400"      , & HLT_DiPFJetAve400      , & b_HLT_DiPFJetAve400      );
-        fChain->SetBranchAddress("HLT_DiPFJetAve500"      , & HLT_DiPFJetAve500      , & b_HLT_DiPFJetAve500      );
-        fChain->SetBranchAddress("HLT_DiPFJetAve60_HFJEC" , & HLT_DiPFJetAve60_HFJEC , & b_HLT_DiPFJetAve60_HFJEC );
-        fChain->SetBranchAddress("HLT_DiPFJetAve80_HFJEC" , & HLT_DiPFJetAve80_HFJEC , & b_HLT_DiPFJetAve80_HFJEC );
-        fChain->SetBranchAddress("HLT_DiPFJetAve100_HFJEC", & HLT_DiPFJetAve100_HFJEC, & b_HLT_DiPFJetAve100_HFJEC);
-        fChain->SetBranchAddress("HLT_DiPFJetAve160_HFJEC", & HLT_DiPFJetAve160_HFJEC, & b_HLT_DiPFJetAve160_HFJEC);
-        fChain->SetBranchAddress("HLT_DiPFJetAve220_HFJEC", & HLT_DiPFJetAve220_HFJEC, & b_HLT_DiPFJetAve220_HFJEC);
-        fChain->SetBranchAddress("HLT_DiPFJetAve300_HFJEC", & HLT_DiPFJetAve300_HFJEC, & b_HLT_DiPFJetAve300_HFJEC);
-    }
-
-}
+        if(oN.Contains("ZeroBias")){
+            fChain->SetBranchStatus("HLT_ZeroBias*", 1);
+            fChain->SetBranchAddress("HLT_ZeroBias"            , & HLT_ZeroBias            , & b_HLT_ZeroBias            );
+        }
+        else{
+            fChain->SetBranchStatus("HLT_PFJet*", 1);
+            fChain->SetBranchStatus("HLT_DiPFJetAve*", 1);
+            fChain->SetBranchAddress("HLT_PFJet40"            , & HLT_PFJet40            , & b_HLT_PFJet40            );
+            fChain->SetBranchAddress("HLT_PFJet60"            , & HLT_PFJet60            , & b_HLT_PFJet60            );
+            fChain->SetBranchAddress("HLT_PFJet80"            , & HLT_PFJet80            , & b_HLT_PFJet80            );
+            fChain->SetBranchAddress("HLT_PFJet140"           , & HLT_PFJet140           , & b_HLT_PFJet140           );
+            fChain->SetBranchAddress("HLT_PFJet200"           , & HLT_PFJet200           , & b_HLT_PFJet200           );
+            fChain->SetBranchAddress("HLT_PFJet260"           , & HLT_PFJet260           , & b_HLT_PFJet260           );
+            fChain->SetBranchAddress("HLT_PFJet320"           , & HLT_PFJet320           , & b_HLT_PFJet320           );
+            fChain->SetBranchAddress("HLT_PFJet400"           , & HLT_PFJet400           , & b_HLT_PFJet400           );
+            fChain->SetBranchAddress("HLT_PFJet450"           , & HLT_PFJet450           , & b_HLT_PFJet450           );
+            fChain->SetBranchAddress("HLT_PFJet500"           , & HLT_PFJet500           , & b_HLT_PFJet500           );
+            fChain->SetBranchAddress("HLT_DiPFJetAve40"       , & HLT_DiPFJetAve40       , & b_HLT_DiPFJetAve40       );
+            fChain->SetBranchAddress("HLT_DiPFJetAve60"       , & HLT_DiPFJetAve60       , & b_HLT_DiPFJetAve60       );
+            fChain->SetBranchAddress("HLT_DiPFJetAve80"       , & HLT_DiPFJetAve80       , & b_HLT_DiPFJetAve80       );
+            fChain->SetBranchAddress("HLT_DiPFJetAve140"      , & HLT_DiPFJetAve140      , & b_HLT_DiPFJetAve140      );
+            fChain->SetBranchAddress("HLT_DiPFJetAve200"      , & HLT_DiPFJetAve200      , & b_HLT_DiPFJetAve200      );
+            fChain->SetBranchAddress("HLT_DiPFJetAve260"      , & HLT_DiPFJetAve260      , & b_HLT_DiPFJetAve260      );
+            fChain->SetBranchAddress("HLT_DiPFJetAve320"      , & HLT_DiPFJetAve320      , & b_HLT_DiPFJetAve320      );
+            fChain->SetBranchAddress("HLT_DiPFJetAve400"      , & HLT_DiPFJetAve400      , & b_HLT_DiPFJetAve400      );
+            fChain->SetBranchAddress("HLT_DiPFJetAve500"      , & HLT_DiPFJetAve500      , & b_HLT_DiPFJetAve500      );
+            fChain->SetBranchAddress("HLT_DiPFJetAve60_HFJEC" , & HLT_DiPFJetAve60_HFJEC , & b_HLT_DiPFJetAve60_HFJEC );
+            fChain->SetBranchAddress("HLT_DiPFJetAve80_HFJEC" , & HLT_DiPFJetAve80_HFJEC , & b_HLT_DiPFJetAve80_HFJEC );
+            fChain->SetBranchAddress("HLT_DiPFJetAve100_HFJEC", & HLT_DiPFJetAve100_HFJEC, & b_HLT_DiPFJetAve100_HFJEC);
+            fChain->SetBranchAddress("HLT_DiPFJetAve160_HFJEC", & HLT_DiPFJetAve160_HFJEC, & b_HLT_DiPFJetAve160_HFJEC);
+            fChain->SetBranchAddress("HLT_DiPFJetAve220_HFJEC", & HLT_DiPFJetAve220_HFJEC, & b_HLT_DiPFJetAve220_HFJEC);
+            fChain->SetBranchAddress("HLT_DiPFJetAve300_HFJEC", & HLT_DiPFJetAve300_HFJEC, & b_HLT_DiPFJetAve300_HFJEC);
+        }
+    }//DiJet
+}//loadTree
 
 NanoTree::NanoTree(){
     fCurrent  = -1;

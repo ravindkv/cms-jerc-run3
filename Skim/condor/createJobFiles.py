@@ -44,7 +44,7 @@ if __name__=="__main__":
         print("Deleted dir: tmpSub")
     os.system("mkdir -p tmpSub")
     tarFile = "tmpSub/Skim.tar.gz"
-    os.system("tar --exclude condor --exclude *.root -zcvf %s ../../Skim"%tarFile)
+    os.system("tar --exclude condor --exclude *.root --exclude output -zcvf %s ../../Skim"%tarFile)
     os.system("cp runMain.sh tmpSub/")
     print("Created dir: tmpSub")
     submitAll = open("tmpSub/submitAll.sh", "w") 

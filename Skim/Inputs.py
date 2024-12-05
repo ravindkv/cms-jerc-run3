@@ -8,7 +8,7 @@ Years = []
 Years.append('2024')
 
 Channels = []
-Channels.append("GamJet")
+#Channels.append("GamJet")
 #Channels.append("DiEleJet")
 #Channels.append("DiMuJet")
 Channels.append("DiJet")

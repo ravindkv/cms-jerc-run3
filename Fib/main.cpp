@@ -51,15 +51,19 @@ void sortTree(TFile * inFile, TFile * outFile){
     // Set branch addresses for sorting
     UInt_t run = 0;
     ULong64_t event = 0;
-    inTree->SetBranchAddress("run", &run);
-    inTree->SetBranchAddress("event", &event);
+    TBranch *b_run_;
+    TBranch *b_event_;
+    inTree->SetBranchAddress("run", &run, &b_run_);
+    inTree->SetBranchAddress("event", &event, &b_event_);
 
     // Collect event entries into a vector
     std::vector<EventEntry> sortedEventEntries;
     sortedEventEntries.reserve(inTree->GetEntries());
 
     for(Long64_t i = 0; i < inTree->GetEntries(); i++) {
-        inTree->GetEntry(i);
+        //inTree->GetEntry(i);
+        b_run_->GetEntry(i);
+        b_event_->GetEntry(i);
         EventEntry evt;
         evt.run = run;
         evt.event = event;
@@ -111,7 +115,7 @@ void sortTree(TFile * inFile, TFile * outFile){
 
 int main(int argc, char* argv[]){
     // Default input JSON file
-    std::string fileDefault = "input/json/FilesFib_2024_GamJet.json";// for help ONLY
+    std::string fileDefault = "input/json/FilesFib_2024_DiMuJet.json";// for help ONLY
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -170,8 +174,8 @@ int main(int argc, char* argv[]){
 
     // Clone the tree structure without copying entries
     // Write newTree to a temporary file
-    //TFile* tempFile_ = TFile::Open("temp.root", "RECREATE");
-    TFile* tempFile_ = TFile::Open(outDir + "/" + oName, "RECREATE");
+    TFile* tempFile_ = TFile::Open("temp.root", "RECREATE");
+    //TFile* tempFile_ = TFile::Open(outDir + "/" + oName, "RECREATE");
     tempFile_->cd();
     TTree* newTree = skimT->fChain->GetTree()->CloneTree(0);
     newTree->SetCacheSize(50*1024*1024);
@@ -215,10 +219,10 @@ int main(int argc, char* argv[]){
 
         Long64_t entry = skimT->loadEntry(i);
         skimT->b_run->GetEntry(entry);
-        skimT->b_event->GetEntry(entry);
 
         // Apply run range selection
         if(skimT->run < startRun) continue;
+        //cout<<skimT->run<<'\n';
         if(skimT->run > endRun) continue;
 		skimT->fChain->GetTree()->GetEntry(entry);
         
@@ -232,16 +236,16 @@ int main(int argc, char* argv[]){
     newTree->Write();
     hEvents_->Write();
     tempFile_->Close();
-    /*
+
     std::cout << "\nSorting the tree by event number..." << std::endl;
     TFile* inFile = TFile::Open("temp.root", "READ");
     TFile* outFile = TFile::Open(outDir + "/" + oName, "RECREATE");
     sortTree(inFile, outFile);
     outFile->cd();
     std::cout << "Output file = " << outFile->GetName() << std::endl;
+    inFile->Close();
     outFile->Close();
     std::remove("temp.root");
-    */
 
     return 0;
 }
