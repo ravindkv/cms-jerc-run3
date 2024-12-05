@@ -19,6 +19,8 @@ void SkimTree::setInputJsonPath(string inDir){
     if(oN.Contains("2024")) year = "2024";
     string channel = "GamJet";
     if(oN.Contains("DiJet")) channel = "DiJet";
+    if(oN.Contains("DiMuJet")) channel = "DiMuJet";
+    if(oN.Contains("DiEleJet")) channel = "DiEleJet";
     inputSkimJson = inDir+"/FilesSkim_"+year+"_"+channel+".json";
     inputFibJson = inDir+"/FilesFib_"+year+"_"+channel+".json";
     cout<<"+ setInputJsonPath() = "<<inputSkimJson<<endl;

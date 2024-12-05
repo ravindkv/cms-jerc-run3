@@ -23,7 +23,7 @@
 #include <sys/types.h>
 
 int main(int argc, char* argv[]){
-    std::string fileDefault = "input/json/FilesNano_2024_DiJet.json";// for help ONLY
+    std::string fileDefault = "input/json/FilesNano_2024_GamJet.json";// for help ONLY
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -47,10 +47,9 @@ int main(int argc, char* argv[]){
                 break;
             case 'h':
                 cout<<"Default input json: "<<fileDefault<<endl;
-                std::cout << "Usage: ./runMain -o sKey_Skim_1of100.root\n" << std::endl;
-                cout<<"Choose sKey from the following:"<<endl;
+                cout<<"Run any of the following:"<<endl;
                 for (auto& element : js.items()) {
-                    std::cout << element.key() << std::endl;
+                std::cout << "./runMain -o "<< element.key()<<"_Skim_1of100.root" << std::endl;
                 }
                 return 0;
             default:
@@ -332,60 +331,65 @@ int main(int argc, char* argv[]){
 
         //DiJet
         if(oName.Contains("DiJet")){
-            nanoT->b_HLT_ZeroBias            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet40             ->GetEntry(entry);
-            nanoT->b_HLT_PFJet60             ->GetEntry(entry);
-            nanoT->b_HLT_PFJet80             ->GetEntry(entry);
-            nanoT->b_HLT_PFJet140            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet200            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet260            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet320            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet400            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet450            ->GetEntry(entry);
-            nanoT->b_HLT_PFJet500            ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve40        ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve60        ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve80        ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve140       ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve200       ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve260       ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve320       ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve400       ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve500       ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve60_HFJEC  ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve80_HFJEC  ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve100_HFJEC ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve160_HFJEC ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve220_HFJEC ->GetEntry(entry);
-            nanoT->b_HLT_DiPFJetAve300_HFJEC ->GetEntry(entry);
+            if(oName.Contains("ZeroBias")){
+                if(!nanoT->b_HLT_ZeroBias) continue;
+                nanoT->b_HLT_ZeroBias            ->GetEntry(entry);
+		        passTrig = nanoT->HLT_ZeroBias;
+            }
+            else{
+                nanoT->b_HLT_PFJet40             ->GetEntry(entry);
+                nanoT->b_HLT_PFJet60             ->GetEntry(entry);
+                nanoT->b_HLT_PFJet80             ->GetEntry(entry);
+                nanoT->b_HLT_PFJet140            ->GetEntry(entry);
+                nanoT->b_HLT_PFJet200            ->GetEntry(entry);
+                nanoT->b_HLT_PFJet260            ->GetEntry(entry);
+                nanoT->b_HLT_PFJet320            ->GetEntry(entry);
+                nanoT->b_HLT_PFJet400            ->GetEntry(entry);
+                nanoT->b_HLT_PFJet450            ->GetEntry(entry);
+                nanoT->b_HLT_PFJet500            ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve40        ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve60        ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve80        ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve140       ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve200       ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve260       ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve320       ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve400       ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve500       ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve60_HFJEC  ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve80_HFJEC  ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve100_HFJEC ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve160_HFJEC ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve220_HFJEC ->GetEntry(entry);
+                nanoT->b_HLT_DiPFJetAve300_HFJEC ->GetEntry(entry);
 
-		    passTrig =
-            nanoT->HLT_ZeroBias            ||
-            nanoT->HLT_PFJet40             ||
-            nanoT->HLT_PFJet60             ||
-            nanoT->HLT_PFJet80             ||
-            nanoT->HLT_PFJet140            ||
-            nanoT->HLT_PFJet200            ||
-            nanoT->HLT_PFJet260            ||
-            nanoT->HLT_PFJet320            ||
-            nanoT->HLT_PFJet400            ||
-            nanoT->HLT_PFJet450            ||
-            nanoT->HLT_PFJet500            ||
-            nanoT->HLT_DiPFJetAve40        ||
-            nanoT->HLT_DiPFJetAve60        ||
-            nanoT->HLT_DiPFJetAve80        ||
-            nanoT->HLT_DiPFJetAve140       ||
-            nanoT->HLT_DiPFJetAve200       ||
-            nanoT->HLT_DiPFJetAve260       ||
-            nanoT->HLT_DiPFJetAve320       ||
-            nanoT->HLT_DiPFJetAve400       ||
-            nanoT->HLT_DiPFJetAve500       ||
-            nanoT->HLT_DiPFJetAve60_HFJEC  ||
-            nanoT->HLT_DiPFJetAve80_HFJEC  ||
-            nanoT->HLT_DiPFJetAve100_HFJEC ||
-            nanoT->HLT_DiPFJetAve160_HFJEC ||
-            nanoT->HLT_DiPFJetAve220_HFJEC ||
-            nanoT->HLT_DiPFJetAve300_HFJEC ;
+		        passTrig =
+                nanoT->HLT_PFJet40             ||
+                nanoT->HLT_PFJet60             ||
+                nanoT->HLT_PFJet80             ||
+                nanoT->HLT_PFJet140            ||
+                nanoT->HLT_PFJet200            ||
+                nanoT->HLT_PFJet260            ||
+                nanoT->HLT_PFJet320            ||
+                nanoT->HLT_PFJet400            ||
+                nanoT->HLT_PFJet450            ||
+                nanoT->HLT_PFJet500            ||
+                nanoT->HLT_DiPFJetAve40        ||
+                nanoT->HLT_DiPFJetAve60        ||
+                nanoT->HLT_DiPFJetAve80        ||
+                nanoT->HLT_DiPFJetAve140       ||
+                nanoT->HLT_DiPFJetAve200       ||
+                nanoT->HLT_DiPFJetAve260       ||
+                nanoT->HLT_DiPFJetAve320       ||
+                nanoT->HLT_DiPFJetAve400       ||
+                nanoT->HLT_DiPFJetAve500       ||
+                nanoT->HLT_DiPFJetAve60_HFJEC  ||
+                nanoT->HLT_DiPFJetAve80_HFJEC  ||
+                nanoT->HLT_DiPFJetAve100_HFJEC ||
+                nanoT->HLT_DiPFJetAve160_HFJEC ||
+                nanoT->HLT_DiPFJetAve220_HFJEC ||
+                nanoT->HLT_DiPFJetAve300_HFJEC ;
+            }
         }
 		if(passTrig){
 		    nanoT->fChain->GetTree()->GetEntry(entry);

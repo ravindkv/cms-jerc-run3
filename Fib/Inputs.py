@@ -2,14 +2,15 @@
 eosFibDir="/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024"
 #-----------------------------------------------------------------
 Years = []
-#Years.append('2022')
-#Years.append('2023')
+Years.append('2022')
+Years.append('2023')
 Years.append('2024')
 
 Channels = {}
 Channels["GamJet"]    = "GamJet"
-#Channels["ZeeJet"]    = "DiEleJet"
-#Channels["ZmmJet"]    = "DiMuJet"
+Channels["DiJet"]     = "DiJet"
+Channels["DiEleJet"]    = "DiEleJet"
+Channels["DiMuJet"]    = "DiMuJet"
 #Channels["MCTruth"]   = "DiJet"
 #Channels["Flavour"]   = "DiJet"
 #Channels["VetoMap"]   = "DiJet"

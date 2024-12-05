@@ -35,7 +35,7 @@ printf "Done skimming at ";/bin/date
 if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
     echo "Running Interactively" ;
 else
-    xrdcp -f output/${oName} ${outDir}
+    xrdcp -f output/${oName} ${outDir}/${oName}
     echo "Cleanup"
     rm -rf CMSSW*
     rm output/*.root 

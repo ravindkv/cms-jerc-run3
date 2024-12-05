@@ -1,1 +1,31 @@
 export X509_CERT_DIR=/cvmfs/grid.cern.ch/etc/grid-security/certificates/
+
+
++ Use consistent naming convenetions for the keys in Skim and Fib
+
++ fix the dupilication:
+[rverma@lxplus965 cms-jerc-run3]$ du -sh /eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v*
+2.1G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib1-380963-381065.root
+1.7G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib2-381067-381079.root
+1.7G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib3-381080-381115.root
+2.4G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib4-381147-381164.root
+1.7G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib5-381190-381191.root
+2.2G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib6-381199-381364.root
+2.3G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev1-nib1-fib7-381365-381380.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev2-nib1-fib1-381384-381384.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev2-nib1-fib2-381417-381443.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev2-nib1-fib3-381477-381515.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v1_2024Ev2-nib1-fib4-381516-381544.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib1-380963-381065.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib2-381067-381079.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib3-381080-381115.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib4-381147-381164.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib5-381190-381191.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib6-381199-381364.root
+12K	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev1-nib1-fib7-381365-381380.root
+2.1G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev2-nib1-fib1-381384-381384.root
+2.8G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev2-nib1-fib2-381417-381443.root
+6.2G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev2-nib1-fib3-381477-381515.root
+3.2G	/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024/2024/GamJet/Data_2024E_GamJet_EGamma0v2_2024Ev2-nib1-fib4-381516-381544.root
+
+
