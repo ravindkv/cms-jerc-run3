@@ -7,14 +7,16 @@ Check the details of Inputs.py file: change the skim dir, year, channel, proxy
 * voms-proxy-init --voms cms --valid 24:00
 * python3 getRootFiles.py 
 
-Have a look at the files produced from the above command
+Have a look at the files produced in the **json** directory 
 
 ### Step-2: produce ONE skim file from nanofiles 
 * cd ..
 * make
 * ./runMain -h
 
-Run any one command printed on the screen
+Run any one command printed on the screen. Check the output directory
+
+* ls output
 
 ### Step-3: submit condor jobs to produce MANY skims 
 
@@ -35,3 +37,6 @@ This will open each file and perform many checks. It  will  create jobs files fo
 jobs which can be resubmitted
 * cd tmpSub
 * condor_submit resubJobs.jdl
+
+The condor output is stored in the path specified in the Skim/Inputs.py file
+
