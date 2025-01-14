@@ -26,9 +26,15 @@ def check_file(args):
             return (sKey, skim, True)
         
         # Check for the specific histogram and its validity
-        h = f.Get("hEvents")
+        h = f.Get("Cutflow/h1EventInCutflow")
         if not h:
-            print(f"hEvents not found in: {skim}")
+            print(f"'Cutflow/h1EventInCutflow' not found in: {skim}")
+            return (sKey, skim, True)
+
+        # Check for the specific TTree and its validity
+        tree = f.Get("Events")
+        if not tree:
+            print(f"'Events' TTree not found in: {skim}")
             return (sKey, skim, True)
 
         # All checks passed, file is considered good
@@ -96,7 +102,7 @@ if __name__ == "__main__":
             # First-time check: iterate over all years and channels
             for year, ch in itertools.product(Years, Channels):
                 print(f"\nProcessing Year: {year}, Channel: {ch}")
-                json_file_path = f"../input/json/FilesSkim_{year}_{ch}.json"
+                json_file_path = f"../input/json/FilesSkim_{ch}_{year}.json"
                 with open(json_file_path, "r") as fSkim:
                     jsonFile = json.load(fSkim)
                 dResub = checkJobs(jsonFile)

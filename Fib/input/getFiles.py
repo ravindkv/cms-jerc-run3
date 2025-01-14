@@ -51,11 +51,11 @@ for year, ch in itertools.product(Years, Channels):
             run_end = fib['run_end']
             nib_fib_name = fib['nib_fib_name']
             match = False
-            if nib_fib_name.split('-')[0]== dataset_name.split('_')[1]: 
+            #if nib_fib_name.split('-')[0]== dataset_name.split('_')[1]: 
             if nib_fib_name.split('-')[0] in dataset_name: 
                 match = True
 
-            if dataset_name.split('_')[1] in nib_fib_name: 
+            #if dataset_name.split('_')[1] in nib_fib_name: 
             if dataset_name.split('_')[1] in nib_fib_name: 
                 match = True
 

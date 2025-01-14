@@ -1,7 +1,9 @@
 Skim/runMain
 Skim/obj
 Skim/output
+Skim/input/old
 Skim/input/json
+Skim/__pycache__/
 Skim/condor/tmpSub
 Skim/input/__pycache__
 Skim/condor/__pycache__

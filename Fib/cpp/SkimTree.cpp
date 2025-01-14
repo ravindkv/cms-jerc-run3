@@ -86,29 +86,61 @@ void SkimTree::loadJobFileNames(){
 }
 
 void SkimTree::loadTree(){
-    cout<<"==> loadTree()"<<endl;
+    cout << "==> loadTree()" << endl;
     TString oN = iName;
     std::cout << "Start SkimTree" << std::endl;
     fChain->SetCacheSize(100*1024*1024);
     int nFiles = loadedJobFileNames.size();
     string dir = "";
-    for(int fileI=0; fileI<nFiles; fileI++){
-      string fName = loadedJobFileNames[fileI];
-      fChain->Add( (dir + fName).c_str());
-      cout << dir+fName << "  " << fChain->GetEntries() << endl;
+
+    for(int fileI = 0; fileI < nFiles; fileI++){
+        string fName = loadedJobFileNames[fileI];
+        string fullPath = dir + fName;
+
+        // Open the file
+        TFile *file = TFile::Open(fullPath.c_str(), "READ");
+        if (!file || file->IsZombie()) {
+            std::cerr << "Error: Could not open file " << fullPath << std::endl;
+            if (file) file->Close();
+            continue;
+        }
+
+        // Check if the 'Events' TTree exists
+        TTree *tree = static_cast<TTree*>(file->Get("Events"));
+        if (!tree) {
+            std::cerr << "Warning: 'Events' TTree not found in file " << fullPath << std::endl;
+            file->Close();
+            continue;
+        }
+
+        // Check for the presence of 'HLT_ZeroBias' branch
+        if (!tree->GetListOfBranches()->FindObject("HLT_ZeroBias")) {
+            std::cerr << "Warning: 'HLT_ZeroBias' branch not found in file " << fullPath << std::endl;
+            file->Close();
+            continue;
+        }
+
+        // Add the file to fChain
+        fChain->Add(fullPath.c_str());
+        std::cout << fullPath << " added to fChain with entries: " << fChain->GetEntries() << std::endl;
+
+        // Close the file
+        file->Close();
     }
+
     std::cout << "Begin" << std::endl;
-    //fChain->SetBranchStatus("*",0);
-    // event
-    //fChain->SetBranchStatus("run",1);
-    //fChain->SetBranchStatus("event",1);
-    //fChain->SetBranchStatus("luminosityBlock",1);
+
+    // Example branch setting (uncomment or modify as needed)
+    // fChain->SetBranchStatus("*", 0);
+    // fChain->SetBranchStatus("run", 1);
+    // fChain->SetBranchStatus("event", 1);
+    // fChain->SetBranchStatus("luminosityBlock", 1);
 
     fChain->SetBranchAddress("run", &run, &b_run);
     fChain->SetBranchAddress("event", &event, &b_event);
     fChain->SetBranchAddress("luminosityBlock", &lumi, &b_lumi);
-
 }
+
 
 SkimTree::SkimTree(){
     fCurrent  = -1;

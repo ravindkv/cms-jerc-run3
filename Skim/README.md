@@ -1,8 +1,11 @@
 ## Produce skim file from NanoAOD
 
+Check the details of Inputs.py file: change the skim dir, year, channel, proxy
+
 ### Step-1: get input root files of samples from DAS
 * cd input
-* python3 getFiles.py  
+* voms-proxy-init --voms cms --valid 24:00
+* python3 getRootFiles.py 
 
 Have a look at the files produced from the above command
 
@@ -11,8 +14,7 @@ Have a look at the files produced from the above command
 * make
 * ./runMain -h
 
-or 
-* ./runMain
+Run any one command printed on the screen
 
 ### Step-3: submit condor jobs to produce MANY skims 
 
@@ -27,9 +29,9 @@ Monitor the condor jobs on linux terminal
 
 Once condor_q is DONE. Check the finished jobs
 * cd ..
-* python3 checkJobStatus.py
+* python3 checkFinishedJobs.py 
 
-This will open each file and perform many checks. It  will  create JDL files for the failed 
+This will open each file and perform many checks. It  will  create jobs files for the failed 
 jobs which can be resubmitted
 * cd tmpSub
 * condor_submit resubJobs.jdl

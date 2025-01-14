@@ -12,12 +12,10 @@ if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
 else
     echo "Running In Batch"
     echo ${_CONDOR_SCRATCH_DIR}
-    export SCRAM_ARCH=el9_amd64_gcc10
-    scramv1 project CMSSW CMSSW_13_3_0
-    cd CMSSW_13_3_0/src
-    eval `scramv1 runtime -sh`
-    cd ../..
-	tar --strip-components=1 -zxf Skim.tar.gz
+	tar -zxf Skim.tar.gz
+    cd Skim
+    make clean
+    make
 fi
 
 #Run for Base, Signal region
@@ -37,7 +35,7 @@ if [ -z ${_CONDOR_SCRATCH_DIR} ] ; then
 else
     xrdcp -f output/${oName} ${outDir}/${oName}
     echo "Cleanup"
-    rm -rf CMSSW*
-    rm output/*.root 
+    cd ..
+    rm -rf Skim 
 fi
 printf "Done ";/bin/date

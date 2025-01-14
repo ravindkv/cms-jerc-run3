@@ -10,113 +10,119 @@
 
 #include <sys/stat.h>
 
-// Struct to hold event information for sorting
+// Struct to hold event information
 struct EventEntry {
     int run;
     ULong64_t event;
     Long64_t entryNumber;
 };
 
-// Comparator to sort EventEntry by run and then by event number
-bool compareByRunAndEvent(const EventEntry& a, const EventEntry& b) {
-    if (a.run != b.run)
-        return a.run < b.run;
+// Comparator for sorting by event number within the same run
+bool compareByEvent(const EventEntry& a, const EventEntry& b) {
     return a.event < b.event;
 }
 
-void sortTree(TFile * inFile, TFile * outFile){
-    // Open the temporary ROOT file
+void sortTreeByRun(TFile* inFile, const std::string& outputDirectory, int startRun, int endRun) {
     if (!inFile || inFile->IsZombie()) {
-        std::cerr << "Error opening "<<inFile->GetName() << std::endl;
+        std::cerr << "Error opening " << (inFile ? inFile->GetName() : "input file") << std::endl;
         return;
     }
     inFile->cd();
-    // Get the tempTree
-    TTree* inTree = (TTree*)inFile->Get("Events"); // Ensure the tree name matches
-    inTree->SetCacheSize(100 * 1024 * 1024); // 100 MB
-    inTree->SetCacheLearnEntries(1000);     // Number of entries to learn cache patterns
 
+    // Get the input tree
+    TTree* inTree = (TTree*)inFile->Get("Events");
     if (!inTree) {
-        std::cerr << "Error: TTree 'Events' not found in "<<inFile->GetName() << std::endl;
+        std::cerr << "Error: TTree 'Events' not found in " << inFile->GetName() << std::endl;
         inFile->Close();
         return;
     }
 
-    if (!outFile || outFile->IsZombie()) {
-        std::cerr << "Error creating output file "<<outFile->GetName() << std::endl;
-        return;
-    }
-    outFile->cd();
-    
-    // Set branch addresses for sorting
+    // Optimize cache
+    inTree->SetCacheSize(500 * 1024 * 1024);  // 500 MB
+    inTree->SetCacheLearnEntries(10000);      
+
+    // Set branches for reading run and event
     UInt_t run = 0;
     ULong64_t event = 0;
-    TBranch *b_run_;
-    TBranch *b_event_;
     inTree->SetBranchStatus("*", 0);
     inTree->SetBranchStatus("run", 1);
     inTree->SetBranchStatus("event", 1);
-    inTree->SetBranchAddress("run", &run, &b_run_);
-    inTree->SetBranchAddress("event", &event, &b_event_);
+    inTree->SetBranchAddress("run", &run);
+    inTree->SetBranchAddress("event", &event);
 
-    // Collect event entries into a vector
-    std::vector<EventEntry> sortedEventEntries;
-    sortedEventEntries.reserve(inTree->GetEntries());
+    Long64_t nEntries = inTree->GetEntries();
+    std::cout << "Reading " << nEntries << " entries..." << std::endl;
 
-    for(Long64_t i = 0; i < inTree->GetEntries(); i++) {
-        //inTree->GetEntry(i);
-        b_run_->GetEntry(i);
-        b_event_->GetEntry(i);
-        EventEntry evt;
-        evt.run = run;
-        evt.event = event;
-        evt.entryNumber = i;
-        sortedEventEntries.push_back(evt);
-    }
+    // Map of run -> vector of events for that run
+    std::map<int, std::vector<EventEntry>> runMap;
 
-    int endEntry= sortedEventEntries.size();
-    std::cout << "Sorting " <<  endEntry << " events by event number..." << std::endl;
-
-    // Sort the vector by event number
-    std::sort(sortedEventEntries.begin(), sortedEventEntries.end(), compareByRunAndEvent);
-
-    std::cout << "Sorting completed. Filling the sorted tree..." << std::endl;
-
-
-    // Clone the tree structure without copying entries
-    inTree->SetBranchStatus("*", 1);
-    TTree* outTree = inTree->CloneTree(0);
-    outTree->SetCacheSize(100 * 1024 * 1024);  // 100 MB
-    outTree->SetCacheLearnEntries(1000);  
-
-    // Loop over the sorted events and fill the outTree
-    double totalTime = 0.0;
-    auto startClock = std::chrono::high_resolution_clock::now();
-    int i = 0;
-    for(const auto& evt : sortedEventEntries){
-        i++;
-        if(endEntry > 100 && i % (endEntry / 100) == 0){
-            totalTime += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startClock).count();
-            int sec = static_cast<int>(totalTime) % 60;
-            int min = static_cast<int>(totalTime) / 60;
-            std::cout << std::setw(10) << 100*i/endEntry << " %" 
-                      << std::setw(10) << min << "m " << sec << "s" << std::endl;
-            startClock = std::chrono::high_resolution_clock::now();
+    // Read all events and group by run
+    for (Long64_t i = 0; i < nEntries; i++) {
+        inTree->GetEntry(i);
+        if (run >= (UInt_t)startRun && run <= (UInt_t)endRun) {
+            EventEntry evt;
+            evt.run = (int)run;
+            evt.event = event;
+            evt.entryNumber = i;
+            runMap[evt.run].push_back(evt);
         }
-        Long64_t entryNumber = evt.entryNumber;
-        inTree->GetEntry(entryNumber);
-        outTree->Fill();
     }
-    inFile->Close();
 
-    std::cout << "nEvents_Fib = " << outTree->GetEntries() << std::endl;
+    inFile->Close(); // We can close the input file here if desired
 
-    // Write the sorted tree
-    outFile->cd();
-    outTree->Write();
+    // Now we have events grouped by run.
+    // For each run, we sort by event and write out a separate file/tree.
+    for (auto &runPair : runMap) {
+        int currentRun = runPair.first;
+        std::vector<EventEntry> &runEvents = runPair.second;
+
+        std::cout << "Sorting run " << currentRun << " with " << runEvents.size() << " events..." << std::endl;
+        std::sort(runEvents.begin(), runEvents.end(), compareByEvent);
+        std::cout << "Sorting for run " << currentRun << " completed." << std::endl;
+
+        // Re-open input file to read data again (or keep it open if memory is not an issue)
+        TFile* inFileAgain = TFile::Open(inFile->GetName(), "READ");
+        TTree* inTreeAgain = (TTree*)inFileAgain->Get("Events");
+        inTreeAgain->SetBranchStatus("*",1);
+
+        // Clone the tree structure for output (single run)
+        std::string outFileName = outputDirectory + "/run_" + std::to_string(currentRun) + ".root";
+        TFile* outFile = TFile::Open(outFileName.c_str(), "RECREATE");
+        TTree* outTree = inTreeAgain->CloneTree(0);
+
+        double totalTime = 0.0;
+        auto startClock = std::chrono::high_resolution_clock::now();
+
+        Long64_t totalEntriesRun = (Long64_t)runEvents.size();
+        // Fill the output tree with sorted entries of this run
+        for (Long64_t i = 0; i < totalEntriesRun; i++) {
+            if (totalEntriesRun > 100 && i > 0 && i % (totalEntriesRun / 100) == 0) {
+                totalTime += std::chrono::duration<double>(std::chrono::high_resolution_clock::now() - startClock).count();
+                int sec = static_cast<int>(totalTime) % 60;
+                int min = static_cast<int>(totalTime) / 60;
+                std::cout << std::setw(10) << (100*i/totalEntriesRun) << " %"
+                          << std::setw(10) << min << "m " << sec << "s (Run " << currentRun << ")" << std::endl;
+                startClock = std::chrono::high_resolution_clock::now();
+            }
+
+            Long64_t entryNumber = runEvents[i].entryNumber;
+            
+            inTreeAgain->GetEntry(entryNumber);
+            outTree->Fill();
+        }
+
+        std::cout << "Finished filling " << outTree->GetEntries() 
+                  << " events for run " << currentRun << std::endl;
+
+        outFile->cd();
+        outTree->Write();
+        outFile->Close();
+        inFileAgain->Close();
+    }
+
+    std::cout << "Done. You now have one file per run in " << outputDirectory << "." << std::endl;
+    std::cout << "You can now hadd them to get a single sorted file." << std::endl;
 }
-
-
 
 int main(int argc, char* argv[]){
     // Default input JSON file
@@ -245,7 +251,8 @@ int main(int argc, char* argv[]){
     std::cout << "\nSorting the tree by event number..." << std::endl;
     TFile* inFile = TFile::Open("temp.root", "READ");
     TFile* outFile = TFile::Open(outDir + "/" + oName, "RECREATE");
-    sortTree(inFile, outFile);
+    //sortTree(inFile, outFile);
+    sortTreeByRun(inFile, "output", 380963, 381065);
     outFile->cd();
     std::cout << "Output file = " << outFile->GetName() << std::endl;
     inFile->Close();

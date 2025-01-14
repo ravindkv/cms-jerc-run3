@@ -1,0 +1,11 @@
+
+{
+    "2024": {
+        "MC": {
+              "MC_2024_Wqqm_TTtoLNu2Q"  : "/TTtoLNu2Q_TuneCP5_13p6TeV_powheg-pythia8/Run3Winter24NanoAOD-JMENanoV14_133X_mcRun3_2024_realistic_v10-v2/NANOAODSIM"
+        },
+        "Data": {
+                "Data_2024C_Wqqm_Muon1"      :"/Muon1/Run2024C-PromptReco-v1/NANOAOD"
+        }
+    }
+}
