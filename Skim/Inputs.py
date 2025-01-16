@@ -17,7 +17,7 @@ Channels = [
     #'ZmmJet',
     #'GamJet',
     'Wqqm',
-    'Wqqe',
+    #'Wqqe',
     #'WqqDiLep',
     #'MultiJet',
 ]
