@@ -134,6 +134,7 @@ Error  = %s/log_$(cluster)_$(process).stderr\n\n' % (vomsProxy, logDir, logDir, 
 if __name__ == "__main__":
     # --- Step 1: Check Git status ---
     #check_git_status()
+    os.system("voms-proxy-init --voms cms")
 
     # --- Step 2: Retrieve Git info ---
     current_date, git_hash = get_git_info()

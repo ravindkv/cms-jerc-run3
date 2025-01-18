@@ -86,6 +86,7 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
              "HLT_Photon175",                                         
              "HLT_Photon200",                                         
              "HLT_Photon30EB_TightID_TightIso",                       
+             "HLT_Photon45EB_TightID_TightIso",
              "HLT_Photon50EB_TightID_TightIso",                       
              "HLT_Photon75EB_TightID_TightIso",                       
              "HLT_Photon90EB_TightID_TightIso",                       

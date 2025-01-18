@@ -5,9 +5,9 @@ Check the details of Inputs.py file: change the skim dir, year, channel, proxy
 ### Step-1: get input root files of samples from DAS
 * cd input
 * voms-proxy-init --voms cms --valid 24:00
-* python3 getRootFiles.py 
+* python3 getNanoFiles.py 
 
-Have a look at the files produced in the **json** directory 
+Have a look at the files produced in the **nano_json** directory 
 
 ### Step-2: produce ONE skim file from nanofiles 
 * cd ..
@@ -21,8 +21,16 @@ Run any one command printed on the screen. Check the output directory
 ### Step-3: submit condor jobs to produce MANY skims 
 
 * cd condor
-* python createJobFiles.py
+* python createSkimJobFiles.py
+
+Have a look at the files produced in the **skim_json** directory 
+
 * cd tmpSub
+
+Submit jobs for one file
+* condor_submit FileName.jdl
+
+Submit jobs for one files
 * source submitAll.sh
 
 Monitor the condor jobs on linux terminal
