@@ -6,7 +6,9 @@ Skim/input/json
 Skim/__pycache__/
 Skim/condor/tmpSub
 Skim/input/__pycache__
+Skim/input/nano_files/
 Skim/condor/__pycache__
+Skim/condor/skim_files/
 
 Fib/runMain
 Fib/obj

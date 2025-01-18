@@ -26,7 +26,7 @@ int main(int argc, char* argv[]){
       return 1;
     }
     
-    std::string jsonDir = "input/json/";
+    std::string jsonDir = "input/nano_files/";
     std::vector<std::string> jsonFiles;
     
     //Read only FilesNano_*.json files in the directory
@@ -96,8 +96,7 @@ int main(int argc, char* argv[]){
     std::shared_ptr<NanoTree> nanoT = std::make_shared<NanoTree>(globalFlag);
     nanoT->setInput(outName);
     nanoT->loadInput();
-    nanoT->setInputJsonPath("input/json/");
-    nanoT->loadInputJson();
+    nanoT->loadInputJson(jsonDir);
     nanoT->loadJobFileNames();
     nanoT->loadTree();
 

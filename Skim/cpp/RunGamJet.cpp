@@ -22,13 +22,13 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
    	nanoT->fChain->SetBranchStatus("Photon_cutBased",1);
    	nanoT->fChain->SetBranchStatus("Photon_jetIdx",1);
    	nanoT->fChain->SetBranchStatus("Photon_seedGain",1);
+   	nanoT->fChain->SetBranchStatus("Photon_pixelSeed",1);
    	nanoT->fChain->SetBranchStatus("nPhoton",1);
   	if(globalFlags_.is2023){
    	    nanoT->fChain->SetBranchStatus("Photon_eCorr",1); 
    	    nanoT->fChain->SetBranchStatus("Photon_mass",1);
     }
   	if(globalFlags_.isMC){
-   	  nanoT->fChain->SetBranchStatus("Photon_genPartIdx",true);
       nanoT->fChain->SetBranchStatus("GenIsolatedPhoton_*",true);
       nanoT->fChain->SetBranchStatus("nGenIsolatedPhoton",true);
     }
@@ -74,7 +74,7 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
         };
     }
 
-    if(globalFlags_.is2022){
+    if(globalFlags_.is2023 || globalFlags_.is2024){
         trigList_ = { 
              "HLT_Photon300_NoHE",                                           
              "HLT_Photon33",                                          
@@ -129,7 +129,7 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
     //------------------------------------
     // Cutflow histograms
     //------------------------------------
-    std::vector<std::string> cuts = { "NanoAOD", "Trigger"};
+    std::vector<std::string> cuts = { "NanoAOD", "Filter", "Trigger"};
     auto h1EventInCutflow = std::make_unique<HistCutflow>("h1EventInCutflow", cuts, fout->mkdir("Cutflow"));
     
     //--------------------------------
@@ -145,16 +145,34 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
         Long64_t entry = nanoT->loadEntry(i);
         h1EventInCutflow->fill("NanoAOD");
 
+        bool passFilter = true;
+		for (const auto& filterN : nanoT->filterList) {
+            if (!nanoT->filterTBranches[filterN]) continue;
+		    nanoT->filterTBranches[filterN]->GetEntry(entry);//Read only content of MET Filter branches from NanoTree
+		    if (!nanoT->filterVals[filterN]) {
+                passFilter = false;
+		        break; 
+		    }
+		}
+        if(!passFilter) continue;
+        h1EventInCutflow->fill("Filter");
+
+        bool passTrigger = false;
 		for (const auto& trigN : trigList_) {
             if (!trigTBranches_[trigN]) continue;
 		    trigTBranches_[trigN]->GetEntry(entry);//Read only content of HLT branches from NanoTree
 		    if (trigVals_[trigN]) {
-            	nanoT->fChain->GetTree()->GetEntry(entry);// Then read content of ALL branches
-                h1EventInCutflow->fill("Trigger");
-            	newTree->Fill();
-		        break; // Event passes if any trigger is true
+                passTrigger = true;
+		        break; 
 		    }
 		}
+        
+        if(!passTrigger) continue;
+        h1EventInCutflow->fill("Trigger");
+        
+        //Now read all of the branches and fill the tree
+        nanoT->fChain->GetTree()->GetEntry(entry);
+        newTree->Fill();
     }
     Helper::printCutflow(h1EventInCutflow->getHistogram());
     std::cout<<"nEvents_Skim = "<<newTree->GetEntries()<<'\n';

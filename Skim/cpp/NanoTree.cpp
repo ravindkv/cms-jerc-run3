@@ -37,34 +37,90 @@ void NanoTree::loadInput() {
     }
 }
 
-void NanoTree::setInputJsonPath(const std::string& inputDir) {
-    std::string year = globalFlags_.is2023 ? "2023" : globalFlags_.is2024 ? "2024" : "2022";
-    std::string channel = Helper::splitString(loadedSampleKey_, "_").at(2);
-    inputJsonPath_ = inputDir + "/FilesNano_" + channel + "_" + year + ".json";
-    std::cout << "+ setInputJsonPath() = " << inputJsonPath_ << '\n';
-}
+void NanoTree::loadInputJson(const std::string& searchDir) {
+    std::cout << "==> loadInputJson()\n";
+    std::vector<std::filesystem::path> jsonFiles;
 
-void NanoTree::loadInputJson() {
-    std::cout << "==> loadInputJson()" << '\n';
-    std::ifstream inputFile(inputJsonPath_);
-    nlohmann::json jsonContent;
-    
     try {
-        jsonContent = nlohmann::json::parse(inputFile);
+        for (const auto& entry : std::filesystem::directory_iterator(searchDir)) {
+            if (entry.path().extension() == ".json" &&
+                entry.path().filename().string().rfind("FilesNano_", 0) == 0) {
+                jsonFiles.push_back(entry.path());
+            }
+        }
     } catch (const std::exception& e) {
-        std::cerr << "\nEXCEPTION: Error parsing JSON at " << inputJsonPath_ << '\n';
-        std::cerr << e.what() << '\n';
+        std::cerr << "Error scanning directory " << searchDir << ": " << e.what() << "\n";
         std::abort();
     }
-    
-    try {
-        jsonContent.at(loadedSampleKey_).get_to(loadedAllFileNames_);
-    } catch (const std::exception& e) {
-        std::cerr << "\nEXCEPTION: Invalid sample key: " << loadedSampleKey_ << '\n';
-        std::cerr << "Available keys:\n";
-        for (const auto& element : jsonContent.items()) {
-            std::cerr << element.key() << '\n';
+
+    if (jsonFiles.empty()) {
+        std::cerr << "No JSON files found in directory: " << searchDir << "\n";
+        std::abort();
+    }
+
+    // We expect exactly one JSON file to contain our key.
+    // Reset any previously loaded list.
+    loadedAllFileNames_.clear();
+
+    int foundCount = 0;
+    nlohmann::json jsonContent;
+
+    // Loop over each JSON file and look for the loadedSampleKey_
+    for (const auto& jsonFile : jsonFiles) {
+        std::ifstream inputFile(jsonFile);
+        if (!inputFile.is_open()) {
+            std::cerr << "Could not open JSON file: " << jsonFile << "\n";
+            continue;
         }
+        
+        try {
+            jsonContent = nlohmann::json::parse(inputFile);
+        } catch (const std::exception& e) {
+            std::cerr << "\nEXCEPTION: Error parsing JSON at " << jsonFile << "\n";
+            std::cerr << e.what() << "\n";
+            continue;
+        }
+
+        std::string channel;
+        try {
+            channel = Helper::splitString(loadedSampleKey_, "_").at(2);
+        } catch (const std::exception& e) {
+            std::cerr << "Error parsing loadedSampleKey_: " << loadedSampleKey_ << "\n";
+            std::cerr << e.what() << "\n";
+            std::abort();
+        }
+
+        if (jsonContent.contains(loadedSampleKey_)) {
+            foundCount++;
+            // Check that the value corresponding to loadedSampleKey_ is an array.
+            const auto& value = jsonContent.at(loadedSampleKey_).at(1);
+            if (!value.is_array()) {
+                std::cerr << "Error: JSON key '" << loadedSampleKey_ 
+                          << "' in file " << jsonFile
+                          << " is not an array. Aborting.\n";
+                std::abort();
+            }
+            // Extract the vector of strings
+            try {
+                loadedAllFileNames_ = value.get<std::vector<std::string>>();
+            } catch (const std::exception& e) {
+                std::cerr << "\nEXCEPTION: Error extracting key '" << loadedSampleKey_
+                          << "' from file " << jsonFile << "\n";
+                std::cerr << e.what() << "\n";
+                std::abort();
+            }
+        }
+    }  // end for
+
+    if (foundCount == 0) {
+        std::cerr << "\nEXCEPTION: Key '" << loadedSampleKey_ 
+                  << "' was not found in any JSON file in " << searchDir << "\n";
+        std::abort();
+    }
+
+    if (foundCount > 1) {
+        std::cerr << "\nEXCEPTION: Key '" << loadedSampleKey_ 
+                  << "' found in multiple JSON files. Please ensure uniqueness.\n";
         std::abort();
     }
 }
@@ -259,7 +315,6 @@ void NanoTree::loadTree() {
       fChain->SetBranchStatus("RawPuppiMET_sumEt",1);
     }
 
-    fChain->SetBranchStatus("Flag_*",1);
 	fChain->SetBranchStatus("Rho_fixed*", 1);
  
     if (globalFlags_.isMC) {
@@ -292,6 +347,20 @@ void NanoTree::loadTree() {
 		*/
     }//MC
 
+    filterList = { 
+        "Flag_goodVertices",
+        "Flag_globalSuperTightHalo2016Filter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_BadPFMuonFilter",
+        "Flag_BadPFMuonDzFilter",
+        "Flag_hfNoisyHitsFilter",
+        "Flag_eeBadScFilter",
+        "Flag_ecalBadCalibFilter"
+    };
+	for (const auto& filterN : filterList) {
+		fChain->SetBranchStatus(filterN.c_str(), true);
+	    fChain->SetBranchAddress(filterN.c_str(), &filterVals[filterN], &filterTBranches[filterN]);
+	} 
 }
 
 auto NanoTree::getEntries() const -> Long64_t {

@@ -32,12 +32,15 @@ public:
     void loadInput();
 
     // JSON management
-    void setInputJsonPath(const std::string& inputDir);
-    void loadInputJson();
+    void loadInputJson(const std::string& searchDir);
 
     // File loading
     void loadJobFileNames();
     void loadTree();
+
+    std::vector<std::string> filterList;
+    std::map<std::string, Bool_t> filterVals;
+    std::map<std::string, TBranch*> filterTBranches;
 
     TChain* fChain = new TChain("Events");   
 

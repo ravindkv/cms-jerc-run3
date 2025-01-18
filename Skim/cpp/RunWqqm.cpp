@@ -66,22 +66,40 @@ auto RunWqqm::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
 	auto startClock = std::chrono::high_resolution_clock::now();
     Helper::initProgress();
 	for(Long64_t i= 0; i < nentries; i++){
-        if(i>10000) break;
+        //if(i>100000) break;
         Helper::printProgress(i, nentries, startClock, totalTime);
         
         Long64_t entry = nanoT->loadEntry(i);
         h1EventInCutflow->fill("NanoAOD");
 
+        bool passFilter = true;
+		for (const auto& filterN : nanoT->filterList) {
+            if (!nanoT->filterTBranches[filterN]) continue;
+		    nanoT->filterTBranches[filterN]->GetEntry(entry);//Read only content of MET Filter branches from NanoTree
+		    if (!nanoT->filterVals[filterN]) {
+                passFilter = false;
+		        break; 
+		    }
+		}
+        if(!passFilter) continue;
+        h1EventInCutflow->fill("Filter");
+
+        bool passTrigger = false;
 		for (const auto& trigN : trigList_) {
             if (!trigTBranches_[trigN]) continue;
 		    trigTBranches_[trigN]->GetEntry(entry);//Read only content of HLT branches from NanoTree
 		    if (trigVals_[trigN]) {
-            	nanoT->fChain->GetTree()->GetEntry(entry);// Then read content of ALL branches
-                h1EventInCutflow->fill("Trigger");
-            	newTree->Fill();
-		        break; // Event passes if any trigger is true
+                passTrigger = true;
+		        break; 
 		    }
 		}
+        
+        if(!passTrigger) continue;
+        h1EventInCutflow->fill("Trigger");
+        
+        //Now read all of the branches and fill the tree
+        nanoT->fChain->GetTree()->GetEntry(entry);
+        newTree->Fill();
     }
     Helper::printCutflow(h1EventInCutflow->getHistogram());
     std::cout<<"nEvents_Skim = "<<newTree->GetEntries()<<'\n';

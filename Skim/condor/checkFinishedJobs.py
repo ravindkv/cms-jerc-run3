@@ -3,12 +3,12 @@ import os
 import sys
 import json
 import itertools
-from ROOT import TFile
 import multiprocessing
+from ROOT import TFile
 sys.dont_write_bytecode = True
 sys.path.insert(0, os.getcwd().replace("condor",""))
 from Inputs import *
-from createJobFiles import createJobs
+from createSkimJobFiles import createJobs
 
 #-------------------------------------------------
 # Function to check a single ROOT file
@@ -51,7 +51,7 @@ def check_file(args):
 #-------------------------------------------------
 # Open each finished file and see if they are OK
 #-------------------------------------------------
-def checkJobs(jsonFile):
+def check_jobs(jsonFile):
     unfinished = {}
     print("Checking for corrupted files using multiprocessing...")
 
@@ -82,6 +82,7 @@ if __name__ == "__main__":
     dResubs = {}
     fResub = "tmpSub/resubFilesSkim.json"
 
+    os.system("voms-proxy-init --voms cms")
     # Ensure the 'tmpSub' directory exists
     os.makedirs("tmpSub", exist_ok=True)
 
@@ -90,7 +91,7 @@ if __name__ == "__main__":
             # If resubmission file exists, check those files
             with open(fResub, "r") as fResub_:
                 jsonFile = json.load(fResub_)
-            dResub = checkJobs(jsonFile)
+            dResub = check_jobs(jsonFile)
             dResubs.update(dResub)
             # Write updated list of files to resubmit
             with open(fResub, "w") as fResub__:
@@ -100,13 +101,19 @@ if __name__ == "__main__":
                 createJobs(fResub___, jdlFile_, logDir)
         else:
             # First-time check: iterate over all years and channels
-            for year, ch in itertools.product(Years, Channels):
-                print(f"\nProcessing Year: {year}, Channel: {ch}")
-                json_file_path = f"../input/json/FilesSkim_{ch}_{year}.json"
-                with open(json_file_path, "r") as fSkim:
-                    jsonFile = json.load(fSkim)
-                dResub = checkJobs(jsonFile)
-                dResubs.update(dResub)
+            for year, ch in itertools.product(list(Years.keys()), Channels):
+                for dataOrMc, samples in Years[year].items():
+                    for sample in samples:
+                        chYearOther = f"{ch}_{year}_{dataOrMc}_{sample}" 
+                        print(f"\nProcessing {chYearOther}")
+                        json_file_path = f"skim_files/FilesSkim_{chYearOther}.json"
+                        if not os.path.exists(json_file_path):
+                            print(f"ERROR: JSON file {json_file_path} does not exist.")
+                            sys.exit(1)
+                        with open(json_file_path, "r") as fSkim:
+                            jsonFile = json.load(fSkim)
+                        dResub = check_jobs(jsonFile)
+                        dResubs.update(dResub)
             # Write the list of files to resubmit
             with open(fResub, "w") as fResub_:
                 json.dump(dResubs, fResub_, indent=4)
