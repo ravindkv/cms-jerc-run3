@@ -117,17 +117,18 @@ def main():
 
             # ---------------------------
             # Process MC samples: one output per sub-category
+            mcName = "MCSummer24"
             # ---------------------------
-            mcDesired = yinfo.get("MC", [])
+            mcDesired = yinfo.get(mcName, [])
             # For each desired MC sub-category, loop over periods whose key starts with the given year
             for subcat in mcDesired:
                 mcFilesNano = {}
                 mcEvents = {}
-                print(f"  [MC/{subcat}]")
+                print(f"  [{mcName}/{subcat}]")
                 for periodKey, periodContent in samplesData.items():
                     if not periodKey.startswith(year):
                         continue
-                    mcBranch = periodContent.get("MC", {})
+                    mcBranch = periodContent.get(mcName, {})
                     # Only process the requested sub-category.
                     if subcat not in mcBranch:
                         continue
@@ -148,7 +149,7 @@ def main():
 
                 # Write out JSON for this MC sub-category (if not empty)
                 if mcFilesNano:
-                    nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_MC_{subcat}.json"
+                    nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_{mcName}_{subcat}.json"
                     with open(nanoOutName, 'w') as f:
                         json.dump(mcFilesNano, f, indent=4)
                 else:
