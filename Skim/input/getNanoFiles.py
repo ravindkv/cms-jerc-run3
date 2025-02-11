@@ -158,22 +158,23 @@ def main():
             # ---------------------------
             # Process Data samples: one output per desired period
             # ---------------------------
-            dataDesired = yinfo.get("Data", [])
+            dataName = "DataReprocessing"
+            dataDesired = yinfo.get(dataName, [])
             print(dataDesired)
             for dataPeriod in dataDesired:
                 dataFilesNano = {}
                 # We know the top-level key is the year (e.g. "2022"), so do:
                 yearData = samplesData.get(year, {})
                 if not yearData:
-                    print(f"  [Data] Year {year} not found in samples JSON!")
+                    print(f"  {dataName} Year {year} not found in samples JSON!")
                     continue
 
-                if dataPeriod not in yearData.get("Data", {}):
+                if dataPeriod not in yearData.get(f"{dataName}", {}):
                     print(f"  [Data] Period {dataPeriod} not found in samples JSON for year {year}")
                     continue
 
-                dataBranch = yearData["Data"][dataPeriod]
-                print(f"  [Data/{dataPeriod}]")
+                dataBranch = yearData[dataName][dataPeriod]
+                print(f"  [{dataName}/{dataPeriod}]")
                 for sampleKey, dataset in dataBranch.items():
                     #print(f"    Querying sample {sampleKey} ...")
                     filesNano = getFiles(dataset)
@@ -188,11 +189,11 @@ def main():
                     print(f"      {nFiles}\t {evtStr}\t {sampleKey}")
                 # Write out JSON for this data period
                 if dataFilesNano:
-                    nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_Data_{dataPeriod}.json"
+                    nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_{dataName}_{dataPeriod}.json"
                     with open(nanoOutName, 'w') as f:
                         json.dump(dataFilesNano, f, indent=4)
                 else:
-                    print(f"    No Data samples found for period '{dataPeriod}' in year {year}\n")
+                    print(f"    No {dataName} samples found for period '{dataPeriod}' in year {year}\n")
             
             print(f"AllEvents for {year} = {formatNum(allEventsYear)}\n")
             allEventsChannel += allEventsYear

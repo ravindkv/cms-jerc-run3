@@ -246,6 +246,20 @@
                 "Data_2024I_GamJet_EGamma1v1": "/EGamma1/Run2024I-PromptReco-v1/NANOAOD",
                 "Data_2024I_GamJet_EGamma1v2": "/EGamma1/Run2024I-PromptReco-v2/NANOAOD"
             }
+        },
+        "DataReprocessing": {
+            "2024C": {
+                "DataReprocessing_2024C_GamJet_EGamma0": "/EGamma0/Run2024C-2024CDEReprocessing-v1/NANOAOD",
+                "DataReprocessing_2024C_GamJet_EGamma1": "/EGamma1/Run2024C-2024CDEReprocessing-v1/NANOAOD"
+            },
+            "2024D": {
+                "DataReprocessing_2024D_GamJet_EGamma0": "/EGamma0/Run2024D-2024CDEReprocessing-v1/NANOAOD",
+                "DataReprocessing_2024D_GamJet_EGamma1": "/EGamma1/Run2024D-2024CDEReprocessing-v1/NANOAOD"
+            },
+            "2024E": {
+                "DataReprocessing_2024E_GamJet_EGamma0": "/EGamma0/Run2024E-2024CDEReprocessing-v1/NANOAOD", 
+                "DataReprocessing_2024E_GamJet_EGamma1": "/EGamma1/Run2024E-2024CDEReprocessing-v1/NANOAOD"
+            }
         }
     }
 }
