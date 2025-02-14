@@ -24,8 +24,10 @@ public:
     ~NanoTree();
 
     Long64_t getEntries() const;
+    Long64_t getEntriesRuns() const;
     Int_t getEntry(Long64_t entry);
     Long64_t loadEntry(Long64_t entry);
+    Long64_t loadEntryRuns(Long64_t entry);
 
     // Input management
     void setInput(const std::string& outputName);
@@ -43,11 +45,13 @@ public:
     std::map<std::string, TBranch*> filterTBranches;
 
     TChain* fChain = new TChain("Events");   
+    TChain* fChainRuns = new TChain("Runs");   
 
 private:
     // Member variables
     GlobalFlag& globalFlags_;
     Int_t fCurrent_{-1}; 
+    Int_t fCurrentRuns_{-1}; 
 
     UInt_t run_{};
     ULong64_t event_{};

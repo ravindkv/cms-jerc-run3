@@ -8,6 +8,7 @@ NanoTree::NanoTree(GlobalFlag& globalFlags) : globalFlags_(globalFlags) {}
 
 NanoTree::~NanoTree() {
     delete fChain;
+    //delete fChainRuns;
 }
 
 void NanoTree::setInput(const std::string& outputName) {
@@ -154,6 +155,7 @@ void NanoTree::loadJobFileNames() {
 void NanoTree::loadTree() {
     std::cout << "==> loadTree()" << '\n';
     fChain->SetCacheSize(Helper::tTreeCatchSize);
+    fChainRuns->SetCacheSize(Helper::tTreeCatchSize);
     bool isCopy = false;  // Set to true if you want to copy files locally
     std::string dir = "root://cms-xrd-global.cern.ch/";  // Default remote directory
 
@@ -240,6 +242,7 @@ void NanoTree::loadTree() {
 
         // File is valid, add it to the TChain
         int added = fChain->Add(fullPath.c_str());
+        fChainRuns->Add(fullPath.c_str());
         if (added == 0) {
             std::cerr << "Warning: TChain::Add failed for " << fullPath << '\n';
             f->Close();
@@ -248,6 +251,7 @@ void NanoTree::loadTree() {
         }
 
         std::cout << fullPath << "  Entries: " << fChain->GetEntries() << '\n';
+        std::cout << fullPath << "  EntriesRuns: " << fChainRuns->GetEntries() << '\n';
         addedFiles++;
         f->Close();
     }
@@ -263,6 +267,7 @@ void NanoTree::loadTree() {
         std::cerr << "Error: No valid ROOT files were added to the TChain. Exiting.\n";
         return;
     }
+    fChainRuns->SetBranchStatus("*", true);
 
     fChain->SetBranchStatus("*", false);
     fChain->SetBranchStatus("run", true);
@@ -367,6 +372,9 @@ auto NanoTree::getEntries() const -> Long64_t {
     return fChain->GetEntries();
 }
 
+auto NanoTree::getEntriesRuns() const -> Long64_t {
+    return fChainRuns->GetEntries();
+}
 auto NanoTree::getEntry(Long64_t entry) -> Int_t {
     return fChain->GetEntry(entry);
 }
@@ -381,3 +389,12 @@ auto NanoTree::loadEntry(Long64_t entry) -> Long64_t {
     return centry;
 }
 
+auto NanoTree::loadEntryRuns(Long64_t entry) -> Long64_t {
+    if (!fChainRuns) return EXIT_FAILURE;
+    Long64_t centry = fChainRuns->LoadTree(entry);
+    if (centry < 0) return centry;
+    if (fChainRuns->GetTreeNumber() != fCurrentRuns_) {
+        fCurrentRuns_ = fChainRuns->GetTreeNumber();
+    }
+    return centry;
+}

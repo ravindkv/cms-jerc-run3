@@ -98,9 +98,20 @@ auto RunWqqe::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
         nanoT->fChain->GetTree()->GetEntry(entry);
         newTree->Fill();
     }
+
+    TTree* newTreeRuns = nanoT->fChainRuns->GetTree()->CloneTree(0);
+    newTreeRuns->SetDirectory(fout);
+    Long64_t nentriesRuns = nanoT->getEntriesRuns();
+    for (Long64_t i = 0; i < nentriesRuns; i++) {
+       Long64_t entry = nanoT->loadEntryRuns(i);
+       nanoT->fChainRuns->GetTree()->GetEntry(entry);
+       newTreeRuns->Fill();      
+    }
     Helper::printCutflow(h1EventInCutflow->getHistogram());
     std::cout<<"nEvents_Skim = "<<newTree->GetEntries()<<'\n';
+    std::cout<<"nRuns_Skim = "<<newTreeRuns->GetEntries()<<'\n';
     std::cout << "Output file path = "<<fout->GetName()<<'\n';
     fout->Write();
+
     return EXIT_SUCCESS; 
 }
