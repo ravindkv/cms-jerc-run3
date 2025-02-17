@@ -158,7 +158,8 @@ def main():
             # ---------------------------
             # Process Data samples: one output per desired period
             # ---------------------------
-            dataName = "DataReprocessing"
+            dataName = "Data"
+            #dataName = "DataReprocessing"
             dataDesired = yinfo.get(dataName, [])
             print(dataDesired)
             for dataPeriod in dataDesired:

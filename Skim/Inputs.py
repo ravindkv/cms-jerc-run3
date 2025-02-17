@@ -24,12 +24,13 @@ Year2023 = {
 
 Year2024 = {
     "MC": [
-        "GJets", "QCD"
+        #"GJets", "QCD"
     ],
     "MCSummer24": [
-        "GJets", "QCD"
+        #"GJets", "QCD"
     ],
     "Data": [
+        "2024FCCv2DIv3", 
         #"2024A", "2024B", "2024C", "2024D", "2024E", "2024F", "2024G", "2024H", "2024I"
     ],
     "DataReprocessing": [
@@ -39,8 +40,8 @@ Year2024 = {
 
 
 Years = {}
-Years['2022'] = Year2022
-Years['2023'] = Year2023
+#Years['2022'] = Year2022
+#Years['2023'] = Year2023
 Years['2024'] = Year2024
 
 
