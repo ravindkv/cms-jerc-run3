@@ -1,25 +1,64 @@
-#-----------------------------------------------------------------
-eosFibDir="/eos/cms/store/group/phys_jetmet/rverma/cms-jerc-run3/Fib/15Nov2024"
-#-----------------------------------------------------------------
-Years = []
-#Years.append('2022')
-#Years.append('2023')
-Years.append('2024')
+# Skim/Inputs.py
 
-Channels = {}
-#Channels["GamJet"]    = "GamJet"
-Channels["DiJet"]     = "DiJet"
-#Channels["DiEleJet"]    = "DiEleJet"
-#Channels["DiMuJet"]    = "DiMuJet"
-#Channels["MCTruth"]   = "DiJet"
-#Channels["Flavour"]   = "DiJet"
-#Channels["VetoMap"]   = "DiJet"
-#Channels["DiJet"]     = "DiJet"
-#Channels["MultiJet"]  = "DiJet"
-#Channels["IncJet"]    = "DiJet"
+# Directory where skimmed files will be stored
+outFibDir = "root://hip-cms-se.csc.fi/store/user/rverma/cms-jerc-run3/Fib/Feb14" 
 
+# Years and Channels to process
+Year2022 = {
+    "MC": [
+        #"GJets", "QCD"
+    ],
+    "Data": [
+        "2022B", "2022C", "2022D", "2022E", "2022F", "2022G"
+    ]
+}
+
+Year2023 = {
+    "MC": [
+        #"GJets", "QCD", "Other"
+    ],
+    "Data": [
+        "2023B", "2023C", "2023D"
+    ]
+}
+
+Year2024 = {
+    "MC": [
+        #"GJets", "QCD"
+    ],
+    "MCSummer24": [
+        #"GJets", "QCD"
+    ],
+    "Data": [
+        "2024A", "2024B", "2024C", "2024D", "2024E", "2024F", "2024G", "2024H", "2024I"
+    ],
+    "DataReprocessing": [
+        "2024C", "2024D", "2024E"
+    ]
+}
+
+
+Years = {}
+Years['2022'] = Year2022
+Years['2023'] = Year2023
+Years['2024'] = Year2024
+
+
+Channels = [
+    #'ZeeJet',
+    #'ZmmJet',
+    'GamJet',
+    #'Wqqm',
+    #'Wqqe',
+    #'WqqDiLep',
+    #'MultiJet',
+]
+
+# VOMS Proxy path (adjust as needed)
 vomsProxy = "x509up_u93032"
-#vomsProxy = "/tmp/x509up_u93032" # Does NOT work on condor node
-reduceJobsMCBy     = 2
-reduceJobsDataBy   = 5
 
+# Events per job
+eventsPerJobMC = 2e6  # Number of events per job for MC
+eventsPerJobData = 8e6  # Number of events per job for Data
+
+tmpSubDir = "tmpSub"

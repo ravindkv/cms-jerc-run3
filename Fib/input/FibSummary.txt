@@ -1,4 +1,4 @@
-i[run1, run2] | name = [year][era]-nib[N]-fib[M] | lum(/fb) |  start and end time  | runs  | number of LS
+[run1, run2] | name = [year][era]-nib[N]-fib[M] | lum(/fb) |  start and end time  | runs  | number of LS
 [355374, 355769]  |    2022B-nib1-fib1   |    0.09656 fb^-1  |   274342 to  285348  |   19  |  4638
 [355862, 356576]  |    2022C-nib1-fib1   |      1.048 fb^-1  |   287652 to  307031  |   48  |  9742
 [356578, 356947]  |    2022C-nib1-fib2   |     0.8888 fb^-1  |   307119 to  313726  |   18  |  4403
