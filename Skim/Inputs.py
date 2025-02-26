@@ -25,14 +25,16 @@ Year2023 = {
 Year2024 = {
     "MC": [
         #"GJets", "QCD"
+        "TTtoLNu2Q"
     ],
     "MCSummer24": [
         #"GJets", "GJetsSherpa", "QCD"
-        "GJetsSherpa"
+        #"GJetsSherpa"
     ],
     "Data": [
         #"2024FCCv2DIv3", 
         #"2024A", "2024B", "2024C", "2024D", "2024E", "2024F", "2024G", "2024H", "2024I"
+        "2024C"
     ],
     "DataReprocessing": [
         #"2024C", "2024D", "2024E"
@@ -49,9 +51,9 @@ Years['2024'] = Year2024
 Channels = [
     #'ZeeJet',
     #'ZmmJet',
-    'GamJet',
-    #'Wqqm',
-    #'Wqqe',
+    #'GamJet',
+    'Wqqm',
+    'Wqqe',
     #'WqqDiLep',
     #'MultiJet',
 ]

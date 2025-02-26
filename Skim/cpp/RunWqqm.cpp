@@ -56,7 +56,7 @@ auto RunWqqm::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
     //------------------------------------
     // Cutflow histograms
     //------------------------------------
-    std::vector<std::string> cuts = { "NanoAOD", "Trigger"};
+    std::vector<std::string> cuts = { "NanoAOD", "Filter", "Trigger"};
     auto h1EventInCutflow = std::make_unique<HistCutflow>("h1EventInCutflow", cuts, fout->mkdir("Cutflow"));
     
     //--------------------------------
