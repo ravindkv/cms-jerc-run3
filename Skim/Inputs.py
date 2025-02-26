@@ -27,10 +27,11 @@ Year2024 = {
         #"GJets", "QCD"
     ],
     "MCSummer24": [
-        #"GJets", "QCD"
+        #"GJets", "GJetsSherpa", "QCD"
+        "GJetsSherpa"
     ],
     "Data": [
-        "2024FCCv2DIv3", 
+        #"2024FCCv2DIv3", 
         #"2024A", "2024B", "2024C", "2024D", "2024E", "2024F", "2024G", "2024H", "2024I"
     ],
     "DataReprocessing": [

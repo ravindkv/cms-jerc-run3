@@ -1,5 +1,6 @@
 #include "NanoTree.h"
 #include "Helper.h"
+#include <TError.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -152,7 +153,7 @@ void NanoTree::loadJobFileNames() {
     loadedJobFileNames_ = Helper::splitVector(loadedAllFileNames_, loadedTotalJobs_).at(loadedNthJob_ - 1);
 }
 
-void NanoTree::loadTree() {
+    void NanoTree::loadTree() {
     std::cout << "==> loadTree()" << '\n';
     fChain->SetCacheSize(Helper::tTreeCatchSize);
     fChainRuns->SetCacheSize(Helper::tTreeCatchSize);
@@ -165,7 +166,7 @@ void NanoTree::loadTree() {
 
     // Optimization parameters for xrdcp
     const int streams = 15;              // Number of parallel data streams
-    const int tcpBufSize = 1048576;      // TCP buffer size (1MB)
+    const int tcpBufSize = 1048576;        // TCP buffer size (1MB)
 
     for (const auto& fileName : loadedJobFileNames_) {
         totalFiles++;
@@ -223,6 +224,15 @@ void NanoTree::loadTree() {
             continue;  // Skip adding this file
         }
 
+        // Additional check: if file size is 0, skip the file.
+        std::cout<<f->GetSize()<<'\n';
+        if (f->GetSize() < 3000) {
+            std::cerr << "Warning: file " << fullPath << " has less than 3000, skipping." << std::endl;
+            f->Close();
+            failedFiles++;
+            continue;  // Skip adding this file
+        }
+
         // Check if "Events" tree exists
         if (!f->GetListOfKeys()->Contains("Events")) {
             std::cerr << "Error: 'Events' not found in " << fullPath << '\n';
@@ -232,7 +242,8 @@ void NanoTree::loadTree() {
         }
 
         // Check the entries in the newly added TTree
-        Long64_t fileEntries = f->Get<TTree>("Events")->GetEntries();
+        TTree* tree = f->Get<TTree>("Events");
+        Long64_t fileEntries = tree->GetEntries();
         if (fileEntries == 0) {
             std::cerr << "\nWarning: 'Events' TTree in file " << fullPath << " has 0 entries. Skipping file.\n\n";
             f->Close();
@@ -328,27 +339,26 @@ void NanoTree::loadTree() {
 		fChain->SetBranchStatus("nPSWeight");
 		fChain->SetBranchStatus("PSWeight");
 		fChain->SetBranchStatus("LHE_HT");
-		fChain->SetBranchStatus("Pileup_nTrueInt");
+	    fChain->SetBranchStatus("Pileup_*",1);
         fChain->SetBranchStatus("GenJet_*",1);
         fChain->SetBranchStatus("nGenJet",1);
-		/*
-	    fChain->SetBranchStatus("Pileup_*",1);
-        fChain->SetBranchStatus("GenPart_*",1);
-        fChain->SetBranchStatus("GenJetAK8_*",1);
-        fChain->SetBranchStatus("nGenPart",1);
-        fChain->SetBranchStatus("nGenJetAK8",1);
-        fChain->SetBranchStatus("LHE_*",1);
-        // weight
+
         fChain->SetBranchStatus("Generator_weight",1);
         fChain->SetBranchStatus("nLHEScaleWeight",1);
         fChain->SetBranchStatus("LHEScaleWeight",1);
         fChain->SetBranchStatus("nLHEPdfWeight",1);
         fChain->SetBranchStatus("nLHEPart",1);
         fChain->SetBranchStatus("LHEPart_*",1);
-        fChain->SetBranchStatus("LHEPdfWeight",1);
         fChain->SetBranchStatus("PSWeight",1);
         fChain->SetBranchStatus("nPSWeight",1);
         fChain->SetBranchStatus("genWeight",1);
+		/*
+        fChain->SetBranchStatus("GenPart_*",1);
+        fChain->SetBranchStatus("nGenPart",1);
+        fChain->SetBranchStatus("GenJetAK8_*",1);
+        fChain->SetBranchStatus("nGenJetAK8",1);
+        fChain->SetBranchStatus("LHEPdfWeight",1);
+        // weight
 		*/
     }//MC
 

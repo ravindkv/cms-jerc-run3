@@ -15,6 +15,8 @@
 #include "TBranch.h"
 #include "TObjArray.h"
 
+#include <TError.h> 
+
 class Helper {
 public:
     //Function to split a vector into smallare vectors
@@ -22,7 +24,6 @@ public:
     
     // Function to split a string into smaller vectors of string 
     static std::vector<std::string> splitString(const std::string& s, const std::string& delimiter);
-
 
     static void initProgress(); 
     static void printProgress(Long64_t jentry, Long64_t nentries, 
