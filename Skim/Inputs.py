@@ -41,19 +41,28 @@ Year2024 = {
     ]
 }
 
+Year2025 = {
+    "MCWinter25": [
+        "GJets", "QCD"
+    ],
+    "Data": [
+        "2025B", "2025C"
+    ],
+}
 
 Years = {}
 #Years['2022'] = Year2022
 #Years['2023'] = Year2023
-Years['2024'] = Year2024
+#Years['2024'] = Year2024
+Years['2025'] = Year2025
 
 
 Channels = [
     #'ZeeJet',
     #'ZmmJet',
-    #'GamJet',
-    'Wqqm',
-    'Wqqe',
+    'GamJet',
+    #'Wqqm',
+    #'Wqqe',
     #'WqqDiLep',
     #'MultiJet',
 ]

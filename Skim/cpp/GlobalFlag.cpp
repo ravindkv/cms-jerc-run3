@@ -5,6 +5,7 @@ GlobalFlag::GlobalFlag(const string& outName) :
     is2022(false), 
     is2023(false), 
     is2024(false), 
+    is2025(false), 
     isData(false), 
     isMC(false), 
     isZeeJet(false), 
@@ -19,6 +20,7 @@ GlobalFlag::GlobalFlag(const string& outName) :
     if (outName.find("2022")!= string::npos) is2022   = true;
     if (outName.find("2023")!= string::npos) is2023 = true;
     if (outName.find("2024")!= string::npos) is2024 = true;
+    if (outName.find("2025")!= string::npos) is2025 = true;
 
     if (outName.find("Data")!= string::npos) isData = true;
     if (outName.find("MC")!= string::npos)   isMC = true;
@@ -39,6 +41,7 @@ void GlobalFlag::printFlag(){
     if(is2022   )cout<<"is2022   = true"<<'\n';
     if(is2023   )cout<<"is2023   = true"<<'\n';
     if(is2024   )cout<<"is2024   = true"<<'\n';
+    if(is2025   )cout<<"is2025   = true"<<'\n';
     if(isData    )cout<<"isData    = true"<<'\n';
     if(isMC      )cout<<"isMC      = true"<<'\n';
     if(isZeeJet  )cout<<"isZeeJet  = true"<<'\n';

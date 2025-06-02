@@ -15,6 +15,7 @@ class GlobalFlag{
         bool is2022;
         bool is2023;
         bool is2024;
+        bool is2025;
 
 
         //Data or MC

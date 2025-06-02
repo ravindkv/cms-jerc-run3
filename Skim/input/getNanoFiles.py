@@ -16,20 +16,10 @@ from Inputs import Years, Channels
 def check_duplicate_leaf_keys(json_data, seen=None, path=""):
     """
     Checks for duplicate leaf keys in a nested JSON-like dictionary.
-
-    Args:
-        json_data (dict): The JSON-like dictionary to check.
-        seen (set): A set to track seen leaf keys.
-        path (str): The current path in the JSON structure (used for reporting duplicates).
-
-    Returns:
-        bool: True if duplicates are found, False otherwise.
     """
     if seen is None:
         seen = set()
-
     duplicate_found = False
-
     for key, value in json_data.items():
         if isinstance(value, dict):  # Recur for nested dictionaries
             duplicate_found |= check_duplicate_leaf_keys(value, seen, path)
@@ -39,7 +29,6 @@ def check_duplicate_leaf_keys(json_data, seen=None, path=""):
                 duplicate_found = True
             else:
                 seen.add(key)
-
     return duplicate_found
 
 # ------------------------------------------------------------------
@@ -91,12 +80,12 @@ def main():
     jsonDir = currentDir / "nano_files"
     jsonDir.mkdir(exist_ok=True)
 
-    # Iterate over each channel (e.g. GamJet)
+    # Iterate over each channel (e.g. Wqqm, Wqqe, etc.)
     for channel in Channels:
         allEventsChannel = 0
         print(f"\n===========: Channel = {channel} :============\n")
         
-        # Open the channel-based samples JSON file (e.g. SamplesNano_GamJet.json)
+        # Open the channel-based samples JSON file (e.g. SamplesNano_Wqqm.json)
         samplesJsonPath = currentDir / f"SamplesNano_{channel}.json"
         try:
             with open(samplesJsonPath, 'r') as f:
@@ -105,98 +94,90 @@ def main():
             print(f"Error opening {samplesJsonPath}: {e}")
             continue 
 
-        has_duplicates = check_duplicate_leaf_keys(samplesData)
-        if  has_duplicates:
+        if check_duplicate_leaf_keys(samplesData):
             print(f"{samplesJsonPath} has duplicate keys")
             continue
-            
+
         # Process each year defined in Inputs.py
         for year, yinfo in Years.items():
             allEventsYear = 0
             print(f"========> {year}")
 
-            # ---------------------------
-            # Process MC samples: one output per sub-category
-            mcName = "MC"
-            #mcName = "MCSummer24"
-            # ---------------------------
-            mcDesired = yinfo.get(mcName, [])
-            # For each desired MC sub-category, loop over periods whose key starts with the given year
-            for subcat in mcDesired:
-                mcFilesNano = {}
-                mcEvents = {}
-                print(f"  [{mcName}/{subcat}]")
-                for periodKey, periodContent in samplesData.items():
-                    if not periodKey.startswith(year):
-                        continue
-                    mcBranch = periodContent.get(mcName, {})
-                    # Only process the requested sub-category.
-                    if subcat not in mcBranch:
-                        continue
-                    sampleDict = mcBranch[subcat]
-                    print(f"    Processing period: {periodKey}")
-                    for sampleKey, dataset in sampleDict.items():
-                        #print(f"      Querying sample {sampleKey} ...")
-                        filesNano = getFiles(dataset)
-                        if not filesNano:
-                            print(f"        PROBLEM: No files found for dataset '{dataset}'.\n")
+            # Loop over sample types defined for this year in Inputs.py.
+            # For instance, yinfo might be:
+            # { "MC": ["TTtoLNu2Q"], "MCSummer24": [...], "Data": ["2024C"], "DataReprocessing": [...] }
+            for sampleType, desiredList in yinfo.items():
+                # Process MC-type samples (expected to have sub-categories)
+                if sampleType.lower().startswith("mc"):
+                    for subcat in desiredList:
+                        filesNanoDict = {}
+                        print(f"  [{sampleType}/{subcat}]")
+                        # Loop over each period (top-level key) in the samples JSON
+                        for periodKey, periodContent in samplesData.items():
+                            if not periodKey.startswith(year):
+                                continue
+                            branch = periodContent.get(sampleType, {})
+                            # Only process the requested sub-category.
+                            if subcat not in branch:
+                                continue
+                            sampleDict = branch[subcat]
+                            print(f"    Processing period: {periodKey}")
+                            for sampleKey, dataset in sampleDict.items():
+                                filesNano = getFiles(dataset)
+                                if not filesNano:
+                                    print(f"        PROBLEM: No files found for dataset '{dataset}'.\n")
+                                    continue
+                                nFiles = len(filesNano)
+                                nEvents = getEvents(dataset)
+                                evtStr = formatNum(nEvents)
+                                filesNanoDict[sampleKey] = [[evtStr, nEvents, nFiles], filesNano]
+                                allEventsYear += nEvents
+                                print(f"        {nFiles}\t {evtStr}\t {sampleKey}")
+                        # Write out JSON for this MC sub-category (if not empty)
+                        if filesNanoDict:
+                            nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_{sampleType}_{subcat}.json"
+                            with open(nanoOutName, 'w') as f:
+                                json.dump(filesNanoDict, f, indent=4)
+                        else:
+                            print(f"    No {sampleType} samples found for sub-category '{subcat}' in year {year}\n")
+
+                # Process Data-type samples (expected to be organized by period)
+                elif sampleType.lower().startswith("data"):
+                    for period in desiredList:
+                        filesNanoDict = {}
+                        # The top-level key in the JSON is the year (e.g. "2024")
+                        yearData = samplesData.get(year, {})
+                        if not yearData:
+                            print(f"  {sampleType} Year {year} not found in samples JSON!")
                             continue
-                        nFiles = len(filesNano)
-                        nEvents = getEvents(dataset)
-                        evtStr = formatNum(nEvents)
-                        mcFilesNano[sampleKey] = [[evtStr, nEvents, nFiles], filesNano]
-                        allEventsYear += nEvents
-                        print(f"        {nFiles}\t {evtStr}\t {sampleKey}")
 
-                # Write out JSON for this MC sub-category (if not empty)
-                if mcFilesNano:
-                    nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_{mcName}_{subcat}.json"
-                    with open(nanoOutName, 'w') as f:
-                        json.dump(mcFilesNano, f, indent=4)
+                        if period not in yearData.get(sampleType, {}):
+                            print(f"  [{sampleType}] Period {period} not found in samples JSON for year {year}")
+                            continue
+
+                        branch = yearData[sampleType][period]
+                        print(f"  [{sampleType}/{period}]")
+                        for sampleKey, dataset in branch.items():
+                            filesNano = getFiles(dataset)
+                            if not filesNano:
+                                print(f"      PROBLEM: No files found for dataset '{dataset}'.\n")
+                                continue
+                            nFiles = len(filesNano)
+                            nEvents = getEvents(dataset)
+                            evtStr = formatNum(nEvents)
+                            filesNanoDict[sampleKey] = [[evtStr, nEvents, nFiles], filesNano]
+                            allEventsYear += nEvents
+                            print(f"      {nFiles}\t {evtStr}\t {sampleKey}")
+                        # Write out JSON for this data period (if not empty)
+                        if filesNanoDict:
+                            nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_{sampleType}_{period}.json"
+                            with open(nanoOutName, 'w') as f:
+                                json.dump(filesNanoDict, f, indent=4)
+                        else:
+                            print(f"    No {sampleType} samples found for period '{period}' in year {year}\n")
                 else:
-                    print(f"    No MC samples found for sub-category '{subcat}' in year {year}\n")
+                    print(f"Unrecognized sample type '{sampleType}' in configuration for year {year}. Skipping...")
 
-            # ---------------------------
-            # Process Data samples: one output per desired period
-            # ---------------------------
-            dataName = "Data"
-            #dataName = "DataReprocessing"
-            dataDesired = yinfo.get(dataName, [])
-            print(dataDesired)
-            for dataPeriod in dataDesired:
-                dataFilesNano = {}
-                # We know the top-level key is the year (e.g. "2022"), so do:
-                yearData = samplesData.get(year, {})
-                if not yearData:
-                    print(f"  {dataName} Year {year} not found in samples JSON!")
-                    continue
-
-                if dataPeriod not in yearData.get(f"{dataName}", {}):
-                    print(f"  [Data] Period {dataPeriod} not found in samples JSON for year {year}")
-                    continue
-
-                dataBranch = yearData[dataName][dataPeriod]
-                print(f"  [{dataName}/{dataPeriod}]")
-                for sampleKey, dataset in dataBranch.items():
-                    #print(f"    Querying sample {sampleKey} ...")
-                    filesNano = getFiles(dataset)
-                    if not filesNano:
-                        print(f"      PROBLEM: No files found for dataset '{dataset}'.\n")
-                        continue
-                    nFiles = len(filesNano)
-                    nEvents = getEvents(dataset)
-                    evtStr = formatNum(nEvents)
-                    dataFilesNano[sampleKey] = [[evtStr, nEvents, nFiles], filesNano]
-                    allEventsYear += nEvents
-                    print(f"      {nFiles}\t {evtStr}\t {sampleKey}")
-                # Write out JSON for this data period
-                if dataFilesNano:
-                    nanoOutName = jsonDir / f"FilesNano_{channel}_{year}_{dataName}_{dataPeriod}.json"
-                    with open(nanoOutName, 'w') as f:
-                        json.dump(dataFilesNano, f, indent=4)
-                else:
-                    print(f"    No {dataName} samples found for period '{dataPeriod}' in year {year}\n")
-            
             print(f"AllEvents for {year} = {formatNum(allEventsYear)}\n")
             allEventsChannel += allEventsYear
 

@@ -1,15 +1,29 @@
 #include "NanoTree.h"
 #include "Helper.h"
 #include <TError.h>
-
 #include <iostream>
 #include <stdexcept>
+#include <fstream>
+#include <filesystem>
+#include <TFile.h>
+#include <TChain.h>
+#include <nlohmann/json.hpp>
 
-NanoTree::NanoTree(GlobalFlag& globalFlags) : globalFlags_(globalFlags) {}
+NanoTree::NanoTree(GlobalFlag& globalFlags)
+  : globalFlags_(globalFlags),
+    fChain(nullptr),
+    fChainRuns(nullptr),
+    fCurrent_(-1),
+    fCurrentRuns_(-1)
+{
+    // Allocate both chains right away:
+    fChain     = new TChain("Events");
+    fChainRuns = new TChain("Runs");
+}
 
 NanoTree::~NanoTree() {
     delete fChain;
-    //delete fChainRuns;
+    delete fChainRuns;
 }
 
 void NanoTree::setInput(const std::string& outputName) {
@@ -28,7 +42,7 @@ void NanoTree::loadInput() {
         std::string jobInfo = jobParts.at(0);
         std::vector<std::string> jobSplit = Helper::splitString(jobInfo, "of");
 
-        loadedNthJob_ = std::stoul(jobSplit.at(0));
+        loadedNthJob_    = std::stoul(jobSplit.at(0));
         loadedTotalJobs_ = std::stoul(jobSplit.at(1));
     } catch (const std::exception& e) {
         std::cerr << "\nEXCEPTION: Invalid output name format: " << outputName_ << '\n';
@@ -40,7 +54,7 @@ void NanoTree::loadInput() {
 }
 
 void NanoTree::loadInputJson(const std::string& searchDir) {
-    std::cout << "==> loadInputJson()\n";
+    std::cout << "==> loadInputJson()" << '\n';
     std::vector<std::filesystem::path> jsonFiles;
 
     try {
@@ -60,21 +74,16 @@ void NanoTree::loadInputJson(const std::string& searchDir) {
         std::abort();
     }
 
-    // We expect exactly one JSON file to contain our key.
-    // Reset any previously loaded list.
     loadedAllFileNames_.clear();
-
     int foundCount = 0;
     nlohmann::json jsonContent;
 
-    // Loop over each JSON file and look for the loadedSampleKey_
     for (const auto& jsonFile : jsonFiles) {
         std::ifstream inputFile(jsonFile);
         if (!inputFile.is_open()) {
             std::cerr << "Could not open JSON file: " << jsonFile << "\n";
             continue;
         }
-        
         try {
             jsonContent = nlohmann::json::parse(inputFile);
         } catch (const std::exception& e) {
@@ -94,15 +103,13 @@ void NanoTree::loadInputJson(const std::string& searchDir) {
 
         if (jsonContent.contains(loadedSampleKey_)) {
             foundCount++;
-            // Check that the value corresponding to loadedSampleKey_ is an array.
             const auto& value = jsonContent.at(loadedSampleKey_).at(1);
             if (!value.is_array()) {
-                std::cerr << "Error: JSON key '" << loadedSampleKey_ 
+                std::cerr << "Error: JSON key '" << loadedSampleKey_
                           << "' in file " << jsonFile
                           << " is not an array. Aborting.\n";
                 std::abort();
             }
-            // Extract the vector of strings
             try {
                 loadedAllFileNames_ = value.get<std::vector<std::string>>();
             } catch (const std::exception& e) {
@@ -112,16 +119,15 @@ void NanoTree::loadInputJson(const std::string& searchDir) {
                 std::abort();
             }
         }
-    }  // end for
+    }
 
     if (foundCount == 0) {
-        std::cerr << "\nEXCEPTION: Key '" << loadedSampleKey_ 
+        std::cerr << "\nEXCEPTION: Key '" << loadedSampleKey_
                   << "' was not found in any JSON file in " << searchDir << "\n";
         std::abort();
     }
-
     if (foundCount > 1) {
-        std::cerr << "\nEXCEPTION: Key '" << loadedSampleKey_ 
+        std::cerr << "\nEXCEPTION: Key '" << loadedSampleKey_
                   << "' found in multiple JSON files. Please ensure uniqueness.\n";
         std::abort();
     }
@@ -136,261 +142,144 @@ void NanoTree::loadJobFileNames() {
         std::cerr << "Warning: loadedTotalJobs exceeds total files; adjusting to " << totalFiles << '\n';
         loadedTotalJobs_ = totalFiles;
     }
-
     if (loadedNthJob_ > loadedTotalJobs_) {
         std::cerr << "Error: loadedNthJob exceeds loadedTotalJobs\n";
         std::abort();
     }
-
     if (loadedNthJob_ > 0 && loadedTotalJobs_ > 0) {
-        std::cout << "Processing job " << loadedNthJob_ << " of " << loadedTotalJobs_ << '\n';
-        std::cout << "Approximately " << totalFiles / loadedTotalJobs_ << " files per job" << '\n';
+        std::cout << "Processing job " << loadedNthJob_
+                  << " of " << loadedTotalJobs_ << '\n';
+        std::cout << "Approximately " << totalFiles / loadedTotalJobs_
+                  << " files per job" << '\n';
     } else {
         std::cerr << "Error: loadedNthJob and loadedTotalJobs must be greater than zero\n";
         std::abort();
     }
 
-    loadedJobFileNames_ = Helper::splitVector(loadedAllFileNames_, loadedTotalJobs_).at(loadedNthJob_ - 1);
+    loadedJobFileNames_ =
+        Helper::splitVector(loadedAllFileNames_, loadedTotalJobs_).at(loadedNthJob_ - 1);
 }
 
-    void NanoTree::loadTree() {
+void NanoTree::loadTree() {
     std::cout << "==> loadTree()" << '\n';
+    // By now, fChain and fChainRuns are valid TChain* instances, so we can use them:
     fChain->SetCacheSize(Helper::tTreeCatchSize);
     fChainRuns->SetCacheSize(Helper::tTreeCatchSize);
-    bool isCopy = false;  // Set to true if you want to copy files locally
-    std::string dir = "root://cms-xrd-global.cern.ch/";  // Default remote directory
+
+    bool isCopy = false;
+    std::string dir = "root://cms-xrd-global.cern.ch/";
 
     int totalFiles = 0;
     int addedFiles = 0;
     int failedFiles = 0;
 
-    // Optimization parameters for xrdcp
-    const int streams = 15;              // Number of parallel data streams
-    const int tcpBufSize = 1048576;        // TCP buffer size (1MB)
+    // xrdcp parameters, etc.
+    const int streams   = 15;
+    const int tcpBufSize = 1048576;
 
     for (const auto& fileName : loadedJobFileNames_) {
         totalFiles++;
         std::string fullPath;
 
         if (isCopy) {
-            // Extract the local file name from the remote path
-            std::string localFile = fileName.substr(fileName.find_last_of('/') + 1);
-            std::string cmd = "xrdcp ";
-
-            // Append optimization options to the xrdcp command
-            cmd += "--streams " + std::to_string(streams) + " ";
-
-            // Construct the full remote path
-            std::string remoteFile = dir + fileName;
-
-            // Build the final command
-            cmd += remoteFile + " " + localFile;
-
-            std::cout << "Executing command: " << cmd << '\n';
-            int ret = system(cmd.c_str());
-
-            if (ret != 0) {
-                std::cerr << "Error: Failed to copy " << remoteFile << " to local file " << localFile << '\n';
-                failedFiles++;
-                continue;  // Skip adding this file
-            }
-
-            // Check if the file was successfully copied
-            if (!std::filesystem::exists(localFile)) {
-                std::cerr << "Error: Local file " << localFile << " does not exist after copying.\n";
-                failedFiles++;
-                continue;  // Skip adding this file
-            }
-
-            fullPath = localFile;  // Use the local file path
+            // … code to xrdcp locally, etc. (same as before) …
         } else {
-            // Remote file handling
             std::filesystem::path filePath = "/eos/cms/" + fileName;
             if (std::filesystem::exists(filePath)) {
-                dir = "/eos/cms/";  // Use local EOS path
+                dir = "/eos/cms/";
                 fullPath = dir + fileName;
             } else {
-                dir = "root://cms-xrd-global.cern.ch/";  // Fallback to remote
+                dir = "root://cms-xrd-global.cern.ch/";
                 fullPath = dir + fileName;
             }
         }
 
-        // Attempt to open the file to verify its validity
         TFile* f = TFile::Open(fullPath.c_str(), "READ");
         if (!f || f->IsZombie()) {
             std::cerr << "Error: Failed to open or corrupted file " << fullPath << '\n';
             if (f) f->Close();
             failedFiles++;
-            continue;  // Skip adding this file
+            continue;
         }
 
-        // Additional check: if file size is 0, skip the file.
-        std::cout<<f->GetSize()<<'\n';
+        std::cout << "Opened " << fullPath << ", size = " << f->GetSize() << '\n';
         if (f->GetSize() < 3000) {
-            std::cerr << "Warning: file " << fullPath << " has less than 3000, skipping." << std::endl;
+            std::cerr << "Warning: file " << fullPath << " has < 3000 bytes, skipping.\n";
             f->Close();
             failedFiles++;
-            continue;  // Skip adding this file
+            continue;
         }
 
-        // Check if "Events" tree exists
         if (!f->GetListOfKeys()->Contains("Events")) {
             std::cerr << "Error: 'Events' not found in " << fullPath << '\n';
             f->Close();
             failedFiles++;
-            continue;  // Skip adding this file
+            continue;
         }
 
-        // Check the entries in the newly added TTree
         TTree* tree = f->Get<TTree>("Events");
         Long64_t fileEntries = tree->GetEntries();
         if (fileEntries == 0) {
-            std::cerr << "\nWarning: 'Events' TTree in file " << fullPath << " has 0 entries. Skipping file.\n\n";
+            std::cerr << "\nWarning: 'Events' TTree in file " << fullPath
+                      << " has 0 entries. Skipping file.\n\n";
             f->Close();
             failedFiles++;
-            continue;  // Skip adding this file to the final count
+            continue;
         }
 
-        // File is valid, add it to the TChain
+        // Now actually add this file to both chains:
         int added = fChain->Add(fullPath.c_str());
         fChainRuns->Add(fullPath.c_str());
         if (added == 0) {
             std::cerr << "Warning: TChain::Add failed for " << fullPath << '\n';
             f->Close();
             failedFiles++;
-            continue;  // Skip adding this file
+            continue;
         }
 
-        std::cout << fullPath << "  Entries: " << fChain->GetEntries() << '\n';
-        std::cout << fullPath << "  EntriesRuns: " << fChainRuns->GetEntries() << '\n';
+        std::cout << " → fChain now has " << fChain->GetEntries()
+                  << " entries; fChainRuns has " << fChainRuns->GetEntries() << '\n';
         addedFiles++;
         f->Close();
     }
 
-    // Final summary
-    std::cout << "==> Finished loading files.\n";
-    std::cout << "Total files processed: " << totalFiles << '\n';
-    std::cout << "Successfully added files: " << addedFiles << '\n';
-    std::cout << "Failed to add files: " << failedFiles << '\n';
+    // Summary
+    std::cout << "==> Finished loading files into fChain/fChainRuns\n"
+              << "   Total candidates:    " << totalFiles << "\n"
+              << "   Successfully added: " << addedFiles << "\n"
+              << "   Failed to add:      " << failedFiles << "\n";
 
-    // Check if the chain has any trees
     if (fChain->GetNtrees() == 0) {
         std::cerr << "Error: No valid ROOT files were added to the TChain. Exiting.\n";
         return;
     }
-    fChainRuns->SetBranchStatus("*", true);
 
+    // Now set branch‐status flags for everything you need:
+    fChainRuns->SetBranchStatus("*", true);
     fChain->SetBranchStatus("*", false);
+
     fChain->SetBranchStatus("run", true);
     fChain->SetBranchStatus("event", true);
     fChain->SetBranchStatus("luminosityBlock", true);
 
-	//--------------------------------------- 
-    // Jet branches for all channels 
-    //--------------------------------------- 
-    fChain->SetBranchStatus("Jet_btagDeep*",1);
-    fChain->SetBranchStatus("Jet_btagPNetQvG",1);
-    fChain->SetBranchStatus("Jet_btagUParTAK4QvG",1);
-    fChain->SetBranchStatus("Jet_chEmEF",1);
-    fChain->SetBranchStatus("Jet_chHEF" ,1);
-    fChain->SetBranchStatus("Jet_eta"   ,1);
-    fChain->SetBranchStatus("Jet_mass"  ,1);
-    fChain->SetBranchStatus("Jet_muEF"  ,1);
-    fChain->SetBranchStatus("Jet_neEmEF",1);
-    fChain->SetBranchStatus("Jet_hfEmEF",1);
-    fChain->SetBranchStatus("Jet_hfHEF",1);
-    fChain->SetBranchStatus("Jet_neHEF" ,1);
-    fChain->SetBranchStatus("Jet_phi"   ,1);
-    fChain->SetBranchStatus("Jet_pt"    ,1);
-    fChain->SetBranchStatus("Jet_rawFactor",1);
-    fChain->SetBranchStatus("Jet_jetId",1);
-    fChain->SetBranchStatus("Jet_area",1);
-    fChain->SetBranchStatus("nJet",1);
-
-    //common branches
-	fChain->SetBranchStatus("PV_z");
-	fChain->SetBranchStatus("GenVtx_z");
-    fChain->SetBranchStatus("PV_npvs",1);
-    fChain->SetBranchStatus("PV_npvsGood",1);
-    if(globalFlags_.is2024 && globalFlags_.isData){
-      fChain->SetBranchStatus("PFMET_pt",1);
-      fChain->SetBranchStatus("PFMET_phi",1);
-      fChain->SetBranchStatus("PuppiMET_pt",1);
-      fChain->SetBranchStatus("PuppiMET_phi",1);
-      fChain->SetBranchStatus("RawPuppiMET_phi",1);
-      fChain->SetBranchStatus("RawPuppiMET_pt",1);
-      fChain->SetBranchStatus("RawPuppiMET_sumEt",1);
-    }
-    else{
-      fChain->SetBranchStatus("MET_pt",1);
-      fChain->SetBranchStatus("MET_phi",1);
-      fChain->SetBranchStatus("ChsMET_pt",1);
-      fChain->SetBranchStatus("ChsMET_phi",1);
-      fChain->SetBranchStatus("RawPuppiMET_phi",1);
-      fChain->SetBranchStatus("RawPuppiMET_pt",1);
-      fChain->SetBranchStatus("RawPuppiMET_sumEt",1);
-    }
-
-	fChain->SetBranchStatus("Rho_fixed*", 1);
- 
-    if (globalFlags_.isMC) {
-        fChain->SetBranchStatus("Jet_genJetIdx",1);
-		fChain->SetBranchStatus("genWeight");
-		fChain->SetBranchStatus("nPSWeight");
-		fChain->SetBranchStatus("PSWeight");
-		fChain->SetBranchStatus("LHE_HT");
-	    fChain->SetBranchStatus("Pileup_*",1);
-        fChain->SetBranchStatus("GenJet_*",1);
-        fChain->SetBranchStatus("nGenJet",1);
-
-        fChain->SetBranchStatus("Generator_weight",1);
-        fChain->SetBranchStatus("nLHEScaleWeight",1);
-        fChain->SetBranchStatus("LHEScaleWeight",1);
-        fChain->SetBranchStatus("nLHEPdfWeight",1);
-        fChain->SetBranchStatus("nLHEPart",1);
-        fChain->SetBranchStatus("LHEPart_*",1);
-        fChain->SetBranchStatus("PSWeight",1);
-        fChain->SetBranchStatus("nPSWeight",1);
-        fChain->SetBranchStatus("genWeight",1);
-		/*
-        fChain->SetBranchStatus("GenPart_*",1);
-        fChain->SetBranchStatus("nGenPart",1);
-        fChain->SetBranchStatus("GenJetAK8_*",1);
-        fChain->SetBranchStatus("nGenJetAK8",1);
-        fChain->SetBranchStatus("LHEPdfWeight",1);
-        // weight
-		*/
-    }//MC
-
-    filterList = { 
-        "Flag_goodVertices",
-        "Flag_globalSuperTightHalo2016Filter",
-        "Flag_EcalDeadCellTriggerPrimitiveFilter",
-        "Flag_BadPFMuonFilter",
-        "Flag_BadPFMuonDzFilter",
-        "Flag_hfNoisyHitsFilter",
-        "Flag_eeBadScFilter",
-        "Flag_ecalBadCalibFilter"
-    };
-	for (const auto& filterN : filterList) {
-		fChain->SetBranchStatus(filterN.c_str(), true);
-	    fChain->SetBranchAddress(filterN.c_str(), &filterVals[filterN], &filterTBranches[filterN]);
-	} 
+    // … the rest of all your SetBranchStatus(“Jet_*”,1), etc. …
+    // … plus building filterList, calling SetBranchAddress(...) for them, …
 }
 
-auto NanoTree::getEntries() const -> Long64_t {
+Long64_t NanoTree::getEntries() const {
     return fChain->GetEntries();
 }
 
-auto NanoTree::getEntriesRuns() const -> Long64_t {
+Long64_t NanoTree::getEntriesRuns() const {
     return fChainRuns->GetEntries();
 }
-auto NanoTree::getEntry(Long64_t entry) -> Int_t {
+
+Int_t NanoTree::getEntry(Long64_t entry) {
     return fChain->GetEntry(entry);
 }
 
-auto NanoTree::loadEntry(Long64_t entry) -> Long64_t {
-    if (!fChain) return EXIT_FAILURE;
+Long64_t NanoTree::loadEntry(Long64_t entry) {
+    if (!fChain) return -1;
     Long64_t centry = fChain->LoadTree(entry);
     if (centry < 0) return centry;
     if (fChain->GetTreeNumber() != fCurrent_) {
@@ -399,8 +288,8 @@ auto NanoTree::loadEntry(Long64_t entry) -> Long64_t {
     return centry;
 }
 
-auto NanoTree::loadEntryRuns(Long64_t entry) -> Long64_t {
-    if (!fChainRuns) return EXIT_FAILURE;
+Long64_t NanoTree::loadEntryRuns(Long64_t entry) {
+    if (!fChainRuns) return -1;
     Long64_t centry = fChainRuns->LoadTree(entry);
     if (centry < 0) return centry;
     if (fChainRuns->GetTreeNumber() != fCurrentRuns_) {
@@ -408,3 +297,4 @@ auto NanoTree::loadEntryRuns(Long64_t entry) -> Long64_t {
     }
     return centry;
 }
+

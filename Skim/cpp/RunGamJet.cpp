@@ -74,7 +74,7 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
         };
     }
 
-    if(globalFlags_.is2023 || globalFlags_.is2024){
+    if(globalFlags_.is2023 || globalFlags_.is2024 || globalFlags_.is2025){
         trigList_ = { 
              "HLT_Photon300_NoHE",                                           
              "HLT_Photon33",                                          
@@ -123,7 +123,35 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
 	    nanoT->fChain->SetBranchAddress(trigN.c_str(), &trigVals_[trigN], &trigTBranches_[trigN]);
 	} 
 
-    TTree* newTree = nanoT->fChain->GetTree()->CloneTree(0);
+    // *** GUARD #1: make sure fChain actually has a TTree ***
+    if (nanoT->fChain->GetNtrees() == 0) {
+        std::cerr << "[RunGamJet] ERROR: fChain has no trees (GetNtrees()==0)."
+                  << " Did loadTree() fail to add any files?\n";
+        return EXIT_FAILURE;
+    }
+
+    // *** GUARD #2: force the chain to load its first tree ***
+    Long64_t firstEntry = nanoT->fChain->LoadTree(0);
+    if (firstEntry < 0) {
+        std::cerr << "[RunGamJet] ERROR: LoadTree(0) returned " << firstEntry
+                  << ". No valid tree to read from.\n";
+        return EXIT_FAILURE;
+    }
+
+    // *** GUARD #3: GetTree() must be non‐null ***
+    TTree* baseTree = nanoT->fChain->GetTree();
+    if (!baseTree) {
+        std::cerr << "[RunGamJet] ERROR: fChain->GetTree() is nullptr. Cannot CloneTree.\n";
+        return EXIT_FAILURE;
+    }
+
+    // Now it’s safe:
+    TTree* newTree = baseTree->CloneTree(0);
+    if (!newTree) {
+        std::cerr << "[RunGamJet] ERROR: CloneTree(0) returned nullptr. Check your input TTree.\n";
+        return EXIT_FAILURE;
+    }
+    newTree->SetDirectory(fout);
     newTree->SetCacheSize(Helper::tTreeCatchSize);
     Long64_t nentries = nanoT->getEntries();
     std::cout << "\nSample has "<<nentries << " entries" << '\n';
@@ -177,7 +205,22 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
         newTree->Fill();
     }
 
-    TTree* newTreeRuns = nanoT->fChainRuns->GetTree()->CloneTree(0);
+    std::cout << "\nNow process the RunsTree \n";
+    // Force loading the first tree in the chain.
+    Long64_t centry = nanoT->fChainRuns->LoadTree(0);
+    if (centry < 0) {
+        std::cerr << "Error: fChainRuns->LoadTree(0) returned " << centry 
+                  << ", no valid Runs tree found. Skipping Runs processing." << std::endl;
+        return EXIT_FAILURE; // or handle the error as needed.
+    }
+
+    TTree* runsTree = nanoT->fChainRuns->GetTree();
+    if (!runsTree) {
+        std::cerr << "Error: No valid Runs tree found in the TChain. Skipping Runs processing." << std::endl;
+        return EXIT_FAILURE;
+    }
+    TTree* newTreeRuns = runsTree->CloneTree(0);
+
     newTreeRuns->SetDirectory(fout);
     Long64_t nentriesRuns = nanoT->getEntriesRuns();
     for (Long64_t i = 0; i < nentriesRuns; i++) {
@@ -189,7 +232,9 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
     std::cout<<"nEvents_Skim = "<<newTree->GetEntries()<<'\n';
     std::cout<<"nRuns_Skim = "<<newTreeRuns->GetEntries()<<'\n';
     std::cout << "Output file path = "<<fout->GetName()<<'\n';
-    fout->Write();
+    fout->cd();
+    newTreeRuns->Write("", TObject::kOverwrite);
+
 
     return EXIT_SUCCESS; 
 }
