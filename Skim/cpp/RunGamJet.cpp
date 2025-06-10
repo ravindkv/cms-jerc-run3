@@ -233,7 +233,7 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
     std::cout<<"nRuns_Skim = "<<newTreeRuns->GetEntries()<<'\n';
     std::cout << "Output file path = "<<fout->GetName()<<'\n';
     fout->cd();
-    newTreeRuns->Write("", TObject::kOverwrite);
+    fout->Write();
 
 
     return EXIT_SUCCESS; 
