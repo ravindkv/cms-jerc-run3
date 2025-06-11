@@ -82,7 +82,6 @@ if __name__ == "__main__":
     dResubs = {}
     fResub = "tmpSub/resubFilesSkim.json"
 
-    os.system("voms-proxy-init --voms cms")
     # Ensure the 'tmpSub' directory exists
     os.makedirs("tmpSub", exist_ok=True)
 

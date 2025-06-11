@@ -262,8 +262,90 @@ void NanoTree::loadTree() {
     fChain->SetBranchStatus("event", true);
     fChain->SetBranchStatus("luminosityBlock", true);
 
-    // … the rest of all your SetBranchStatus(“Jet_*”,1), etc. …
-    // … plus building filterList, calling SetBranchAddress(...) for them, …
+//--------------------------------------- 
+    // Jet branches for all channels 
+    //--------------------------------------- 
+    fChain->SetBranchStatus("Jet_btagDeep*",1);
+    fChain->SetBranchStatus("Jet_btagPNetQvG",1);
+    fChain->SetBranchStatus("Jet_btagUParTAK4QvG",1);
+    fChain->SetBranchStatus("Jet_chEmEF",1);
+    fChain->SetBranchStatus("Jet_chHEF" ,1);
+    fChain->SetBranchStatus("Jet_eta"   ,1);
+    fChain->SetBranchStatus("Jet_mass"  ,1);
+    fChain->SetBranchStatus("Jet_muEF"  ,1);
+    fChain->SetBranchStatus("Jet_neEmEF",1);
+    fChain->SetBranchStatus("Jet_hfEmEF",1);
+    fChain->SetBranchStatus("Jet_hfHEF",1);
+    fChain->SetBranchStatus("Jet_neHEF" ,1);
+    fChain->SetBranchStatus("Jet_phi"   ,1);
+    fChain->SetBranchStatus("Jet_pt"    ,1);
+    fChain->SetBranchStatus("Jet_rawFactor",1);
+    fChain->SetBranchStatus("Jet_jetId",1);
+    fChain->SetBranchStatus("Jet_area",1);
+    fChain->SetBranchStatus("nJet",1);
+
+    //common branches
+	fChain->SetBranchStatus("PV_z");
+    fChain->SetBranchStatus("PV_npvs",1);
+    fChain->SetBranchStatus("PV_npvsGood",1);
+    fChain->SetBranchStatus("PFMET_pt",1);
+    fChain->SetBranchStatus("PFMET_phi",1);
+    fChain->SetBranchStatus("PuppiMET_pt",1);
+    fChain->SetBranchStatus("PuppiMET_phi",1);
+    fChain->SetBranchStatus("RawPuppiMET_phi",1);
+    fChain->SetBranchStatus("RawPuppiMET_pt",1);
+    fChain->SetBranchStatus("RawPuppiMET_sumEt",1);
+    fChain->SetBranchStatus("MET_pt",1);
+    fChain->SetBranchStatus("MET_phi",1);
+    fChain->SetBranchStatus("ChsMET_pt",1);
+    fChain->SetBranchStatus("ChsMET_phi",1);
+
+	fChain->SetBranchStatus("Rho_fixed*", 1);
+ 
+    if (globalFlags_.isMC) {
+        fChain->SetBranchStatus("Jet_genJetIdx",1);
+		fChain->SetBranchStatus("genWeight");
+		fChain->SetBranchStatus("nPSWeight");
+		fChain->SetBranchStatus("PSWeight");
+		fChain->SetBranchStatus("LHE_HT");
+	    fChain->SetBranchStatus("Pileup_*",1);
+        fChain->SetBranchStatus("GenJet_*",1);
+	    fChain->SetBranchStatus("GenVtx_z");
+        fChain->SetBranchStatus("nGenJet",1);
+
+        fChain->SetBranchStatus("Generator_weight",1);
+        fChain->SetBranchStatus("nLHEScaleWeight",1);
+        fChain->SetBranchStatus("LHEScaleWeight",1);
+        fChain->SetBranchStatus("nLHEPdfWeight",1);
+        fChain->SetBranchStatus("nLHEPart",1);
+        fChain->SetBranchStatus("LHEPart_*",1);
+        fChain->SetBranchStatus("PSWeight",1);
+        fChain->SetBranchStatus("nPSWeight",1);
+        fChain->SetBranchStatus("genWeight",1);
+		/*
+        fChain->SetBranchStatus("GenPart_*",1);
+        fChain->SetBranchStatus("nGenPart",1);
+        fChain->SetBranchStatus("GenJetAK8_*",1);
+        fChain->SetBranchStatus("nGenJetAK8",1);
+        fChain->SetBranchStatus("LHEPdfWeight",1);
+        // weight
+		*/
+    }//MC
+
+    filterList = { 
+        "Flag_goodVertices",
+        "Flag_globalSuperTightHalo2016Filter",
+        "Flag_EcalDeadCellTriggerPrimitiveFilter",
+        "Flag_BadPFMuonFilter",
+        "Flag_BadPFMuonDzFilter",
+        "Flag_hfNoisyHitsFilter",
+        "Flag_eeBadScFilter",
+        "Flag_ecalBadCalibFilter"
+    };
+	for (const auto& filterN : filterList) {
+		fChain->SetBranchStatus(filterN.c_str(), true);
+	    fChain->SetBranchAddress(filterN.c_str(), &filterVals[filterN], &filterTBranches[filterN]);
+	} 
 }
 
 Long64_t NanoTree::getEntries() const {
