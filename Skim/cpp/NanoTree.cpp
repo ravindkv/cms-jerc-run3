@@ -277,6 +277,8 @@ void NanoTree::loadTree() {
     fChain->SetBranchStatus("Jet_hfEmEF",1);
     fChain->SetBranchStatus("Jet_hfHEF",1);
     fChain->SetBranchStatus("Jet_neHEF" ,1);
+    fChain->SetBranchStatus("Jet_chMultiplicity" ,1);
+    fChain->SetBranchStatus("Jet_neMultiplicity" ,1);
     fChain->SetBranchStatus("Jet_phi"   ,1);
     fChain->SetBranchStatus("Jet_pt"    ,1);
     fChain->SetBranchStatus("Jet_rawFactor",1);

@@ -24,10 +24,10 @@ auto RunGamJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
    	nanoT->fChain->SetBranchStatus("Photon_seedGain",1);
    	nanoT->fChain->SetBranchStatus("Photon_pixelSeed",1);
    	nanoT->fChain->SetBranchStatus("nPhoton",1);
-  	if(globalFlags_.is2023){
-   	    nanoT->fChain->SetBranchStatus("Photon_eCorr",1); 
-   	    nanoT->fChain->SetBranchStatus("Photon_mass",1);
-    }
+   	nanoT->fChain->SetBranchStatus("Photon_eCorr",1); 
+   	nanoT->fChain->SetBranchStatus("Photon_mass",1);
+   	nanoT->fChain->SetBranchStatus("Photon_sieie",1);
+   	nanoT->fChain->SetBranchStatus("Photon_pfChargedIso",1);
   	if(globalFlags_.isMC){
       nanoT->fChain->SetBranchStatus("GenIsolatedPhoton_*",true);
       nanoT->fChain->SetBranchStatus("nGenIsolatedPhoton",true);
