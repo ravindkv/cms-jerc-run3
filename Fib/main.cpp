@@ -120,7 +120,7 @@ void sortTree(TFile * inFile, TFile * outFile){
 
 int main(int argc, char* argv[]){
     // Default input JSON file
-    std::string fileDefault = "input/json/FilesFib_2024_DiJet.json";// for help ONLY
+    std::string fileDefault = "input/json/FilesFib_GamJet_2024_DataReprocessing_2024C.json";// for help ONLY
     std::ifstream fileDefault_(fileDefault.c_str());
     nlohmann::json js; 
     try{
@@ -179,11 +179,43 @@ int main(int argc, char* argv[]){
 
     // Clone the tree structure without copying entries
     // Write newTree to a temporary file
-    TFile* tempFile_ = TFile::Open("temp.root", "RECREATE");
+    //TFile* tempFile_ = TFile::Open("temp.root", "RECREATE");
     //TFile* tempFile_ = TFile::Open(outDir + "/" + oName, "RECREATE");
-    tempFile_->cd();
-    TTree* newTree = skimT->fChain->GetTree()->CloneTree(0);
-    newTree->SetCacheSize(50*1024*1024);
+    TFile* outFile = TFile::Open(outDir + "/" + oName, "RECREATE");
+    outFile->cd();
+
+
+    // *** GUARD #1: make sure fChain actually has a TTree ***
+    if (skimT->fChain->GetNtrees() == 0) {
+        std::cerr << "[RunGamJet] ERROR: fChain has no trees (GetNtrees()==0)."
+                  << " Did loadTree() fail to add any files?\n";
+        return EXIT_FAILURE;
+    }
+
+    // *** GUARD #2: force the chain to load its first tree ***
+    Long64_t firstEntry = skimT->fChain->LoadTree(0);
+    if (firstEntry < 0) {
+        std::cerr << "[RunGamJet] ERROR: LoadTree(0) returned " << firstEntry
+                  << ". No valid tree to read from.\n";
+        return EXIT_FAILURE;
+    }
+
+    // *** GUARD #3: GetTree() must be non‐null ***
+    TTree* baseTree = skimT->fChain->GetTree();
+    if (!baseTree) {
+        std::cerr << "[RunGamJet] ERROR: fChain->GetTree() is nullptr. Cannot CloneTree.\n";
+        return EXIT_FAILURE;
+    }
+
+    // Now it’s safe:
+    TTree* newTree = baseTree->CloneTree(0);
+    if (!newTree) {
+        std::cerr << "[RunGamJet] ERROR: CloneTree(0) returned nullptr. Check your input TTree.\n";
+        return EXIT_FAILURE;
+    }
+    newTree->SetDirectory(outFile);
+
+
     Long64_t nEntr = skimT->GetEntries();
 
     int startEntry = 0;
@@ -236,19 +268,19 @@ int main(int argc, char* argv[]){
 
     }
     std::cout << "nEvents_Fib = " << newTree->GetEntries() << std::endl;
-    std::cout << "Output file = " << tempFile_->GetName() << std::endl;
+    //std::cout << "Output file = " << tempFile_->GetName() << std::endl;
 
     newTree->Write();
     hEvents_->Write();
-    tempFile_->Close();
+    //tempFile_->Close();
 
     std::cout << "\nSorting the tree by event number..." << std::endl;
-    TFile* inFile = TFile::Open("temp.root", "READ");
-    TFile* outFile = TFile::Open(outDir + "/" + oName, "RECREATE");
-    sortTree(inFile, outFile);
+    //TFile* inFile = TFile::Open("temp.root", "READ");
+    //TFile* outFile = TFile::Open(outDir + "/" + oName, "RECREATE");
+    //sortTree(inFile, outFile);
     outFile->cd();
     std::cout << "Output file = " << outFile->GetName() << std::endl;
-    inFile->Close();
+    //inFile->Close();
     outFile->Close();
     std::remove("temp.root");
 

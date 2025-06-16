@@ -31,6 +31,7 @@ def getFib(fibSummary):
                     'run_end': run_end,
                     'nib_fib_name': nib_fib_name
                 })
+    #print(fib_list)
     return fib_list
 
 # Directory containing the skim JSON files
@@ -72,7 +73,8 @@ for ch in Channels:
                         if not match:
                             continue
                         # Construct a new dataset name that appends nib_fib info and run range
-                        new_dataset_name = f"{dataset_name}_{nib_fib_name}-{run_start}-{run_end}"
+                        just_nib_fib  = nib_fib_name.split('-')[1]+'-'+nib_fib_name.split('-')[2]
+                        new_dataset_name = f"{dataset_name}_{just_nib_fib}-{run_start}-{run_end}"
                         # Construct the output file path. Here we include year, category and channel
                         output_file_path = f"{outFibDir}/{year}/{category}/{ch}/{new_dataset_name}.root"
                         output_json[new_dataset_name] = [

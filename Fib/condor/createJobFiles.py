@@ -52,7 +52,7 @@ if __name__=="__main__":
     print("Created dir: tmpSub")
     submitAll = open("tmpSub/submitAll.sh", "w") 
     for year, ch in itertools.product(Years, Channels):
-        outPath = f"{eosFibDir}/{year}/{ch}"
+        outPath = f"{outFibDir}/{year}/{ch}"
         os.system(f"mkdir -p {outPath}")
         print(f"Created dir: {outPath}")
         jsonFile = open(f"../input/json/FilesFib_{year}_{ch}.json", "r")

@@ -45,9 +45,9 @@ void SkimTree:: loadInputJson(){
     try{
         std::vector<std::string> fibVals;
         jsFib.at(loadedFibKey).get_to(fibVals);
-        loadedSkimKey = fibVals.at(0);
-        beginRun = fibVals.at(1);
-        endRun   = fibVals.at(2);
+        loadedSkimKey = fibVals.at(2);
+        beginRun = fibVals.at(0);
+        endRun   = fibVals.at(1);
         jsSkim.at(loadedSkimKey).get_to(loadedAllFileNames);
     }catch (const exception & e){
         cout<<"\nEXCEPTION: Check the loadedSkimKey: "<<loadedSkimKey<<endl;
@@ -109,13 +109,6 @@ void SkimTree::loadTree(){
         TTree *tree = static_cast<TTree*>(file->Get("Events"));
         if (!tree) {
             std::cerr << "Warning: 'Events' TTree not found in file " << fullPath << std::endl;
-            file->Close();
-            continue;
-        }
-
-        // Check for the presence of 'HLT_ZeroBias' branch
-        if (!tree->GetListOfBranches()->FindObject("HLT_ZeroBias")) {
-            std::cerr << "Warning: 'HLT_ZeroBias' branch not found in file " << fullPath << std::endl;
             file->Close();
             continue;
         }

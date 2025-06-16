@@ -1,7 +1,7 @@
 # Skim/Inputs.py
 
 # Directory where skimmed files will be stored
-outFibDir = "root://hip-cms-se.csc.fi/store/user/rverma/cms-jerc-run3/Fib/Feb14" 
+outFibDir = "root://hip-cms-se.csc.fi/store/user/rverma/cms-jerc-run3/Fib/16June2025" 
 
 # Years and Channels to process
 Year2022 = {
@@ -30,7 +30,8 @@ Year2024 = {
         #"GJets", "QCD"
     ],
     "Data": [
-        "2024A", "2024B", "2024C", "2024D", "2024E", "2024F", "2024G", "2024H", "2024I"
+        #"2024A", "2024B", "2024C", "2024D", "2024E", "2024F", "2024G", "2024H", "2024I"
+        "2024F", "2024G", "2024H", "2024I"
     ],
     "DataReprocessing": [
         "2024C", "2024D", "2024E"
@@ -39,8 +40,8 @@ Year2024 = {
 
 
 Years = {}
-Years['2022'] = Year2022
-Years['2023'] = Year2023
+#Years['2022'] = Year2022
+#Years['2023'] = Year2023
 Years['2024'] = Year2024
 
 
