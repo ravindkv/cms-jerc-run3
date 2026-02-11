@@ -45,9 +45,9 @@ void SkimTree:: loadInputJson(){
     try{
         std::vector<std::string> fibVals;
         jsFib.at(loadedFibKey).get_to(fibVals);
-        loadedSkimKey = fibVals.at(2);
-        beginRun = fibVals.at(0);
-        endRun   = fibVals.at(1);
+        beginRun = fibVals.at(1);
+        endRun   = fibVals.at(2);
+        loadedSkimKey = fibVals.at(0);
         jsSkim.at(loadedSkimKey).get_to(loadedAllFileNames);
     }catch (const exception & e){
         cout<<"\nEXCEPTION: Check the loadedSkimKey: "<<loadedSkimKey<<endl;

@@ -1,5 +1,5 @@
 
-ROOT_L=`root-config --libs`
+ROOT_L := $(filter-out -lROOTNTupleUtil,$(shell root-config --libs))
 ROOT_I=-I`root-config --incdir` -I./header
 GCC=g++ -std=c++17
 

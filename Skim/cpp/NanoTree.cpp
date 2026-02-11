@@ -156,8 +156,8 @@ void NanoTree::loadJobFileNames() {
         std::abort();
     }
 
-    loadedJobFileNames_ =
-        Helper::splitVector(loadedAllFileNames_, loadedTotalJobs_).at(loadedNthJob_ - 1);
+    loadedJobFileNames_ = Helper::splitVector(loadedAllFileNames_, loadedTotalJobs_).at(loadedNthJob_ - 1);
+
 }
 
 void NanoTree::loadTree() {
@@ -216,6 +216,9 @@ void NanoTree::loadTree() {
             failedFiles++;
             continue;
         }
+        if (!f->GetListOfKeys()->Contains("Runs")) {
+            std::cerr << "Warning: 'Runs' not found in " << fullPath << " (will skip Runs copy for this file).\n";
+        }
 
         TTree* tree = f->Get<TTree>("Events");
         Long64_t fileEntries = tree->GetEntries();
@@ -266,6 +269,7 @@ void NanoTree::loadTree() {
     // Jet branches for all channels 
     //--------------------------------------- 
     fChain->SetBranchStatus("Jet_btagDeep*",1);
+    fChain->SetBranchStatus("Jet_btagUParT*",1);
     fChain->SetBranchStatus("Jet_btagPNetQvG",1);
     fChain->SetBranchStatus("Jet_btagUParTAK4QvG",1);
     fChain->SetBranchStatus("Jet_chEmEF",1);
@@ -362,6 +366,22 @@ Int_t NanoTree::getEntry(Long64_t entry) {
     return fChain->GetEntry(entry);
 }
 
+
+auto NanoTree::loadEntry(Long64_t entry) -> Long64_t {
+    if (!fChain) return EXIT_FAILURE;
+    Long64_t centry = fChain->LoadTree(entry);
+    if (centry < 0) return centry;
+
+    if (fChain->GetTreeNumber() != fCurrent_) {
+        fCurrent_ = fChain->GetTreeNumber();
+        const TFile* cur = fChain->GetCurrentFile();
+        const char* name = cur ? cur->GetName() : "<unknown>";
+        std::cout << "[Events] Switched to file #" << fCurrent_
+                  << ": " << name << '\n';
+    }
+    return centry;
+}
+/*
 Long64_t NanoTree::loadEntry(Long64_t entry) {
     if (!fChain) return -1;
     Long64_t centry = fChain->LoadTree(entry);
@@ -371,7 +391,7 @@ Long64_t NanoTree::loadEntry(Long64_t entry) {
     }
     return centry;
 }
-
+*/
 Long64_t NanoTree::loadEntryRuns(Long64_t entry) {
     if (!fChainRuns) return -1;
     Long64_t centry = fChainRuns->LoadTree(entry);

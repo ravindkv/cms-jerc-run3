@@ -121,6 +121,7 @@ Error  = %s/log_$(cluster)_$(process).stderr\n\n' % (vomsProxy, logDir, logDir, 
     data = json.load(jsonFile)
     jdlFile.write('Executable =  runMain.sh \n')
     jdlFile.write(common_command)
+    localCmd = ""
     for sKey, skims in data.items():
         jdlFile.write("\n")
         for skim in skims:
@@ -129,7 +130,9 @@ Error  = %s/log_$(cluster)_$(process).stderr\n\n' % (vomsProxy, logDir, logDir, 
             oName   = "%s%s" % (sKey, restStr)
             args = 'Arguments  = %s %s\n' % (oName, outDir)
             args += "Queue 1\n"
+            localCmd += "./runMain -o %s && xrdcp -f output/%s %s && "%(oName, oName, outDir)
             jdlFile.write(args)
+    print(localCmd)
 
 if __name__ == "__main__":
     # --- Step 1: Check Git status ---

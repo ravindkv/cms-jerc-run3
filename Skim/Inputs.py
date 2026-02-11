@@ -28,7 +28,7 @@ Year2024 = {
         #"TTtoLNu2Q"
     ],
     "MCSummer24": [
-        "GJets", "GJetsSherpa", "QCD"
+        #"GJets", "GJetsSherpa", "QCD"
     ],
     "Data": [
         #"2024FCCv2DIv3", 
@@ -42,11 +42,11 @@ Year2024 = {
 
 Year2025 = {
     "MCWinter25": [
-        "GJets", "QCD"
+        #"GJets", "QCD"
+        #"QCD"
     ],
     "Data": [
-        "2025B", "2025C"
-        #"2025C"
+        "2025C", "2025D", "2025E", "2025F", "2025G"
     ],
 }
 
@@ -60,11 +60,11 @@ Years['2024'] = Year2024
 Channels = [
     #'ZeeJet',
     #'ZmmJet',
-    'GamJet',
+    #'GamJet',
     #'Wqqm',
     #'Wqqe',
     #'WqqDiLep',
-    #'MultiJet',
+    'MultiJet',
 ]
 
 # VOMS Proxy path (adjust as needed)
@@ -72,6 +72,6 @@ vomsProxy = "x509up_u93032"
 
 # Events per job
 eventsPerJobMC = 2e6  # Number of events per job for MC
-eventsPerJobData = 8e6  # Number of events per job for Data
+eventsPerJobData = 3e6  # Number of events per job for Data
 
 tmpSubDir = "tmpSub"
