@@ -53,7 +53,7 @@ if __name__=="__main__":
     submitAll = open("tmpSub/submitAll.sh", "w") 
     for year, ch in itertools.product(Years, Channels):
         outPath = f"{outFibDir}/{year}/{ch}"
-        os.system(f"mkdir -p {outPath}")
+        os.system(f"gfal-mkdir -p {outPath}")
         print(f"Created dir: {outPath}")
         jsonFile = open(f"../input/json/FilesFib_{year}_{ch}.json", "r")
         jdlName  = f'submitJobs_{year}_{ch}.jdl'

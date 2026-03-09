@@ -47,6 +47,7 @@ for ch in Channels:
             for sub in subdatasets:
                 skimJson = f"FilesSkim_{ch}_{year}_{category}_{sub}.json"
                 skimJsonPath = os.path.join(skimDir, skimJson)
+                print(skimJsonPath)
                 if not os.path.exists(skimJsonPath):
                     print(f"Warning: {skimJsonPath} does not exist. Skipping.")
                     continue

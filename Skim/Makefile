@@ -3,7 +3,7 @@
 ##############################################
 
 # Compiler and standard
-GCC       = g++ -g -std=c++17
+GCC = /usr/bin/g++ -g -std=c++17
 
 # ROOT flags
 ROOT_L := $(filter-out -lROOTNTupleUtil,$(shell root-config --libs))

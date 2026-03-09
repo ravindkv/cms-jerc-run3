@@ -1,7 +1,7 @@
 # Skim/Inputs.py
 
 # Directory where skimmed files will be stored
-outFibDir = "root://hip-cms-se.csc.fi/store/user/rverma/cms-jerc-run3/Fib/16June2025" 
+outFibDir = "root://hip-cms-se.csc.fi/store/user/rverma/cms-jerc-run3/Fib/12Feb2026" 
 
 # Years and Channels to process
 Year2022 = {
@@ -48,11 +48,11 @@ Years['2024'] = Year2024
 Channels = [
     #'ZeeJet',
     #'ZmmJet',
-    'GamJet',
+    #'GamJet',
     #'Wqqm',
     #'Wqqe',
     #'WqqDiLep',
-    #'MultiJet',
+    'MultiJet',
 ]
 
 # VOMS Proxy path (adjust as needed)

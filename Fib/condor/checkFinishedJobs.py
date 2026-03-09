@@ -21,7 +21,8 @@ def check_file(args):
         f = TFile.Open(skim, "READ")
         
         # Quick exit if file is inaccessible or corrupted
-        if not f or f.IsZombie() or f.GetSize() < 3000:
+        if not f or f.IsZombie():
+        #if not f or f.IsZombie() or f.GetSize() < 3000:
             print(f"Corrupted or empty file: {skim}")
             return (sKey, skim, True)
         
