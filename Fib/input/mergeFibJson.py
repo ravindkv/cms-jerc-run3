@@ -30,11 +30,12 @@ def merge_json_files(output_filename: str, patterns: list):
 if __name__ == '__main__':
     # Patterns matching your JSON files
     file_patterns = [
-        'FilesFib_MultiJet_2024_Data_2024?.json',
-        'FilesFib_MultiJet_2024_DataReprocessing_2024?.json'
+        'json/FilesFib_MultiJet_2024_Data_2024?.json',
+        'json/FilesFib_MultiJet_2024_Data_2024Iv2.json',
+        'json/FilesFib_MultiJet_2024_DataReprocessing_2024?.json'
     ]
     # Output filename
-    output_file = 'FilesFib_2024_MultiJet.json'
+    output_file = 'json/FilesFib_2024_MultiJet.json'
 
     merge_json_files(output_file, file_patterns)
     print('Merge complete.')

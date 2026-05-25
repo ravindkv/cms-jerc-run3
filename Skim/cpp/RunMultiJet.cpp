@@ -21,9 +21,12 @@ auto RunMultiJet::Run(std::shared_ptr<NanoTree>& nanoT, TFile *fout) -> int{
     trigList_ = {
             "HLT_MC",
             "HLT_ZeroBias",
+            "HLT_ZeroBias_FirstCollisionInTrain",
+            "HLT_ZeroBias_LastCollisionInTrain",
             "HLT_PFJet40", 
             "HLT_PFJet60", 
             "HLT_PFJet80", 
+            "HLT_PFJet110",
             "HLT_PFJet140",
             "HLT_PFJet200",
             "HLT_PFJet260",

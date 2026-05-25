@@ -9,6 +9,7 @@ Skim/input/__pycache__
 Skim/input/nano_files/
 Skim/condor/__pycache__
 Skim/condor/skim_files/
+Skim/runMain.d
 
 Fib/runMain
 Fib/obj
@@ -17,6 +18,7 @@ Fib/input/json
 Fib/condor/tmpSub
 Fib/input/__pycache__
 Fib/condor/__pycache__
+Fib/input/old25_json/
 
 Hist/runMain
 Hist/obj

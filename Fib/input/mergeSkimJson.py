@@ -3,8 +3,8 @@ import glob
 
 # Pattern to match all relevant json files
 file_patterns = [
-    "FilesSkim_MultiJet_2024_Data_2024*.json",
-    "FilesSkim_MultiJet_2024_DataReprocessing_2024*.json"
+    "json/FilesSkim_MultiJet_2024_Data_2024*.json",
+    "json/FilesSkim_MultiJet_2024_DataReprocessing_2024*.json"
 ]
 
 # Find all files matching the patterns
@@ -13,7 +13,7 @@ for pattern in file_patterns:
     input_files.extend(glob.glob(pattern))
 
 # Output file name
-output_file = "FilesSkim_2024_MultiJet.json"
+output_file = "json/FilesSkim_2024_MultiJet.json"
 
 merged_dict = {}
 
